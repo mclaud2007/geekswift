@@ -13,6 +13,7 @@
 		071097F32358E50300932A4E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 071097F12358E50300932A4E /* LaunchScreen.storyboard */; };
 		071098012358EA2B00932A4E /* LoginFormController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071098002358EA2B00932A4E /* LoginFormController.swift */; };
 		071098032358EA3D00932A4E /* LoginForm.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 071098022358EA3D00932A4E /* LoginForm.storyboard */; };
+		07E419C02360678A00EF92E6 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		071097F42358E50300932A4E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		071098002358EA2B00932A4E /* LoginFormController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginFormController.swift; sourceTree = "<group>"; };
 		071098022358EA3D00932A4E /* LoginForm.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LoginForm.storyboard; sourceTree = "<group>"; };
+		07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				071097F12358E50300932A4E /* LaunchScreen.storyboard */,
 				071097F42358E50300932A4E /* Info.plist */,
 				071098022358EA3D00932A4E /* LoginForm.storyboard */,
+				07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */,
 			);
 			path = weather;
 			sourceTree = "<group>";
@@ -140,6 +143,7 @@
 			files = (
 				071098012358EA2B00932A4E /* LoginFormController.swift in Sources */,
 				071097E72358E50100932A4E /* AppDelegate.swift in Sources */,
+				07E419C02360678A00EF92E6 /* UIViewController+Ext.swift in Sources */,
 				071097E92358E50100932A4E /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

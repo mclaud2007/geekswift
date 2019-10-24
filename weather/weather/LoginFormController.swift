@@ -22,16 +22,16 @@ class LoginFormController: UIViewController {
         // Do any additional setup after loading the view.
     }
     
-    @IBAction func btnClickAction(_ sender: Any) {
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         let user_login = loginInput.text!
         let user_password = passwordInput.text!
         
-        if user_login == "admin" && user_password == "qwerty" {
-            print("Успешная авторизация")
+        if user_login == "" && user_password == "" {
+            return true
         } else {
-            print("Неуспешная авторизация")
+            show(message: "Поле логин и пароль должны быть пустыми.")
+            return false
         }
-        
     }
     
     // Когда клавиатура появляется
