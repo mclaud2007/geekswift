@@ -12,7 +12,8 @@ private let reuseIdentifier = "Cell"
 
 class FriendsPhotoController: UICollectionViewController {
     var PhotosLists = [UIImage(named: "photonotfound")]
-
+    var Likes = [-1]
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
@@ -25,7 +26,6 @@ class FriendsPhotoController: UICollectionViewController {
         return 1
     }
 
-
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return PhotosLists.count
     }
@@ -37,9 +37,14 @@ class FriendsPhotoController: UICollectionViewController {
     
         // Configure the cell
         if (PhotosLists[indexPath.row] != nil){
-            cell.FriendsPhotoImageView.image = PhotosLists[indexPath.row]
+            cell.FriendPhotoImageView.showImage(image: PhotosLists[indexPath.row]!)
+            
+            if (Likes.count > indexPath.item && Likes[indexPath.item] > 0){
+                cell.FriendLike.initLikes(likes: Likes[indexPath.item], isLiked: false)
+            }
+            
         } else {
-            cell.FriendsPhotoImageView.image = UIImage(named: "photonotfound")
+            cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!)
         }
         
         return cell

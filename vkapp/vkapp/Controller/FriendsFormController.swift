@@ -9,8 +9,7 @@
 import UIKit
 
 class FriendsFormController: UITableViewController {
-    
-    let FriendsList = [
+     let FriendsList = [
         Friend(photo: UIImage(named: "bruce")!,
                name: "Брюс Уиллис",
                photos: [
@@ -19,7 +18,8 @@ class FriendsFormController: UITableViewController {
                         UIImage(named: "bruce3")!,
                         UIImage(named: "bruce4")!,
                         UIImage(named: "bruce")!
-                       ]
+                       ],
+               likes: [10, 11, 15, 20, 50]
         ),
         Friend(photo: UIImage(named: "arnold")!,
                name: "Арнольд Шварценеггер",
@@ -30,7 +30,8 @@ class FriendsFormController: UITableViewController {
                         UIImage(named: "arnold4")!,
                         UIImage(named: "arnold5")!,
                         UIImage(named: "arnold")!
-                       ]),
+                       ],
+               likes: [13, 16, 21, 25, 43]),
         Friend(name: "Сильвестер Сталоне"),
         Friend(name: "Джейсон Стеттем"),
         Friend(name: "Сэмюэл Л. Джексон"),
@@ -71,9 +72,9 @@ class FriendsFormController: UITableViewController {
         cell.lblFriendsName.text = FriendsList[indexPath.row].name
         
         if FriendsList[indexPath.row].photo != nil {
-            cell.imgFriendsPhoto.image = FriendsList[indexPath.row].photo
+            cell.FriendPhotoImageView.showImage(image: FriendsList[indexPath.row].photo!)
         } else {
-            cell.imgFriendsPhoto.image = UIImage(named: "photonotfound")
+            cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!)
         }
         
         return cell
@@ -87,6 +88,7 @@ class FriendsFormController: UITableViewController {
             
             if FriendsList[indexPath.row].photos != nil {
                 destinationVC.PhotosLists = FriendsList[indexPath.row].photos!
+                destinationVC.Likes = FriendsList[indexPath.row].likes 
             }
         }
     }

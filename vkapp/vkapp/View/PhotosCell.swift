@@ -10,5 +10,8 @@ import UIKit
 
 class PhotosCell: UICollectionViewCell {
     
-    @IBOutlet weak var FriendsPhotoImageView: UIImageView!
+    @IBOutlet weak var FriendPhotoImageView: AvatarView!
+    @IBOutlet weak var FriendLike: LikeControl!
+    
+    
 }
