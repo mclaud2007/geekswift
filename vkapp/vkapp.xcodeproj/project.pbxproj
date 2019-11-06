@@ -16,6 +16,7 @@
 		0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F9236460FE0016E6D8 /* GroupsCell.swift */; };
 		0769B0FC23646C8D0016E6D8 /* AllGroupsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0FB23646C8D0016E6D8 /* AllGroupsController.swift */; };
 		0769B0FE23646D280016E6D8 /* AllGroupCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0FD23646D280016E6D8 /* AllGroupCell.swift */; };
+		0773D3602371BD85006AFAA3 /* FriendsSearchControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */; };
 		0779F55E236EA77B008E0A51 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0779F55D236EA77B008E0A51 /* AvatarView.swift */; };
 		0788EE38236341C500379186 /* Friends.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0788EE37236341C500379186 /* Friends.swift */; };
 		0788EE3B23634A0A00379186 /* FriendsPhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0788EE3A23634A0A00379186 /* FriendsPhotoController.swift */; };
@@ -41,6 +42,7 @@
 		0769B0F9236460FE0016E6D8 /* GroupsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsCell.swift; sourceTree = "<group>"; };
 		0769B0FB23646C8D0016E6D8 /* AllGroupsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllGroupsController.swift; sourceTree = "<group>"; };
 		0769B0FD23646D280016E6D8 /* AllGroupCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllGroupCell.swift; sourceTree = "<group>"; };
+		0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsSearchControl.swift; sourceTree = "<group>"; };
 		0779F55D236EA77B008E0A51 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		0788EE37236341C500379186 /* Friends.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Friends.swift; sourceTree = "<group>"; };
 		0788EE3A23634A0A00379186 /* FriendsPhotoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsPhotoController.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 				0769B0FD23646D280016E6D8 /* AllGroupCell.swift */,
 				0779F55D236EA77B008E0A51 /* AvatarView.swift */,
 				07E1338B236EF80500FCC49B /* LikeControl.swift */,
+				0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -216,6 +219,7 @@
 				0788EE3B23634A0A00379186 /* FriendsPhotoController.swift in Sources */,
 				071098012358EA2B00932A4E /* LoginFormController.swift in Sources */,
 				07E1338C236EF80500FCC49B /* LikeControl.swift in Sources */,
+				0773D3602371BD85006AFAA3 /* FriendsSearchControl.swift in Sources */,
 				0769B0F623645F8D0016E6D8 /* Groups.swift in Sources */,
 				0779F55E236EA77B008E0A51 /* AvatarView.swift in Sources */,
 				0769B0FE23646D280016E6D8 /* AllGroupCell.swift in Sources */,

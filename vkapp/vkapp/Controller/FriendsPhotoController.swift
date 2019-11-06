@@ -11,8 +11,13 @@ import UIKit
 private let reuseIdentifier = "Cell"
 
 class FriendsPhotoController: UICollectionViewController {
+    
+    // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
     var PhotosLists = [UIImage(named: "photonotfound")]
+    // Массив лайков под фотографиями или -1 - это значит оценок нет
     var Likes = [-1]
+    // Массив уже отмеченных фотографий или -1 по умолчанию
+    var Liked = [-1]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,11 +45,18 @@ class FriendsPhotoController: UICollectionViewController {
             cell.FriendPhotoImageView.showImage(image: PhotosLists[indexPath.row]!)
             
             if (Likes.count > indexPath.item && Likes[indexPath.item] > 0){
-                cell.FriendLike.initLikes(likes: Likes[indexPath.item], isLiked: false)
+                var isAlreadyLiked = false
+                
+                if (Liked.contains(where: { $0 == indexPath.item }) == true){
+                    isAlreadyLiked = true
+                }
+                
+                cell.FriendLike.initLikes(likes: Likes[indexPath.item], isLiked: isAlreadyLiked)
             }
             
         } else {
             cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!)
+            cell.FriendLike.initLikes(likes: -1, isLiked: false)
         }
         
         return cell
