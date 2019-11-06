@@ -9,8 +9,9 @@
 import UIKit
 
 class FriendsFormController: UITableViewController {
+    @IBOutlet weak var friendCharsControl: FriendsSearchControl!
     
-    let FriendsList = [
+     let FriendsList = [
         Friend(photo: UIImage(named: "bruce")!,
                name: "Брюс Уиллис",
                photos: [
@@ -19,7 +20,10 @@ class FriendsFormController: UITableViewController {
                         UIImage(named: "bruce3")!,
                         UIImage(named: "bruce4")!,
                         UIImage(named: "bruce")!
-                       ]
+                       ],
+               likes: [10, 11, 15, 20, 50],
+               liked: [1,2,4]
+
         ),
         Friend(photo: UIImage(named: "arnold")!,
                name: "Арнольд Шварценеггер",
@@ -30,7 +34,9 @@ class FriendsFormController: UITableViewController {
                         UIImage(named: "arnold4")!,
                         UIImage(named: "arnold5")!,
                         UIImage(named: "arnold")!
-                       ]),
+                       ],
+               likes: [13, 16, 21, 25, 43],
+               liked: [1,3]),
         Friend(name: "Сильвестер Сталоне"),
         Friend(name: "Джейсон Стеттем"),
         Friend(name: "Сэмюэл Л. Джексон"),
@@ -41,12 +47,45 @@ class FriendsFormController: UITableViewController {
         Friend(name: "Рутгер Хауэр")
     ]
     
+    // Список букв пользователей для контрола
+    var FriendAlphabetList: [String] = []
+       
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // На этом экране нам нужна навигация
         navigationController?.setNavigationBarHidden(false, animated: false)
         self.title = "Друзья"
+       
+        // Собираем все первые буквы фамилий
+        for Friend in FriendsList {
+            if (Friend.name != "") {
+                let fullNameArr = Friend.name.split(separator: " ", maxSplits: 2)
+                let firstName = fullNameArr[0]
+                let lastName = fullNameArr.count > 1 ? fullNameArr[1] : nil
+                var firstLetter = String(firstName.prefix(1))
+                
+                // Есть фамилия
+                if (lastName != nil){
+                    firstLetter = String(lastName!.prefix(1))
+                }
+                
+                if (FriendAlphabetList.contains(firstLetter) == false){
+                    FriendAlphabetList.append(firstLetter)
+                }
+            }
+        }
+        
+        if (FriendAlphabetList.count > 0){
+            friendCharsControl.setChars(sChars: FriendAlphabetList)
+            friendCharsControl.addTarget(self, action: #selector(catchCharChanged(_:)), for: .valueChanged)
+        }
+    }
+    
+    @objc public func catchCharChanged(_ sender: FriendsSearchControl){
+        if (friendCharsControl.selectedChar != nil){
+            print("Выбрана буква " + (friendCharsControl.selectedChar ?? "nil"))
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -71,9 +110,9 @@ class FriendsFormController: UITableViewController {
         cell.lblFriendsName.text = FriendsList[indexPath.row].name
         
         if FriendsList[indexPath.row].photo != nil {
-            cell.imgFriendsPhoto.image = FriendsList[indexPath.row].photo
+            cell.FriendPhotoImageView.showImage(image: FriendsList[indexPath.row].photo!)
         } else {
-            cell.imgFriendsPhoto.image = UIImage(named: "photonotfound")
+            cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!)
         }
         
         return cell
@@ -86,7 +125,10 @@ class FriendsFormController: UITableViewController {
             destinationVC.title = FriendsList[indexPath.row].name
             
             if FriendsList[indexPath.row].photos != nil {
+                // Дальше надо заменить на передачу ID пользователя, а экран фото должен сам запрсоить данные
                 destinationVC.PhotosLists = FriendsList[indexPath.row].photos!
+                destinationVC.Likes = FriendsList[indexPath.row].likes!
+                destinationVC.Liked = FriendsList[indexPath.row].liked!
             }
         }
     }
