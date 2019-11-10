@@ -19,6 +19,7 @@ class AvatarView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        self.setupView()
     }
     
     required init?(coder: NSCoder) {
@@ -34,6 +35,7 @@ class AvatarView: UIView {
         self.ImageView.clipsToBounds = true
         self.ImageView.layer.masksToBounds = true
         self.ImageView.contentMode = .scaleAspectFill
+        
         self.addSubview(self.ImageView)
     }
     
@@ -43,10 +45,12 @@ class AvatarView: UIView {
         self.ImageView.layer.cornerRadius = floor(bounds.width / 2)
         
         // Слой с тенью
+        layer.cornerRadius = floor(bounds.width / 2)
+        
+        // Если вынести эти параметры - перестанет срабатывать IBInspectable :/
+        layer.shadowColor = self.shadowColor.cgColor
         layer.shadowOpacity = self.shadowOpacity
         layer.shadowRadius = self.shdowRadius
-        layer.shadowColor = self.shadowColor.cgColor
-        layer.cornerRadius = floor(bounds.width / 2)
     }
     
     public func showImage(image: UIImage){

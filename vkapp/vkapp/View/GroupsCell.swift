@@ -12,4 +12,8 @@ class GroupsCell: UITableViewCell {
     @IBOutlet weak var lblGroupsName: UILabel!
     @IBOutlet weak var lblGroupsImage: UIImageView!
 
+    override func prepareForReuse() {
+        lblGroupsName.text = "..."
+        lblGroupsImage.image = UIImage(named: "photonotfound")
+    }
 }

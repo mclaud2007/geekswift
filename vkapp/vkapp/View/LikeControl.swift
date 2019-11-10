@@ -10,6 +10,11 @@ import UIKit
 
 class LikeControl: UIControl {
     @IBInspectable var initLikes: Int = -1
+    @IBInspectable var notLikedTextColor: UIColor = .white
+    @IBInspectable var LikedTextColor: UIColor = .red
+    @IBInspectable var likedTextFontSize: CGFloat = 17
+    
+    
     var likes: Int = 0
     var isLiked: Bool = false
     
@@ -35,6 +40,7 @@ class LikeControl: UIControl {
         
         // Drawing code
         self.lblLikes = UILabel()
+        self.lblLikes.font = UIFont(name: "System", size: likedTextFontSize)
         self.lblLikes.frame = CGRect(x: 20, y: 0, width: bounds.width, height: bounds.height)
 
         if (self.initLikes > 0){
@@ -68,9 +74,9 @@ class LikeControl: UIControl {
         }
         
         if (self.isLiked == true){
-            self.lblLikes.textColor = UIColor.red
+            self.lblLikes.textColor = LikedTextColor
         } else {
-            self.lblLikes.textColor = UIColor.white
+            self.lblLikes.textColor = notLikedTextColor
         }
     }
     
