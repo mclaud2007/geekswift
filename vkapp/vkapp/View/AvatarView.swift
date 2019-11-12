@@ -20,11 +20,31 @@ class AvatarView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.setupView()
+        self.setupGesture()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.setupView()
+        self.setupGesture()
+    }
+    
+    private func setupGesture(){
+        let doubleTapGR = UITapGestureRecognizer(target: self, action: #selector(startAnimation))
+        doubleTapGR.numberOfTapsRequired = 1
+        self.addGestureRecognizer(doubleTapGR)
+    }
+    
+    @objc private func startAnimation(){
+        let animation = CASpringAnimation(keyPath: "transform.scale")
+        animation.toValue = 0.85
+        animation.autoreverses = true
+        animation.duration = 0.55
+        animation.stiffness = 85
+        animation.mass = 0.85
+        animation.damping = 0.3
+        animation.initialVelocity = 5
+        self.layer.add(animation, forKey: nil)
     }
     
     private func setupView(){

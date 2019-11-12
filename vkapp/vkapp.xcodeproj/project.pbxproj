@@ -33,6 +33,7 @@
 		07E419C02360678A00EF92E6 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */; };
 		07F93DDA23644C4700F6B3B0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */; };
 		07F93DDD23644C7F00F6B3B0 /* PhotosCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F93DDC23644C7F00F6B3B0 /* PhotosCell.swift */; };
+		07F99D2A237B3DE4002E87ED /* LoadingViewControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +65,7 @@
 		07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
 		07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		07F93DDC23644C7F00F6B3B0 /* PhotosCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosCell.swift; sourceTree = "<group>"; };
+		07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingViewControl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,6 +165,7 @@
 				0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */,
 				07326D2D2375744800548A86 /* FriendsCellProto.swift */,
 				07326D352376F63E00548A86 /* NewsTableCell.swift */,
+				07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -247,6 +250,7 @@
 				07C3721F23773A6400828D30 /* FriendsFormController.swift in Sources */,
 				0773D3602371BD85006AFAA3 /* FriendsSearchControl.swift in Sources */,
 				0769B0F623645F8D0016E6D8 /* Groups.swift in Sources */,
+				07F99D2A237B3DE4002E87ED /* LoadingViewControl.swift in Sources */,
 				0779F55E236EA77B008E0A51 /* AvatarView.swift in Sources */,
 				0769B0FE23646D280016E6D8 /* AllGroupCell.swift in Sources */,
 				0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */,

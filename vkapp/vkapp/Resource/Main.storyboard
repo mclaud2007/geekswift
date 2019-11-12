@@ -66,14 +66,23 @@
                                             <action selector="loginButtonClick:" destination="8mc-zv-NRf" eventType="touchUpInside" id="3XB-AR-ADC"/>
                                         </connections>
                                     </button>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vHc-ue-3Jg" customClass="LoadingViewControl" customModule="vkapp" customModuleProvider="target">
+                                        <rect key="frame" x="20" y="345" width="335" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="40" id="AdW-A1-a5a"/>
+                                        </constraints>
+                                    </view>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstItem="vHc-ue-3Jg" firstAttribute="top" secondItem="yhp-pR-BKS" secondAttribute="bottom" constant="30" id="0gh-dQ-oxR"/>
                                     <constraint firstAttribute="bottom" secondItem="yhp-pR-BKS" secondAttribute="bottom" constant="504" id="DRv-Cb-dfQ"/>
                                     <constraint firstItem="yKE-S5-H3V" firstAttribute="leading" secondItem="1kk-ER-Qpl" secondAttribute="leading" id="G8y-db-Jtq"/>
+                                    <constraint firstItem="vHc-ue-3Jg" firstAttribute="leading" secondItem="wOn-j5-YJw" secondAttribute="leading" constant="20" id="JFl-TD-xRR"/>
                                     <constraint firstItem="ekj-oM-xr4" firstAttribute="trailing" secondItem="EMh-Jh-zqY" secondAttribute="trailing" id="JfN-Qi-ZdG"/>
                                     <constraint firstItem="yhp-pR-BKS" firstAttribute="top" secondItem="ekj-oM-xr4" secondAttribute="bottom" constant="30" id="KrG-HL-hvs"/>
                                     <constraint firstItem="yKE-S5-H3V" firstAttribute="trailing" secondItem="N5c-yy-ZQV" secondAttribute="centerX" multiplier="0.35" id="Qc6-gQ-C2r"/>
                                     <constraint firstItem="EMh-Jh-zqY" firstAttribute="leading" secondItem="yKE-S5-H3V" secondAttribute="trailing" constant="60" id="RW1-ar-2gH"/>
+                                    <constraint firstItem="vHc-ue-3Jg" firstAttribute="centerX" secondItem="En5-GL-YFx" secondAttribute="centerX" id="Rvq-Tc-Zf5"/>
                                     <constraint firstItem="EMh-Jh-zqY" firstAttribute="top" secondItem="En5-GL-YFx" secondAttribute="bottom" constant="60" id="UqD-va-Uhv"/>
                                     <constraint firstItem="En5-GL-YFx" firstAttribute="top" secondItem="N5c-yy-ZQV" secondAttribute="top" constant="60" id="ZOv-F5-GFP"/>
                                     <constraint firstItem="yhp-pR-BKS" firstAttribute="centerX" secondItem="N5c-yy-ZQV" secondAttribute="centerX" id="f6g-fG-cHW"/>
@@ -104,6 +113,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="ezi-Nz-Rjh"/>
                     <connections>
+                        <outlet property="loadingControl" destination="vHc-ue-3Jg" id="6Jw-bh-SHX"/>
                         <outlet property="loginInput" destination="EMh-Jh-zqY" id="0Lf-wO-daI"/>
                         <outlet property="passwordInput" destination="ekj-oM-xr4" id="I9W-g8-QJT"/>
                         <outlet property="scrolView" destination="HBP-l1-K7F" id="s89-Ci-zEH"/>
@@ -376,6 +386,11 @@
                                                 <constraint firstAttribute="width" constant="50" id="bwg-7k-GL8"/>
                                                 <constraint firstAttribute="height" constant="20" id="geS-Cc-RkO"/>
                                             </constraints>
+                                            <userDefinedRuntimeAttributes>
+                                                <userDefinedRuntimeAttribute type="color" keyPath="notLikedTextColor">
+                                                    <color key="value" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </userDefinedRuntimeAttribute>
+                                            </userDefinedRuntimeAttributes>
                                         </view>
                                     </subviews>
                                     <constraints>

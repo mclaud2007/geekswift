@@ -133,19 +133,20 @@ class FriendsFormController: UIViewController {
     
     @objc public func catchCharChanged(_ sender: FriendsSearchControl){
         if let firstLetter = friendCharsControl.selectedChar {
-            // Для начала очистим фильтр
-            FriendListFiltered.removeAll()
-            
-            // Если первая буква у нас All, значит надо вывести все как раньше
-            if firstLetter != "All" {
-                if let friendGroupListByChar = FriendsAlphabetList[firstLetter] {
-                    for i in friendGroupListByChar {
-                        FriendListFiltered.append(FriendsList[i])
-                    }
-                }
+            // Для начала очистим фильтр (если он не пустой)
+            if FriendListFiltered.count > 0 {
+                // Очищаем фильтр и перезагружаем список
+                FriendListFiltered.removeAll()
+                tableView.reloadData()
             }
             
-             tableView.reloadData()
+            // Убираем клавиатуру если она есть
+            searchBar.endEditing(true)
+            
+            if let section = FriendAlphabetList.firstIndex(of: firstLetter) {
+                // Просто мотаем к нужной секции
+                tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
+            }
         }
     }
     
@@ -174,6 +175,8 @@ extension FriendsFormController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         // Очищаем фильтрованный список
         FriendListFiltered.removeAll()
+        
+        
         
         if searchText.count >= 2 {
             for Friend in FriendsList {

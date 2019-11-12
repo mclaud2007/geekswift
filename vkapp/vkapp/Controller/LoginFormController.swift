@@ -12,6 +12,7 @@ class LoginFormController: UIViewController {
     @IBOutlet weak var loginInput: UITextField!
     @IBOutlet weak var passwordInput: UITextField!
     @IBOutlet weak var scrolView: UIScrollView!
+    @IBOutlet var loadingControl: LoadingViewControl!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,6 +60,8 @@ class LoginFormController: UIViewController {
         
         // И когда она исчезает
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillBeHidden), name: UIResponder.keyboardWillHideNotification, object: nil)
+        
+        loadingControl.startAnimation()
     }
     
     override func viewDidDisappear(_ animated: Bool) {

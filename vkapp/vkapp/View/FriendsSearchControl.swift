@@ -9,7 +9,7 @@
 import UIKit
 
 class FriendsSearchControl: UIControl {
-    var selectedChar: String? = nil {
+    public var selectedChar: String? = nil {
         didSet {
             self.updateSelectedChar()
             self.sendActions(for: .valueChanged)
@@ -35,7 +35,7 @@ class FriendsSearchControl: UIControl {
     
     public func setChars (sChars: [String]){
         self.friendChars = sChars
-        self.friendChars.append("All")
+        //self.friendChars.append("All")
         
         // Если есть буквы создаем под них кнопки
         if (friendChars.count > 0){
