@@ -12,6 +12,11 @@
 		071097F02358E50300932A4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 071097EF2358E50300932A4E /* Assets.xcassets */; };
 		071097F32358E50300932A4E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 071097F12358E50300932A4E /* LaunchScreen.storyboard */; };
 		071098012358EA2B00932A4E /* LoginFormController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071098002358EA2B00932A4E /* LoginFormController.swift */; };
+		07326D2F2375744800548A86 /* FriendsCellProto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07326D2D2375744800548A86 /* FriendsCellProto.swift */; };
+		07326D302375744800548A86 /* FriendsCellProto.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07326D2E2375744800548A86 /* FriendsCellProto.xib */; };
+		07326D372376F63F00548A86 /* NewsTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07326D352376F63E00548A86 /* NewsTableCell.swift */; };
+		07326D382376F63F00548A86 /* NewsTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 07326D362376F63F00548A86 /* NewsTableCell.xib */; };
+		07326D3B2376FDEE00548A86 /* NewsFormController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07326D3A2376FDEE00548A86 /* NewsFormController.swift */; };
 		0769B0F623645F8D0016E6D8 /* Groups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F523645F8D0016E6D8 /* Groups.swift */; };
 		0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F9236460FE0016E6D8 /* GroupsCell.swift */; };
 		0769B0FC23646C8D0016E6D8 /* AllGroupsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0FB23646C8D0016E6D8 /* AllGroupsController.swift */; };
@@ -20,14 +25,15 @@
 		0779F55E236EA77B008E0A51 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0779F55D236EA77B008E0A51 /* AvatarView.swift */; };
 		0788EE38236341C500379186 /* Friends.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0788EE37236341C500379186 /* Friends.swift */; };
 		0788EE3B23634A0A00379186 /* FriendsPhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0788EE3A23634A0A00379186 /* FriendsPhotoController.swift */; };
-		0793234923620F3C00394647 /* FriendsFormController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0793234823620F3C00394647 /* FriendsFormController.swift */; };
 		0793234B236228B400394647 /* GroupsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0793234A236228B400394647 /* GroupsController.swift */; };
 		07A956A923620D120065741F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07A956A823620D120065741F /* Main.storyboard */; };
-		07AADDA9236339240082A861 /* FriendsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07AADDA8236339230082A861 /* FriendsCell.swift */; };
+		07C3721D2377115600828D30 /* News.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C3721C2377115600828D30 /* News.swift */; };
+		07C3721F23773A6400828D30 /* FriendsFormController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C3721E23773A6400828D30 /* FriendsFormController.swift */; };
 		07E1338C236EF80500FCC49B /* LikeControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E1338B236EF80500FCC49B /* LikeControl.swift */; };
 		07E419C02360678A00EF92E6 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */; };
 		07F93DDA23644C4700F6B3B0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */; };
 		07F93DDD23644C7F00F6B3B0 /* PhotosCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F93DDC23644C7F00F6B3B0 /* PhotosCell.swift */; };
+		07F99D2A237B3DE4002E87ED /* LoadingViewControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +43,11 @@
 		071097EF2358E50300932A4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		071097F22358E50300932A4E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		071098002358EA2B00932A4E /* LoginFormController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginFormController.swift; sourceTree = "<group>"; };
+		07326D2D2375744800548A86 /* FriendsCellProto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsCellProto.swift; sourceTree = "<group>"; };
+		07326D2E2375744800548A86 /* FriendsCellProto.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FriendsCellProto.xib; sourceTree = "<group>"; };
+		07326D352376F63E00548A86 /* NewsTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsTableCell.swift; sourceTree = "<group>"; };
+		07326D362376F63F00548A86 /* NewsTableCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewsTableCell.xib; sourceTree = "<group>"; };
+		07326D3A2376FDEE00548A86 /* NewsFormController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsFormController.swift; sourceTree = "<group>"; };
 		0769B0F3236450680016E6D8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0769B0F523645F8D0016E6D8 /* Groups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Groups.swift; sourceTree = "<group>"; };
 		0769B0F9236460FE0016E6D8 /* GroupsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsCell.swift; sourceTree = "<group>"; };
@@ -46,14 +57,15 @@
 		0779F55D236EA77B008E0A51 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		0788EE37236341C500379186 /* Friends.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Friends.swift; sourceTree = "<group>"; };
 		0788EE3A23634A0A00379186 /* FriendsPhotoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsPhotoController.swift; sourceTree = "<group>"; };
-		0793234823620F3C00394647 /* FriendsFormController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsFormController.swift; sourceTree = "<group>"; };
 		0793234A236228B400394647 /* GroupsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsController.swift; sourceTree = "<group>"; };
 		07A956A823620D120065741F /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
-		07AADDA8236339230082A861 /* FriendsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsCell.swift; sourceTree = "<group>"; };
+		07C3721C2377115600828D30 /* News.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = News.swift; sourceTree = "<group>"; };
+		07C3721E23773A6400828D30 /* FriendsFormController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsFormController.swift; sourceTree = "<group>"; };
 		07E1338B236EF80500FCC49B /* LikeControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeControl.swift; sourceTree = "<group>"; };
 		07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
 		07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		07F93DDC23644C7F00F6B3B0 /* PhotosCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosCell.swift; sourceTree = "<group>"; };
+		07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingViewControl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,11 +110,21 @@
 			path = vkapp;
 			sourceTree = "<group>";
 		};
+		07326D392376F64E00548A86 /* XIB */ = {
+			isa = PBXGroup;
+			children = (
+				07326D362376F63F00548A86 /* NewsTableCell.xib */,
+				07326D2E2375744800548A86 /* FriendsCellProto.xib */,
+			);
+			path = XIB;
+			sourceTree = "<group>";
+		};
 		0788EE392363422700379186 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				0788EE37236341C500379186 /* Friends.swift */,
 				0769B0F523645F8D0016E6D8 /* Groups.swift */,
+				07C3721C2377115600828D30 /* News.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -111,10 +133,11 @@
 			isa = PBXGroup;
 			children = (
 				071098002358EA2B00932A4E /* LoginFormController.swift */,
-				0793234823620F3C00394647 /* FriendsFormController.swift */,
 				0793234A236228B400394647 /* GroupsController.swift */,
 				0788EE3A23634A0A00379186 /* FriendsPhotoController.swift */,
 				0769B0FB23646C8D0016E6D8 /* AllGroupsController.swift */,
+				07326D3A2376FDEE00548A86 /* NewsFormController.swift */,
+				07C3721E23773A6400828D30 /* FriendsFormController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -122,6 +145,7 @@
 		07A956A523620C980065741F /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				07326D392376F64E00548A86 /* XIB */,
 				0769B0F3236450680016E6D8 /* Info.plist */,
 				071097EF2358E50300932A4E /* Assets.xcassets */,
 				071097F12358E50300932A4E /* LaunchScreen.storyboard */,
@@ -133,13 +157,15 @@
 		07F93DDB23644C6000F6B3B0 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				07AADDA8236339230082A861 /* FriendsCell.swift */,
 				07F93DDC23644C7F00F6B3B0 /* PhotosCell.swift */,
 				0769B0F9236460FE0016E6D8 /* GroupsCell.swift */,
 				0769B0FD23646D280016E6D8 /* AllGroupCell.swift */,
 				0779F55D236EA77B008E0A51 /* AvatarView.swift */,
 				07E1338B236EF80500FCC49B /* LikeControl.swift */,
 				0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */,
+				07326D2D2375744800548A86 /* FriendsCellProto.swift */,
+				07326D352376F63E00548A86 /* NewsTableCell.swift */,
+				07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -203,9 +229,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				07A956A923620D120065741F /* Main.storyboard in Resources */,
+				07326D302375744800548A86 /* FriendsCellProto.xib in Resources */,
 				07F93DDA23644C4700F6B3B0 /* Default-568h@2x.png in Resources */,
 				071097F32358E50300932A4E /* LaunchScreen.storyboard in Resources */,
 				071097F02358E50300932A4E /* Assets.xcassets in Resources */,
+				07326D382376F63F00548A86 /* NewsTableCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -219,20 +247,24 @@
 				0788EE3B23634A0A00379186 /* FriendsPhotoController.swift in Sources */,
 				071098012358EA2B00932A4E /* LoginFormController.swift in Sources */,
 				07E1338C236EF80500FCC49B /* LikeControl.swift in Sources */,
+				07C3721F23773A6400828D30 /* FriendsFormController.swift in Sources */,
 				0773D3602371BD85006AFAA3 /* FriendsSearchControl.swift in Sources */,
 				0769B0F623645F8D0016E6D8 /* Groups.swift in Sources */,
+				07F99D2A237B3DE4002E87ED /* LoadingViewControl.swift in Sources */,
 				0779F55E236EA77B008E0A51 /* AvatarView.swift in Sources */,
 				0769B0FE23646D280016E6D8 /* AllGroupCell.swift in Sources */,
 				0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */,
 				0793234B236228B400394647 /* GroupsController.swift in Sources */,
-				0793234923620F3C00394647 /* FriendsFormController.swift in Sources */,
+				07326D372376F63F00548A86 /* NewsTableCell.swift in Sources */,
+				07326D2F2375744800548A86 /* FriendsCellProto.swift in Sources */,
+				07326D3B2376FDEE00548A86 /* NewsFormController.swift in Sources */,
 				0788EE38236341C500379186 /* Friends.swift in Sources */,
 				071097E72358E50100932A4E /* AppDelegate.swift in Sources */,
 				0769B0FC23646C8D0016E6D8 /* AllGroupsController.swift in Sources */,
 				07E419C02360678A00EF92E6 /* UIViewController+Ext.swift in Sources */,
 				071097E92358E50100932A4E /* SceneDelegate.swift in Sources */,
+				07C3721D2377115600828D30 /* News.swift in Sources */,
 				07F93DDD23644C7F00F6B3B0 /* PhotosCell.swift in Sources */,
-				07AADDA9236339240082A861 /* FriendsCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

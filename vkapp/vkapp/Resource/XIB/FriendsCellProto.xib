@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15509"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="FriendsCellProto" rowHeight="71" id="KGk-i7-Jjw" customClass="FriendsCellProto" customModule="vkapp" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="71"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="293" height="71"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5i0-Vh-Ggd">
+                        <rect key="frame" x="241" y="25" width="42" height="21"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BYf-0M-N7O" customClass="AvatarView" customModule="vkapp" customModuleProvider="target">
+                        <rect key="frame" x="10" y="5" width="61" height="61"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstAttribute="height" priority="999" constant="64" id="TD7-o6-LEa"/>
+                            <constraint firstAttribute="width" secondItem="BYf-0M-N7O" secondAttribute="height" multiplier="1:1" priority="999" id="pac-Wh-9zF"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="shadowColor">
+                                <color key="value" systemColor="linkColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="BYf-0M-N7O" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="10" id="2Cq-xa-vRK"/>
+                    <constraint firstItem="5i0-Vh-Ggd" firstAttribute="centerY" secondItem="BYf-0M-N7O" secondAttribute="centerY" id="2L0-hS-Ufy"/>
+                    <constraint firstAttribute="bottom" secondItem="BYf-0M-N7O" secondAttribute="bottom" constant="5" id="PkD-eQ-LIF"/>
+                    <constraint firstAttribute="trailing" secondItem="5i0-Vh-Ggd" secondAttribute="trailing" constant="10" id="faB-SU-gCv"/>
+                    <constraint firstItem="BYf-0M-N7O" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="5" id="rzm-fM-hmw"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="FriendPhotoImageView" destination="BYf-0M-N7O" id="KJD-X3-8YY"/>
+                <outlet property="lblFriendsName" destination="5i0-Vh-Ggd" id="8d3-6N-sSR"/>
+            </connections>
+            <point key="canvasLocation" x="137.68115942028987" y="134.93303571428569"/>
+        </tableViewCell>
+    </objects>
+</document>

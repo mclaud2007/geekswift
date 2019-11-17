@@ -10,6 +10,11 @@ import UIKit
 
 class LikeControl: UIControl {
     @IBInspectable var initLikes: Int = -1
+    @IBInspectable var notLikedTextColor: UIColor = .white
+    @IBInspectable var LikedTextColor: UIColor = .red
+    @IBInspectable var likedTextFontSize: CGFloat = 17
+    
+    
     var likes: Int = 0
     var isLiked: Bool = false
     
@@ -35,6 +40,7 @@ class LikeControl: UIControl {
         
         // Drawing code
         self.lblLikes = UILabel()
+        self.lblLikes.font = UIFont(name: "System", size: likedTextFontSize)
         self.lblLikes.frame = CGRect(x: 20, y: 0, width: bounds.width, height: bounds.height)
 
         if (self.initLikes > 0){
@@ -42,6 +48,7 @@ class LikeControl: UIControl {
         } else {
             self.lblLikes.text = ""
         }
+        
         addSubview(self.lblLikes)
         
         self.imgHeart = UIImageView()
@@ -59,19 +66,26 @@ class LikeControl: UIControl {
         self.likes = likes
         self.isLiked = isLiked
         
-        self.lblLikes.text = String(self.likes)
-        
         if (self.isLiked == true){
+            self.lblLikes.textColor = self.LikedTextColor
+        } else {
+            self.lblLikes.textColor = self.notLikedTextColor
+        }
+        
+        // Создаем анимацию количества лайков
+        UIView.transition(with: self.lblLikes,
+                          duration: 0.25,
+                          options: .transitionFlipFromRight,
+                          animations: {
+                            self.lblLikes.text = String(self.likes)
+        } )
+        
+        // Создаем анимацию на изображение сердца
+        UIView.transition(with: self.imgHeart, duration: 0.25, options: .transitionCrossDissolve, animations: { if (self.isLiked == true){
             self.imgHeart.image = UIImage(named: "heart-on")
         } else {
             self.imgHeart.image = UIImage(named: "heart-off")
-        }
-        
-        if (self.isLiked == true){
-            self.lblLikes.textColor = UIColor.red
-        } else {
-            self.lblLikes.textColor = UIColor.white
-        }
+        } })
     }
     
     @objc public func setLikeDislike(){
@@ -88,6 +102,7 @@ class LikeControl: UIControl {
             }
         }
         
+        // Обновляем лайки
         self.initLikes(likes: self.likes, isLiked: self.isLiked)
     }
 }

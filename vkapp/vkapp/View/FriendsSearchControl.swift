@@ -9,14 +9,14 @@
 import UIKit
 
 class FriendsSearchControl: UIControl {
-    var selectedChar: String? = nil {
+    public var selectedChar: String? = nil {
         didSet {
             self.updateSelectedChar()
             self.sendActions(for: .valueChanged)
         }
     }
     
-    var friendChars: [String] = []
+    var friendChars: [String?] = []
     var stackView: UIStackView!
     private var buttons: [UIButton] = []
     
@@ -24,16 +24,18 @@ class FriendsSearchControl: UIControl {
         self.stackView = UIStackView()
         
         self.stackView.spacing = 8
-        self.stackView.axis = .horizontal
+        self.stackView.axis = .vertical
         self.stackView.alignment = .center
         self.translatesAutoresizingMaskIntoConstraints = false
         self.stackView.distribution = .fillEqually
+        self.stackView.widthAnchor.constraint(equalToConstant: 35).isActive = true
         
         self.addSubview(self.stackView)
     }
     
     public func setChars (sChars: [String]){
         self.friendChars = sChars
+        //self.friendChars.append("All")
         
         // Если есть буквы создаем под них кнопки
         if (friendChars.count > 0){
@@ -60,7 +62,10 @@ class FriendsSearchControl: UIControl {
     public func updateSelectedChar(){
         for (index, button) in self.buttons.enumerated() {
             guard let sChar:String = self.friendChars[index] else { return }
-            button.isSelected = sChar == self.selectedChar
+            
+            if sChar != "All" {
+                button.isSelected = sChar == self.selectedChar
+            }
         }
     }
 
