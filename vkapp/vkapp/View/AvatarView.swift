@@ -8,10 +8,11 @@
 
 import UIKit
 
-class AvatarView: UIView {
+class AvatarView: UIControl {
 
     var Image: UIImage!
     var ImageView: UIImageView!
+    var CurrentIndexPath: IndexPath?
     
     @IBInspectable var shadowColor: UIColor = UIColor.black
     @IBInspectable var shdowRadius: CGFloat = 5
@@ -45,6 +46,11 @@ class AvatarView: UIView {
         animation.damping = 0.3
         animation.initialVelocity = 5
         self.layer.add(animation, forKey: nil)
+        
+        // После того как анимация закончилась отправим эвент что аватар нажат
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
+            self.sendActions(for: .touchUpInside)
+        })
     }
     
     private func setupView(){
@@ -73,8 +79,9 @@ class AvatarView: UIView {
         layer.shadowRadius = self.shdowRadius
     }
     
-    public func showImage(image: UIImage){
+    public func showImage(image: UIImage, indexPath: IndexPath? = nil){
         // Меняем адрес картинки
         self.ImageView.image = image
+        self.CurrentIndexPath = indexPath ?? nil
     }
 }

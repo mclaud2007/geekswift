@@ -26,7 +26,13 @@ class LoginFormController: UIViewController {
         let user_password = passwordInput.text!
         
         if user_login == "" && user_password == "" {
-            performSegue(withIdentifier: "segueMainScreen", sender: nil)
+            loadingControl.startAnimation()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
+                self.loadingControl.isHidden = true
+                self.performSegue(withIdentifier: "segueMainScreen", sender: nil)
+            }
+            
         } else {
             show(message: "Поле логин и пароль должны быть пустыми.")
         }
@@ -60,8 +66,6 @@ class LoginFormController: UIViewController {
         
         // И когда она исчезает
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillBeHidden), name: UIResponder.keyboardWillHideNotification, object: nil)
-        
-        loadingControl.startAnimation()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
