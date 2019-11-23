@@ -42,7 +42,7 @@ class FriendsPhotoController: UICollectionViewController {
     
         // Configure the cell
         if (PhotosLists[indexPath.row] != nil){
-            cell.FriendPhotoImageView.showImage(image: PhotosLists[indexPath.row]!)
+            cell.FriendPhotoImageView.showImage(image: PhotosLists[indexPath.row]!, indexPath: indexPath)
             
             if (Likes.count > indexPath.item && Likes[indexPath.item] > 0){
                 var isAlreadyLiked = false
@@ -55,10 +55,44 @@ class FriendsPhotoController: UICollectionViewController {
             }
             
         } else {
-            cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!)
+            cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!, indexPath: indexPath)
             cell.FriendLike.initLikes(likes: -1, isLiked: false)
         }
         
+        // Вешаем обработчик клика по аватарке
+        cell.FriendPhotoImageView.addTarget(self, action: #selector(catchAvatarClicked(_:)), for: .touchUpInside)
+        
         return cell
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "ShowBigPhotos", sender: self)
+    }
+    
+    @objc func catchAvatarClicked (_ sender: AvatarView){
+        if let indexPath = sender.CurrentIndexPath {
+            // Выберем ячейку, чтобы при подготовке сеги передались корректные данные
+            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredHorizontally)
+           
+            // Выполняем сегу
+            performSegue(withIdentifier: "ShowBigPhotos", sender: self)
+            
+            // Убираем выделение ячейки
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowBigPhotos" {
+            if let destinationVC = segue.destination as? BigPhotosController,
+                let indexPath = collectionView.indexPathsForSelectedItems {
+                destinationVC.PhotosLists = self.PhotosLists
+                
+                if let _ = self.PhotosLists[indexPath[0][1]] {
+                    destinationVC.CurrentImageNumber = indexPath[0][1]
+                }
+            }
+            
+        }
     }
 }

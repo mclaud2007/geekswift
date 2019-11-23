@@ -131,6 +131,19 @@ class FriendsFormController: UIViewController {
         }
     }
     
+    @objc public func catchAvatarViewClicked(_ sender: AvatarView){
+        if let indexPath = sender.CurrentIndexPath {
+            // Выберем ячейку, чтобы при подготовке сеги передались корректные данные
+            tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+            
+            // Выполняем сегу
+            performSegue(withIdentifier: "ShowPhotos", sender: self)
+            
+            // Убираем выделение ячейки
+            tableView.deselectRow(at: indexPath, animated: true)
+        }
+    }
+    
     @objc public func catchCharChanged(_ sender: FriendsSearchControl){
         if let firstLetter = friendCharsControl.selectedChar {
             // Для начала очистим фильтр (если он не пустой)
@@ -176,26 +189,16 @@ extension FriendsFormController: UISearchBarDelegate {
         // Очищаем фильтрованный список
         FriendListFiltered.removeAll()
         
-        
-        
-        if searchText.count >= 2 {
-            for Friend in FriendsList {
-                if Friend.name.contains(searchText) {
-                    FriendListFiltered.append(Friend)
-                }
+        for Friend in FriendsList {
+            if Friend.name.contains(searchText) {
+                FriendListFiltered.append(Friend)
             }
         }
-        
+    
         tableView.reloadData()
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        if let searchText = searchBar.searchTextField.text {
-            if searchText.count < 2 {
-                show(message: "Для поиска необходимо минимум два символа")
-            }
-        }
-        
         searchBar.endEditing(true)
     }
     
@@ -217,7 +220,6 @@ extension FriendsFormController: UITableViewDelegate {
 }
 
 extension FriendsFormController: UITableViewDataSource {
-    
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if FriendListFiltered.count > 0 {
             return ""
@@ -242,10 +244,13 @@ extension FriendsFormController: UITableViewDataSource {
         cell.lblFriendsName.text = CurrentFriend.name
         
         if CurrentFriend.photo != nil {
-            cell.FriendPhotoImageView.showImage(image: CurrentFriend.photo!)
+            cell.FriendPhotoImageView.showImage(image: CurrentFriend.photo!, indexPath: indexPath)
         } else {
-            cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!)
+            cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!, indexPath: indexPath)
         }
+        
+        // Вешаем обработчик на клик по аватару
+        cell.FriendPhotoImageView.addTarget(self, action: #selector(catchAvatarViewClicked(_:)), for: .touchUpInside)
         
         return cell
     }
