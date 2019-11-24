@@ -12,5 +12,8 @@ class PhotosCell: UICollectionViewCell {
     @IBOutlet weak var FriendPhotoImageView: AvatarView!
     @IBOutlet weak var FriendLike: LikeControl!
     
-    
+    override func prepareForReuse() {
+        self.FriendPhotoImageView.showImage(image: getNotFoundPhoto())
+        self.FriendLike.initLikes(likes: -1, isLiked: false)
+    }
 }

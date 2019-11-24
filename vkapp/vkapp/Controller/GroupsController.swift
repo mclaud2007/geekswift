@@ -48,6 +48,10 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         return GroupsList.count
     }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75
+    }
 
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -120,7 +124,7 @@ extension GroupsController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let searchText = searchBar.searchTextField.text {
             if searchText.count < 2 {
-                show(message: "Для поиска необходимо минимум два символа")
+                showErrorMessage(message: "Для поиска необходимо минимум два символа")
             }
         }
         

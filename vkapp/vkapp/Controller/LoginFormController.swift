@@ -11,55 +11,70 @@ import UIKit
 class LoginFormController: UIViewController {
     @IBOutlet weak var loginInput: UITextField!
     @IBOutlet weak var passwordInput: UITextField!
-    @IBOutlet weak var scrolView: UIScrollView!
+    @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet var loadingControl: LoadingViewControl!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         let hideKeyboardGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
-        scrolView?.addGestureRecognizer(hideKeyboardGesture)
+        scrollView?.addGestureRecognizer(hideKeyboardGesture)
+        
+        // Если это найтмод, то цвет background'а будет черный
+        if isDarkMode {
+            self.view.backgroundColor = .black
+        }
+    }
+    
+    private func showFriendScreen(){
+        let friendVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TabBarController")
+        friendVC.modalTransitionStyle = .coverVertical
+        friendVC.modalPresentationStyle = .overFullScreen
+        self.present(friendVC, animated: true, completion: nil)
     }
 
     @IBAction func loginButtonClick(_ sender: Any) {
-        let user_login = loginInput.text!
-        let user_password = passwordInput.text!
+        let login = loginInput.text ?? ""
+        let password = passwordInput.text ?? ""
         
-        if user_login == "" && user_password == "" {
-            loadingControl.startAnimation()
+        if login.isEmpty, password.isEmpty {
+            self.loadingControl.startAnimation()
             
+            // Имитация загрузки данных
             DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
-                self.loadingControl.isHidden = true
-                self.performSegue(withIdentifier: "segueMainScreen", sender: nil)
+                self.loadingControl.stopAnimation()
+                self.showFriendScreen()
+                //self.performSegue(withIdentifier: "segueMainScreen", sender: nil)
             }
-            
         } else {
-            show(message: "Поле логин и пароль должны быть пустыми.")
+            showErrorMessage(message: "Поле логин и пароль должны быть пустыми.")
         }
     }
     
     // Когда клавиатура появляется
     @objc func keyboardWasShown​(notification: Notification) {
-        let info = notification.userInfo! as NSDictionary
-        let kbSize = (info.value(forKey: UIResponder.keyboardFrameEndUserInfoKey) as! NSValue).cgRectValue.size
-        let contentInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: kbSize.height, right: 0.0)
+        if let _ = scrollView {
+            let info = notification.userInfo! as NSDictionary
+            let kbSize = (info.value(forKey: UIResponder.keyboardFrameEndUserInfoKey) as! NSValue).cgRectValue.size
+            let contentInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: kbSize.height, right: 0.0)
+            
+            scrollView?.contentInset = contentInsets
+            scrollView?.scrollIndicatorInsets = contentInsets
+        }
         
-        self.scrolView?.contentInset = contentInsets
-        scrolView?.scrollIndicatorInsets = contentInsets
     }
     
     // Когда клавиатура исчезает
     @objc func keyboardWillBeHidden(notification: Notification){
         let contentInsets = UIEdgeInsets.zero
-        scrolView?.contentInset = contentInsets
-        scrolView?.scrollIndicatorInsets = contentInsets
+        
+        scrollView?.contentInset = contentInsets
+        scrollView?.scrollIndicatorInsets = contentInsets
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        // Прячем полоску навигации, она нам нужна только для того чтобы сделать unwind
-        navigationController?.setNavigationBarHidden(true, animated: true)
         
         // Подписываемся на сообщение когда клавиатура появляется
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWasShown​), name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -77,7 +92,8 @@ class LoginFormController: UIViewController {
     }
     
     @objc func hideKeyboard() {
-        self.scrolView?.endEditing(true)
+        scrollView?.endEditing(true)
+        
     }
     
     @IBAction func logautClick(segue: UIStoryboardSegue) {

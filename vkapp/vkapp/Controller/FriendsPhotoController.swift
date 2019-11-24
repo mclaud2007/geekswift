@@ -18,14 +18,6 @@ class FriendsPhotoController: UICollectionViewController {
     var Likes = [-1]
     // Массив уже отмеченных фотографий или -1 по умолчанию
     var Liked = [-1]
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -41,21 +33,28 @@ class FriendsPhotoController: UICollectionViewController {
         }
     
         // Configure the cell
-        if (PhotosLists[indexPath.row] != nil){
-            cell.FriendPhotoImageView.showImage(image: PhotosLists[indexPath.row]!, indexPath: indexPath)
+        if PhotosLists.indices.contains(indexPath.row),
+            let photos = PhotosLists[indexPath.row] {
             
-            if (Likes.count > indexPath.item && Likes[indexPath.item] > 0){
-                var isAlreadyLiked = false
-                
-                if (Liked.contains(where: { $0 == indexPath.item }) == true){
-                    isAlreadyLiked = true
+            // Фотография по идее есть
+            cell.FriendPhotoImageView.showImage(image: photos, indexPath: indexPath)
+            
+            // Ищем информацию о лайках
+            if Likes.count > indexPath.item && Likes.indices.contains(indexPath.item) {
+                if Likes[indexPath.item] > 0 {
+                    var isAlreadyLiked = false
+                    
+                    if (Liked.contains(where: { $0 == indexPath.item }) == true){
+                        isAlreadyLiked = true
+                    }
+                    
+                    // Лайки нашли - инициализируем контрол
+                    cell.FriendLike.initLikes(likes: Likes[indexPath.item], isLiked: isAlreadyLiked)
                 }
-                
-                cell.FriendLike.initLikes(likes: Likes[indexPath.item], isLiked: isAlreadyLiked)
             }
             
         } else {
-            cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!, indexPath: indexPath)
+            cell.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
             cell.FriendLike.initLikes(likes: -1, isLiked: false)
         }
         
@@ -92,7 +91,6 @@ class FriendsPhotoController: UICollectionViewController {
                     destinationVC.CurrentImageNumber = indexPath[0][1]
                 }
             }
-            
         }
     }
 }

@@ -9,62 +9,97 @@
 import UIKit
 
 class FriendsSearchControl: UIControl {
-    public var selectedChar: String? = nil {
+    public var selectedChar: String? {
         didSet {
             self.updateSelectedChar()
             self.sendActions(for: .valueChanged)
         }
     }
     
-    var friendChars: [String?] = []
+    var friendsLastNameCharsArray: [String?] = []
     var stackView: UIStackView!
     private var buttons: [UIButton] = []
     
     private func setupView(){
         self.stackView = UIStackView()
         
-        self.stackView.spacing = 8
         self.stackView.axis = .vertical
         self.stackView.alignment = .center
         self.translatesAutoresizingMaskIntoConstraints = false
         self.stackView.distribution = .fillEqually
-        self.stackView.widthAnchor.constraint(equalToConstant: 35).isActive = true
         
         self.addSubview(self.stackView)
     }
     
     public func setChars (sChars: [String]){
-        self.friendChars = sChars
+        self.friendsLastNameCharsArray = sChars
         //self.friendChars.append("All")
         
+        // Здесь будем хранить предыдущую кнопку для расчета констрейнтов
+        var prevButton: UIButton?
+        
         // Если есть буквы создаем под них кнопки
-        if (friendChars.count > 0){
-            for sChar in friendChars {
+        if (friendsLastNameCharsArray.count > 0){
+            for sChar in friendsLastNameCharsArray {
                 let button = UIButton(type: .system)
+                
                 button.setTitle(sChar, for: .normal)
                 button.setTitleColor(.link, for: .normal)
                 button.setTitleColor(.white, for: .selected)
-                button.addTarget(self, action: #selector(selectChar), for: .touchUpInside)
-                button.heightAnchor.constraint(greaterThanOrEqualToConstant: 30).isActive = true
-                button.widthAnchor.constraint(greaterThanOrEqualToConstant: 30).isActive = true
-                button.addTarget(self, action: #selector(selectChar(_:)), for: .touchUpInside)
+                button.addTarget(self, action: #selector(setChar), for: .touchUpInside)
+                
+                // Задаем размеры созданной кнопки
+                let widthConstraint = button.widthAnchor.constraint(equalToConstant: 30)
+                widthConstraint.priority = UILayoutPriority(rawValue: 999)
+                widthConstraint.isActive = true
+
+                let heightConstraint = button.heightAnchor.constraint(equalToConstant: 30)
+                heightConstraint.priority = UILayoutPriority(rawValue: 999)
+                heightConstraint.isActive = true
+                
+                // Добавляем в массив кнопок и размещаем на stackView
                 self.buttons.append(button)
                 self.stackView.addArrangedSubview(button)
+                
+                // Уже была создана кнопка ранее, верх расчитаем от её низа
+                if let _ = prevButton {
+                    let topConstraint = button.topAnchor.constraint(equalTo: prevButton!.bottomAnchor)
+                    topConstraint.priority = UILayoutPriority(rawValue: 999)
+                    topConstraint.isActive = true
+                } else {
+                    // В противном случае верх считаем от верха stackView
+                    let topConstraint = button.topAnchor.constraint(equalTo: self.stackView.layoutMarginsGuide.topAnchor)
+                    topConstraint.priority = UILayoutPriority(rawValue: 999)
+                    topConstraint.isActive = true
+                }
+                
+                // Вешаем обработку по нажатию
+                button.addTarget(self, action: #selector(setChar(_:)), for: .touchUpInside)
+                
+                // Запоминаем текущую кнопку как предыдущую
+                prevButton = button
             }
         }
     }
     
-    @objc public func selectChar(_ sender: UIButton){
+    @objc public func setChar(_ sender: UIButton){
         guard let index = self.buttons.firstIndex(of: sender) else { return }
-        self.selectedChar = friendChars[index]
+        
+        if friendsLastNameCharsArray.indices.contains(index) {
+            self.selectedChar = friendsLastNameCharsArray[index]
+        } else {
+            return
+        }
     }
     
     public func updateSelectedChar(){
         for (index, button) in self.buttons.enumerated() {
-            guard let sChar:String = self.friendChars[index] else { return }
+            if self.friendsLastNameCharsArray.indices.contains(index) {
+                let sChar = self.friendsLastNameCharsArray[index]
             
-            if sChar != "All" {
-                button.isSelected = sChar == self.selectedChar
+                if sChar != "All" {
+                    button.isSelected = sChar == self.selectedChar
+                }
             }
         }
     }
