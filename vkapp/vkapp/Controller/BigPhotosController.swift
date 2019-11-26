@@ -73,7 +73,7 @@ class BigPhotosController: UIViewController {
             self.BigPhotoImageViewTmp.image = UIImage(named: "photonotfound")!
         }
 
-        // Показываем слой и вытаскиваем его на передний план
+        // Показваем слой и вытаскиваем его на передний план
         if direction == .left {
             self.BigPhotoImageViewTmp.center.x -= self.view.bounds.width
         } else {

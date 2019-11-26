@@ -50,19 +50,18 @@ class FriendsFormController: UIViewController {
     ]
     
     // Отфильтрованный список пользователей
-    var FriendListFiltered: [Friend] = []
+    var ListOfFilterdFriends: [Friend] = []
     
     // Список букв пользователей для контрола
-    var FriendAlphabetList: [String] = []
+    var ListOfFirstCharOfLastname: [String] = []
     
     // Список пользователей разделенных по буквам
-    var FriendsAlphabetList: Dictionary<String,[Int]> = ["All":[-1]]
+    var ListOfFriendByAlphabet: Dictionary<String,[Int]> = ["All":[-1]]
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // На этом экране нам нужна навигация
-        navigationController?.setNavigationBarHidden(false, animated: false)
+        // Устанавливаем название экрана
         self.title = "Друзья"
         
         // Регистрируем xib в качестве прототипа ячейки
@@ -74,61 +73,70 @@ class FriendsFormController: UIViewController {
         
         // Собираем все первые буквы фамилий
         for (index,elemnet) in FriendsList.enumerated() {
-            if (elemnet.name != "") {
-                let fullNameArr = elemnet.name.split(separator: " ", maxSplits: 2)
+            if !elemnet.name.isEmpty {
+                let fullNameArr = elemnet.name.split(separator: " ")
+                
+                // Для простоты будем думать что формат у записи ФИ
                 let firstName = fullNameArr[0]
-                let lastName = fullNameArr.count > 1 ? fullNameArr[1] : nil
-                var firstLetter = String(firstName.prefix(1))
+                let lastName = fullNameArr.count > 1 ? fullNameArr.last : nil
                 
-                // Есть фамилия
-                if (lastName != nil){
-                    firstLetter = String(lastName!.prefix(1))
-                }
+                // Первая буква фамили или, если ее нет - то имени
+                let firstLetter = String(lastName?.prefix(1) ?? firstName.prefix(1))
                 
-                if (FriendAlphabetList.contains(firstLetter) == false){
-                    FriendAlphabetList.append(firstLetter)
-                }
-                
-                // Первый запуск
-                if FriendsAlphabetList["All"] != nil && FriendsAlphabetList["All"]![0] == -1 {
-                    FriendsAlphabetList["All"]![0] = index
-                } else {
-                    FriendsAlphabetList["All"]!.append(index)
+                // Если такой буквы у нас еще нет - добавим её
+                if !ListOfFirstCharOfLastname.contains(firstLetter) {
+                    ListOfFirstCharOfLastname.append(firstLetter)
                 }
                 
                 // Запоминаем пользователя в конкретной секции
-                if FriendsAlphabetList[firstLetter] == nil {
-                    FriendsAlphabetList[firstLetter] = [index]
+                if ListOfFriendByAlphabet[firstLetter] == nil {
+                    ListOfFriendByAlphabet[firstLetter] = [index]
                 } else {
-                    FriendsAlphabetList[firstLetter]!.append(index)
+                    ListOfFriendByAlphabet[firstLetter]!.append(index)
                 }
             }
         }
         
-        if (FriendAlphabetList.count > 0){
-            friendCharsControl.setChars(sChars: FriendAlphabetList )
+        // Друзья найдены - нужно инициализировать контрол для поиска по первой букве фамилии
+        if (ListOfFirstCharOfLastname.count > 0){
+            friendCharsControl.setChars(sChars: ListOfFirstCharOfLastname )
             friendCharsControl.addTarget(self, action: #selector(catchCharChanged(_:)), for: .valueChanged)
         }
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.navigationBar.topItem?.title = "Друзья"
-    }
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        navigationController?.navigationBar.topItem?.title = "Друзья"
+//    }
     
     // MARK: Получаем текущего пользователя из массива по секции и ключу
-    public func getCurrentFriend(section: Int, row: Int) -> Friend {
-        if FriendListFiltered.count > 0 {
-            return FriendListFiltered[row]
+    public func getCurrentFriend(section: Int, row: Int) -> Friend? {
+        if ListOfFilterdFriends.count > 0 {
+            if ListOfFilterdFriends.indices.contains(row) {
+                return ListOfFilterdFriends[row]
+            }
             
         } else {
             // Выбираем пользователя из секции и ячейки
-            let SectionName = FriendAlphabetList[section]
-            let FriendListFromSection = FriendsAlphabetList[SectionName]
-            let CurrentFriendID = FriendListFromSection![row]
-            
-            return FriendsList[CurrentFriendID]
+            if ListOfFirstCharOfLastname.indices.contains(section) {
+                // Получаем букву по которой будем искать друзей
+                let SectionName = ListOfFirstCharOfLastname[section]
+                
+                // Пользователи на выбранную букву существуют
+                if ListOfFriendByAlphabet[SectionName] != nil {
+                    // И осталось выяснить внутри есть кто-нибудь
+                    if ListOfFriendByAlphabet[SectionName]!.indices.contains(row) {
+                        let CurrentFriendID = ListOfFriendByAlphabet[SectionName]![row]
+                        
+                        if FriendsList.indices.contains(CurrentFriendID) {
+                            return FriendsList[CurrentFriendID]
+                        }
+                    }
+                }
+            }
         }
+        
+        return nil
     }
     
     @objc public func catchAvatarViewClicked(_ sender: AvatarView){
@@ -147,16 +155,16 @@ class FriendsFormController: UIViewController {
     @objc public func catchCharChanged(_ sender: FriendsSearchControl){
         if let firstLetter = friendCharsControl.selectedChar {
             // Для начала очистим фильтр (если он не пустой)
-            if FriendListFiltered.count > 0 {
+            if ListOfFilterdFriends.count > 0 {
                 // Очищаем фильтр и перезагружаем список
-                FriendListFiltered.removeAll()
+                ListOfFilterdFriends.removeAll()
                 tableView.reloadData()
             }
             
             // Убираем клавиатуру если она есть
             searchBar.endEditing(true)
             
-            if let section = FriendAlphabetList.firstIndex(of: firstLetter) {
+            if let section = ListOfFirstCharOfLastname.firstIndex(of: firstLetter) {
                 // Просто мотаем к нужной секции
                 tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
             }
@@ -169,15 +177,17 @@ class FriendsFormController: UIViewController {
             let indexPath = tableView.indexPathForSelectedRow {
             
             // Выбираем пользователя из секции и ячейки
-            let CurrentFriend = getCurrentFriend(section: indexPath.section, row: indexPath.row)
-            
-            destinationVC.title = CurrentFriend.name
-            
-            if CurrentFriend.photos != nil {
-                // Дальше надо заменить на передачу ID пользователя, а экран фото должен сам запрсоить данные
-                destinationVC.PhotosLists = CurrentFriend.photos!
-                destinationVC.Likes = CurrentFriend.likes!
-                destinationVC.Liked = CurrentFriend.liked!
+            if let CurrentFriend = getCurrentFriend(section: indexPath.section, row: indexPath.row) {
+                destinationVC.title = CurrentFriend.name
+                
+                if let photos = CurrentFriend.photos {
+                    // Передаем фото, они точно есть (проверили выше) лайки передаем либо значения ли дефолт
+                    destinationVC.PhotosLists = photos
+                    destinationVC.Likes = CurrentFriend.likes ?? [-1]
+                    destinationVC.Liked = CurrentFriend.liked ?? [-1]
+                }
+            } else {
+                showErrorMessage(message: "Данные не найдены")
             }
         }
     }
@@ -187,14 +197,16 @@ class FriendsFormController: UIViewController {
 extension FriendsFormController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         // Очищаем фильтрованный список
-        FriendListFiltered.removeAll()
+        ListOfFilterdFriends.removeAll()
         
-        for Friend in FriendsList {
-            if Friend.name.contains(searchText) {
-                FriendListFiltered.append(Friend)
+        if FriendsList.count > 0 {
+            for Friend in FriendsList {
+                if Friend.name.contains(searchText) {
+                    ListOfFilterdFriends.append(Friend)
+                }
             }
         }
-    
+        
         tableView.reloadData()
     }
     
@@ -207,7 +219,7 @@ extension FriendsFormController: UISearchBarDelegate {
         searchBar.endEditing(true)
         
         // Очищаем фильтрованный список
-        FriendListFiltered.removeAll()
+        ListOfFilterdFriends.removeAll()
         tableView.reloadData()
     }
 }
@@ -221,11 +233,12 @@ extension FriendsFormController: UITableViewDelegate {
 
 extension FriendsFormController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if FriendListFiltered.count > 0 {
+        // Пользователи отфильтрованы - там не будем разбивать пока на буквы
+        if ListOfFilterdFriends.count > 0 {
             return ""
         } else {
-            if let headTitle:String = FriendAlphabetList[section] {
-                return headTitle
+            if ListOfFirstCharOfLastname.indices.contains(section) {
+                return ListOfFirstCharOfLastname[section]
             } else {
                 return ""
             }
@@ -238,38 +251,43 @@ extension FriendsFormController: UITableViewDataSource {
         }
         
         // Выбираем пользователя из секции и ячейки
-        let CurrentFriend = getCurrentFriend(section: indexPath.section, row: indexPath.row)
-        
-        // Configure the cell...
-        cell.lblFriendsName.text = CurrentFriend.name
-        
-        if CurrentFriend.photo != nil {
-            cell.FriendPhotoImageView.showImage(image: CurrentFriend.photo!, indexPath: indexPath)
+        if let CurrentFriend = getCurrentFriend(section: indexPath.section, row: indexPath.row) {
+            // Configure the cell...
+            cell.lblFriendsName.text = CurrentFriend.name
+            
+            if let photos = CurrentFriend.photo {
+                cell.FriendPhotoImageView.showImage(image: photos, indexPath: indexPath)
+            } else {
+                cell.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
+            }
+            
+            // Вешаем обработчик на клик по аватару
+            cell.FriendPhotoImageView.addTarget(self, action: #selector(catchAvatarViewClicked(_:)), for: .touchUpInside)
         } else {
-            cell.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!, indexPath: indexPath)
+            cell.lblFriendsName.text = "Not found!"
+            cell.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
         }
-        
-        // Вешаем обработчик на клик по аватару
-        cell.FriendPhotoImageView.addTarget(self, action: #selector(catchAvatarViewClicked(_:)), for: .touchUpInside)
         
         return cell
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        // Если фильтрованный массив не пучтой, значит у нас будет одна секция
-        if FriendListFiltered.count > 0 {
+        // Если фильтрованный массив не пустой, значит у нас будет одна секция
+        if ListOfFilterdFriends.count > 0 {
             return 1
+            
         } else {
-            return FriendAlphabetList.count
+            return ListOfFirstCharOfLastname.count
+            
         }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if FriendListFiltered.count > 0 {
-            return FriendListFiltered.count
+        if ListOfFilterdFriends.count > 0 {
+            return ListOfFilterdFriends.count
             
         } else {
-            if let FriendSectionList = FriendsAlphabetList[FriendAlphabetList[section]] {
+            if let FriendSectionList = ListOfFriendByAlphabet[ListOfFirstCharOfLastname[section]] {
                 return FriendSectionList.count
             }
         }

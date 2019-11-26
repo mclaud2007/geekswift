@@ -71,4 +71,20 @@ class LoadingViewControl: UIControl {
             self.lblLoading2.layer.borderColor = UIColor.white.cgColor
         } )
     }
+    
+    public func stopAnimation(){
+        self.isHidden = true
+        self.lblLoading.alpha = 1
+        
+        // Удаляем все анимации
+        self.lblLoading.layer.removeAllAnimations()
+        self.lblLoading1.layer.removeAllAnimations()
+        self.lblLoading2.layer.removeAllAnimations()
+        
+        // Возвращаем все на свои места
+        self.lblLoading.backgroundColor = .white
+        self.lblLoading.layer.cornerRadius = 7.5
+        self.lblLoading.layer.borderWidth = 2
+        self.lblLoading.layer.borderColor = UIColor.gray.cgColor
+    }
 }

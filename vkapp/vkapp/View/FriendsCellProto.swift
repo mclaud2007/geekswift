@@ -14,7 +14,6 @@ class FriendsCellProto: UITableViewCell {
     
     override func prepareForReuse() {
         self.lblFriendsName.text = "..."
-        self.FriendPhotoImageView.showImage(image: UIImage(named: "photonotfound")!)
+        self.FriendPhotoImageView.showImage(image: getNotFoundPhoto())
     }
-    
 }
