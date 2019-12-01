@@ -13,6 +13,7 @@ class LoginFormController: UIViewController {
     @IBOutlet weak var passwordInput: UITextField!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet var loadingControl: LoadingViewControl!
+    let sessionData = Session.instance
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +38,7 @@ class LoginFormController: UIViewController {
         let login = loginInput.text ?? ""
         let password = passwordInput.text ?? ""
         
-        if login.isEmpty, password.isEmpty {
+        if sessionData.login(login: login, password: password) {
             self.loadingControl.startAnimation()
             
             // Имитация загрузки данных
@@ -97,6 +98,7 @@ class LoginFormController: UIViewController {
     }
     
     @IBAction func logautClick(segue: UIStoryboardSegue) {
+        sessionData.logout()
         navigationController?.popToRootViewController(animated: true)
     }
 }

@@ -355,7 +355,7 @@
         <!--Friends Photo-->
         <scene sceneID="iA6-71-Gmp">
             <objects>
-                <collectionViewController id="ZmG-ZD-KMx" userLabel="Friends Photo" customClass="FriendsPhotoController" customModule="vkapp" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="FriendsPhotoController" id="ZmG-ZD-KMx" userLabel="Friends Photo" customClass="FriendsPhotoController" customModule="vkapp" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="XNv-X1-XKY">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -466,7 +466,7 @@
         <!--Friends Form Group Navigation-->
         <scene sceneID="70d-qC-iy1">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="z3E-dz-Nt3" userLabel="Friends Form Group Navigation" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="z3E-dz-Nt3" userLabel="Friends Form Group Navigation" customClass="CustomNavControll" customModule="vkapp" customModuleProvider="target" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" tag="2" title="Группы" image="person.3.fill" catalog="system" id="pjQ-ep-19H"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="EQ9-uL-bnY">

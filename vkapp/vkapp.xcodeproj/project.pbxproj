@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0707922A2392438B00F728BC /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070792292392438B00F728BC /* Session.swift */; };
 		071097E72358E50100932A4E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071097E62358E50100932A4E /* AppDelegate.swift */; };
 		071097E92358E50100932A4E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071097E82358E50100932A4E /* SceneDelegate.swift */; };
 		071097F02358E50300932A4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 071097EF2358E50300932A4E /* Assets.xcassets */; };
@@ -40,6 +41,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		070792292392438B00F728BC /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		071097E32358E50100932A4E /* vkapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vkapp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		071097E62358E50100932A4E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		071097E82358E50100932A4E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -85,6 +87,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0707922723923D7700F728BC /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				07F93DDC23644C7F00F6B3B0 /* FriendPhotosCell.swift */,
+				07326D2D2375744800548A86 /* FriendsCellProto.swift */,
+				07326D352376F63E00548A86 /* NewsTableCell.swift */,
+				0769B0F9236460FE0016E6D8 /* GroupsCell.swift */,
+				0769B0FD23646D280016E6D8 /* AllGroupCell.swift */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
+		0707922823923D8800F728BC /* CustomControlls */ = {
+			isa = PBXGroup;
+			children = (
+				0779F55D236EA77B008E0A51 /* AvatarView.swift */,
+				07E1338B236EF80500FCC49B /* LikeControl.swift */,
+			);
+			path = CustomControlls;
+			sourceTree = "<group>";
+		};
 		071097DA2358E50100932A4E = {
 			isa = PBXGroup;
 			children = (
@@ -141,6 +164,7 @@
 				0788EE37236341C500379186 /* Friends.swift */,
 				0769B0F523645F8D0016E6D8 /* Groups.swift */,
 				07C3721C2377115600828D30 /* News.swift */,
+				070792292392438B00F728BC /* Session.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -174,14 +198,9 @@
 		07F93DDB23644C6000F6B3B0 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				07F93DDC23644C7F00F6B3B0 /* FriendPhotosCell.swift */,
-				0769B0F9236460FE0016E6D8 /* GroupsCell.swift */,
-				0769B0FD23646D280016E6D8 /* AllGroupCell.swift */,
-				0779F55D236EA77B008E0A51 /* AvatarView.swift */,
-				07E1338B236EF80500FCC49B /* LikeControl.swift */,
+				0707922723923D7700F728BC /* Cells */,
+				0707922823923D8800F728BC /* CustomControlls */,
 				0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */,
-				07326D2D2375744800548A86 /* FriendsCellProto.swift */,
-				07326D352376F63E00548A86 /* NewsTableCell.swift */,
 				07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */,
 			);
 			path = View;
@@ -271,6 +290,7 @@
 				07F99D2A237B3DE4002E87ED /* LoadingViewControl.swift in Sources */,
 				0779F55E236EA77B008E0A51 /* AvatarView.swift in Sources */,
 				0769B0FE23646D280016E6D8 /* AllGroupCell.swift in Sources */,
+				0707922A2392438B00F728BC /* Session.swift in Sources */,
 				0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */,
 				0793234B236228B400394647 /* GroupsController.swift in Sources */,
 				07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */,

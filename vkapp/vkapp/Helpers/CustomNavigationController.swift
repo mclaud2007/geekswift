@@ -24,13 +24,15 @@ class CustomNavControll: UINavigationController, UINavigationControllerDelegate 
         
         if operation == .push {
             self.interactTransition.ViewController = toVC
-            return CutomTransitionAnimatorPush()
+            return CutomTransitionAnimatorPop()
+            
         } else if operation == .pop {
             if navigationController.viewControllers.first != toVC {
                 self.interactTransition.ViewController = toVC
             }
+        
+            return CutomTransitionAnimatorPush()
             
-            return CutomTransitionAnimatorPop()
         } else if operation == .none {
             return nil
         } else {

@@ -9,9 +9,19 @@
 import UIKit
 
 class FriendsFormController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableView: UITableView! {
+        didSet {
+            tableView.delegate = self
+            tableView.dataSource = self
+        }
+    }
+    
     @IBOutlet weak var friendCharsControl: FriendsSearchControl!
-    @IBOutlet weak var searchBar: UISearchBar!
+    @IBOutlet weak var searchBar: UISearchBar! {
+        didSet {
+            searchBar.delegate = self
+        }
+    }
     
     let FriendsList = [
         Friend(photo: UIImage(named: "bruce")!,
@@ -58,6 +68,10 @@ class FriendsFormController: UIViewController {
     // Список пользователей разделенных по буквам
     var ListOfFriendByAlphabet: Dictionary<String,[Int]> = ["All":[-1]]
     
+    var sessionData = Session.instance
+    var userID: Int?
+    var token: String?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -67,47 +81,52 @@ class FriendsFormController: UIViewController {
         // Регистрируем xib в качестве прототипа ячейки
         tableView.register(UINib(nibName: "FriendsCellProto", bundle: nil), forCellReuseIdentifier: "FriendsCellProto")
         
-        tableView.dataSource = self
-        tableView.delegate = self
-        searchBar.delegate = self
+        // Получаем данные сессии
+        userID = self.sessionData.getUserId()
+        token = self.sessionData.getToken()
         
-        // Собираем все первые буквы фамилий
-        for (index,elemnet) in FriendsList.enumerated() {
-            if !elemnet.name.isEmpty {
-                let fullNameArr = elemnet.name.split(separator: " ")
-                
-                // Для простоты будем думать что формат у записи ФИ
-                let firstName = fullNameArr[0]
-                let lastName = fullNameArr.count > 1 ? fullNameArr.last : nil
-                
-                // Первая буква фамили или, если ее нет - то имени
-                let firstLetter = String(lastName?.prefix(1) ?? firstName.prefix(1))
-                
-                // Если такой буквы у нас еще нет - добавим её
-                if !ListOfFirstCharOfLastname.contains(firstLetter) {
-                    ListOfFirstCharOfLastname.append(firstLetter)
-                }
-                
-                // Запоминаем пользователя в конкретной секции
-                if ListOfFriendByAlphabet[firstLetter] == nil {
-                    ListOfFriendByAlphabet[firstLetter] = [index]
-                } else {
-                    ListOfFriendByAlphabet[firstLetter]!.append(index)
+        // На этом экране у нас уже должен быть userID и токен - иначе выбрасываем обратно на экран логина
+        if userID! > 0 && !token!.isEmpty {
+            // Собираем все первые буквы фамилий
+            for (index,elemnet) in FriendsList.enumerated() {
+                if !elemnet.name.isEmpty {
+                    let fullNameArr = elemnet.name.split(separator: " ")
+                    
+                    // Для простоты будем думать что формат у записи ФИ
+                    let firstName = fullNameArr[0]
+                    let lastName = fullNameArr.count > 1 ? fullNameArr.last : nil
+                    
+                    // Первая буква фамили или, если ее нет - то имени
+                    let firstLetter = String(lastName?.prefix(1) ?? firstName.prefix(1))
+                    
+                    // Если такой буквы у нас еще нет - добавим её
+                    if !ListOfFirstCharOfLastname.contains(firstLetter) {
+                        ListOfFirstCharOfLastname.append(firstLetter)
+                    }
+                    
+                    // Запоминаем пользователя в конкретной секции
+                    if ListOfFriendByAlphabet[firstLetter] == nil {
+                        ListOfFriendByAlphabet[firstLetter] = [index]
+                    } else {
+                        ListOfFriendByAlphabet[firstLetter]!.append(index)
+                    }
                 }
             }
-        }
-        
-        // Друзья найдены - нужно инициализировать контрол для поиска по первой букве фамилии
-        if (ListOfFirstCharOfLastname.count > 0){
-            friendCharsControl.setChars(sChars: ListOfFirstCharOfLastname )
-            friendCharsControl.addTarget(self, action: #selector(catchCharChanged(_:)), for: .valueChanged)
+            
+            // Друзья найдены - нужно инициализировать контрол для поиска по первой букве фамилии
+            if (ListOfFirstCharOfLastname.count > 0){
+                friendCharsControl.setChars(sChars: ListOfFirstCharOfLastname )
+                friendCharsControl.addTarget(self, action: #selector(catchCharChanged(_:)), for: .valueChanged)
+            }
+        } else {
+            let LoginController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "LoginScreenVC")
+            LoginController.modalTransitionStyle = .flipHorizontal
+            LoginController.modalPresentationStyle = .overFullScreen
+            self.present(LoginController, animated: true) {
+                LoginController.showErrorMessage(message: "Что-то пошло не так. Попробуйте еще раз позже.")
+            }
         }
     }
-    
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        navigationController?.navigationBar.topItem?.title = "Друзья"
-//    }
     
     // MARK: Получаем текущего пользователя из массива по секции и ключу
     public func getCurrentFriend(section: Int, row: Int) -> Friend? {

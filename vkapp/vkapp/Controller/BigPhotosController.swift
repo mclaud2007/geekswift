@@ -22,6 +22,7 @@ class BigPhotosController: UIViewController {
     enum panDirectionEnum {
         case left
         case right
+        case bottom
         case none
     }
     
@@ -64,11 +65,17 @@ class BigPhotosController: UIViewController {
             } else if transition.x > 0 {
                 self.panDirect = .right
             } else {
-                self.panDirect = .none
+                if transition.y > 0 {
+                    self.panDirect = .bottom
+                } else {
+                    self.panDirect = .none
+                }
             }
             
-            if self.panDirect != .none {
+            if self.panDirect != .none && self.panDirect != .bottom {
                 self.startAnimation()
+            } else if self.panDirect == .bottom {
+                self.goBack()
             }
             
         case .changed:
@@ -76,10 +83,13 @@ class BigPhotosController: UIViewController {
             
             switch self.panDirect {
             case .right:
-                let percent = min(max(0, sender.translation(in: view).x / 200), 1)
+                let percent = min(max(0, sender.translation(in: view).x / 500), 1)
                 propertyAnimator.fractionComplete = percent
             case .left:
-                let percent = min(max(0, -sender.translation(in: view).x / 200), 1)
+                let percent = min(max(0, -sender.translation(in: view).x / 500), 1)
+                propertyAnimator.fractionComplete = percent
+            case .bottom:
+                let percent = min(max(0, sender.translation(in: view).y / 500), 1)
                 propertyAnimator.fractionComplete = percent
             case .none:
                 let transition = sender.translation(in: self.view)
@@ -92,14 +102,19 @@ class BigPhotosController: UIViewController {
                     self.panDirect = .right
                     self.startAnimation()
                 } else {
-                    self.panDirect = .none
+                    if transition.y > 0 {
+                        self.panDirect = .bottom
+                        self.goBack()
+                    } else {
+                        self.panDirect = .none
+                    }
                 }
             }
             
         case .ended:
             guard let propertyAnimator = self.panInteractiveAnimator else { return }
             
-            if propertyAnimator.fractionComplete > 0.33 {
+            if propertyAnimator.fractionComplete > 0.20 {
                 propertyAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0.5)
             } else {
                 propertyAnimator.isReversed = true
@@ -111,7 +126,12 @@ class BigPhotosController: UIViewController {
         }
     }
     
+    private func goBack(){
+        self.navigationController?.popViewController(animated: true)
+    }
+    
     private func startAnimation(){
+        // Если направление движения лево/право
         if self.animationHasFinished == true {
             // Стартуя анимацию пока она не завершится, новую запускать нельзя
             self.animationHasFinished = false
@@ -137,7 +157,7 @@ class BigPhotosController: UIViewController {
             self.BigPhotoImageViewTmp.isHidden = false
             
             // Создаем универсальную анимацию
-            panInteractiveAnimator = UIViewPropertyAnimator(duration: 2, curve: .easeInOut, animations: {
+            panInteractiveAnimator = UIViewPropertyAnimator(duration: 1, curve: .linear, animations: {
                 if self.panDirect == .left {
                     self.BigPhotoImageView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5).concatenating(CGAffineTransform(translationX: -2 * self.view.bounds.width, y: 0))
                     self.BigPhotoImageViewTmp.transform = .identity
