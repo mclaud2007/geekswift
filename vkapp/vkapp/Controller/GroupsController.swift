@@ -17,19 +17,24 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     var GroupsFiltered: [Groups] = []
     
-    @IBOutlet weak var searchBar: UISearchBar!
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var searchBar: UISearchBar! {
+        didSet {
+            searchBar.delegate = self
+        }
+    }
+    
+    @IBOutlet weak var tableView: UITableView! {
+        didSet {
+            tableView.delegate = self
+            tableView.dataSource = self
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         navigationController?.setNavigationBarHidden(false, animated: false)
         self.title = "Группы"
-        
-        tableView.dataSource = self
-        tableView.delegate = self
-        searchBar.delegate = self
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {

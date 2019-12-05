@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Alamofire
 
 class Friend {
     let name: String
@@ -20,6 +21,16 @@ class Friend {
     // Массив ЗНАЧЕНИЯ в котором - номера (ключи) фото, к которым
     // уже поставил отметку нравится текущий пользователь
     let liked: [Int]?
+    let token = Session.instance.getToken()
+    
+    init() {
+        self.name = ""
+        self.photo = nil
+        self.photos = nil
+        self.likes = [-1]
+        self.liked = [-1]
+        self.load()
+    }
     
     init (photo: UIImage, name: String, photos: Array<UIImage>, likes: [Int], liked: [Int]){
         self.name = name
@@ -51,5 +62,23 @@ class Friend {
         self.photos = nil
         self.likes = [0]
         self.liked = [-1]
+    }
+    
+    func load() {
+        if !token.isEmpty {
+            let path = "method/friends.get/"
+            let parameters: Parameters = [
+                "access_token": token,
+                "order": "name",
+                "v": "5.103",
+                "fields":"nickname"
+            ]
+            
+            let url = "https://api.vk.com/" + path
+            print(url)
+            AF.request(url, method: .get, parameters: parameters).responseJSON { response in
+                print(response)
+            }
+        }
     }
 }

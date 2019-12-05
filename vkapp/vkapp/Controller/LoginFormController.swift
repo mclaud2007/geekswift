@@ -7,23 +7,92 @@
 //
 
 import UIKit
+import WebKit
+
+extension LoginFormController: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        
+        guard let url = navigationResponse.response.url, url.path == "/blank.html", let fragment = url.fragment else {
+            decisionHandler(.allow)
+            return
+        }
+        
+        let params = fragment
+                     .components(separatedBy: "&")
+                     .map { $0.components(separatedBy: "=") }
+            .reduce([String: String]()) { result, param in
+                    var dict = result
+                    let key = param[0]
+                    let value = param[1]
+                    dict[key] = value
+                    return dict
+            }
+           
+        if let token = params["access_token"] {
+            VKLogin.isHidden = true
+            
+            sessionData.setToken(token: token)
+            self.loadingControl.startAnimation()
+            
+            // Имитация загрузки данных
+            self.loadingControl.stopAnimation()
+            self.showFriendScreen()
+            
+        } else {
+            showErrorMessage(message: "Не удалось получить токен")
+        }
+        
+        decisionHandler(.cancel)
+    }
+}
 
 class LoginFormController: UIViewController {
-    @IBOutlet weak var loginInput: UITextField!
-    @IBOutlet weak var passwordInput: UITextField!
-    @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet var loadingControl: LoadingViewControl!
+    @IBOutlet weak var VKLogin: WKWebView! {
+        didSet {
+            VKLogin.navigationDelegate = self
+        }
+    }
+    
+    let sessionData = Session.instance
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        let hideKeyboardGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
-        scrollView?.addGestureRecognizer(hideKeyboardGesture)
-        
+
         // Если это найтмод, то цвет background'а будет черный
         if isDarkMode {
             self.view.backgroundColor = .black
         }
+        
+        // Сразу включим анимацию, потому как если пользователь залогинен мы пойдем дальше
+        self.loadingControl.startAnimation()
+        
+        // Токен надо будет где-то сохранить на устройстве, если он не пустой
+        // то идем сразу на экран друзей, в противном случае покажем кнопку
+        // вход, которая покажет WebView
+        if sessionData.getToken().isEmpty {
+            // Готовим запрос
+            var urlComponents = URLComponents()
+            urlComponents.scheme = "https"
+            urlComponents.host = "oauth.vk.com"
+            urlComponents.path = "/authorize"
+            urlComponents.queryItems = [
+                URLQueryItem(name: "client_id", value: "7230104"),
+                URLQueryItem(name: "display", value: "mobile"),
+                URLQueryItem(name: "redirect_url", value: "https://oauth.vk.com/blank.html"),
+                URLQueryItem(name: "response_type", value: "token")
+            ]
+            
+            let request = URLRequest(url: urlComponents.url!)
+            VKLogin.isHidden = true
+            
+            // Загружаем страницу логина в VK
+            VKLogin.load(request)
+        } else {
+            self.loadingControl.stopAnimation()
+            self.showFriendScreen()
+        }
+        
     }
     
     private func showFriendScreen(){
@@ -34,10 +103,11 @@ class LoginFormController: UIViewController {
     }
 
     @IBAction func loginButtonClick(_ sender: Any) {
-        let login = loginInput.text ?? ""
+        VKLogin.isHidden = false
+        /*let login = loginInput.text ?? ""
         let password = passwordInput.text ?? ""
         
-        if login.isEmpty, password.isEmpty {
+        if sessionData.login(login: login, password: password) {
             self.loadingControl.startAnimation()
             
             // Имитация загрузки данных
@@ -48,39 +118,12 @@ class LoginFormController: UIViewController {
             }
         } else {
             showErrorMessage(message: "Поле логин и пароль должны быть пустыми.")
-        }
+        }*/
     }
-    
-    // Когда клавиатура появляется
-    @objc func keyboardWasShown​(notification: Notification) {
-        if let _ = scrollView {
-            let info = notification.userInfo! as NSDictionary
-            let kbSize = (info.value(forKey: UIResponder.keyboardFrameEndUserInfoKey) as! NSValue).cgRectValue.size
-            let contentInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: kbSize.height, right: 0.0)
-            
-            scrollView?.contentInset = contentInsets
-            scrollView?.scrollIndicatorInsets = contentInsets
-        }
-        
-    }
-    
-    // Когда клавиатура исчезает
-    @objc func keyboardWillBeHidden(notification: Notification){
-        let contentInsets = UIEdgeInsets.zero
-        
-        scrollView?.contentInset = contentInsets
-        scrollView?.scrollIndicatorInsets = contentInsets
-        
-    }
+
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        // Подписываемся на сообщение когда клавиатура появляется
-        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWasShown​), name: UIResponder.keyboardWillShowNotification, object: nil)
-        
-        // И когда она исчезает
-        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillBeHidden), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -91,12 +134,8 @@ class LoginFormController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
-    @objc func hideKeyboard() {
-        scrollView?.endEditing(true)
-        
-    }
-    
     @IBAction func logautClick(segue: UIStoryboardSegue) {
+        sessionData.logout()
         navigationController?.popToRootViewController(animated: true)
     }
 }

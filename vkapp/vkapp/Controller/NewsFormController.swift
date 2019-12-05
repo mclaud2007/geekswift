@@ -8,7 +8,26 @@
 
 import UIKit
 
+// MARK: расширение для подсчета лайков
+extension NewsFormController: LikeControlProto {
+    func likeClicked (sender: LikeControl) {
+        if (sender.isLiked == true){
+            sender.likes -= 1
+            sender.isLiked = false
 
+        } else {
+            sender.likes += 1
+            sender.isLiked = true
+            
+            if (sender.likes == 0) {
+                sender.likes = 1
+            }
+        }
+        
+        // Обновляем лайки
+        sender.initLikes(likes: sender.likes, isLiked: sender.isLiked)
+    }
+}
 
 class NewsFormController: UIViewController {
     let NewsList = [
@@ -62,6 +81,7 @@ extension NewsFormController: UITableViewDataSource {
         cell.lblShare.text = String(NewsCell.shared!)
         cell.lblViews.text = String(NewsCell.views!)
         cell.lblComments.text = String(NewsCell.comments!)
+        cell.lblLikeControl.delegate = self
         cell.lblLikeControl.initLikes(likes: NewsCell.likes!, isLiked: NewsCell.isLiked!)
         cell.imgNewsPicture.image = NewsCell.picture
         cell.imgAvatarView.showImage(image: NewsCell.avatar!)

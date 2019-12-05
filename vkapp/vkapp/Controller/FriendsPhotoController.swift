@@ -10,6 +10,27 @@ import UIKit
 
 private let reuseIdentifier = "Cell"
 
+// MARK: расширение для подсчета лайков
+extension FriendsPhotoController: LikeControlProto {
+    func likeClicked (sender: LikeControl) {
+        if (sender.isLiked == true){
+            sender.likes -= 1
+            sender.isLiked = false
+
+        } else {
+            sender.likes += 1
+            sender.isLiked = true
+            
+            if (sender.likes == 0) {
+                sender.likes = 1
+            }
+        }
+        
+        // Обновляем лайки
+        sender.initLikes(likes: sender.likes, isLiked: sender.isLiked)
+    }
+}
+
 class FriendsPhotoController: UICollectionViewController {
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
@@ -38,6 +59,9 @@ class FriendsPhotoController: UICollectionViewController {
             
             // Фотография по идее есть
             cell.FriendPhotoImageView.showImage(image: photos, indexPath: indexPath)
+            
+            // Объявляем делегата
+            cell.FriendLike.delegate = self
             
             // Ищем информацию о лайках
             if Likes.count > indexPath.item && Likes.indices.contains(indexPath.item) {

@@ -8,12 +8,17 @@
 
 import UIKit
 
+protocol LikeControlProto {
+    func likeClicked (sender: LikeControl) -> Void
+}
+
 class LikeControl: UIControl {
     @IBInspectable var initLikes: Int = -1
     @IBInspectable var notLikedTextColor: UIColor = .white
     @IBInspectable var LikedTextColor: UIColor = .red
     @IBInspectable var likedTextFontSize: CGFloat = 17
     
+    var delegate: LikeControlProto?
     
     var likes: Int = 0
     var isLiked: Bool = false
@@ -89,20 +94,6 @@ class LikeControl: UIControl {
     }
     
     @objc public func setLikeDislike(){
-        if (self.isLiked == true){
-            self.likes -= 1
-            self.isLiked = false
-
-        } else {
-            self.likes += 1
-            self.isLiked = true
-            
-            if (self.likes == 0) {
-                self.likes = 1
-            }
-        }
-        
-        // Обновляем лайки
-        self.initLikes(likes: self.likes, isLiked: self.isLiked)
+        self.delegate?.likeClicked(sender: self)
     }
 }
