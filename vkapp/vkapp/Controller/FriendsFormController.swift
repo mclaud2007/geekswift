@@ -82,11 +82,13 @@ class FriendsFormController: UIViewController {
         tableView.register(UINib(nibName: "FriendsCellProto", bundle: nil), forCellReuseIdentifier: "FriendsCellProto")
         
         // Получаем данные сессии
-        userID = self.sessionData.getUserId()
         token = self.sessionData.getToken()
         
         // На этом экране у нас уже должен быть userID и токен - иначе выбрасываем обратно на экран логина
-        if userID! > 0 && !token!.isEmpty {
+        if !token!.isEmpty {
+            // Пример загрузки друзей
+            let friend_load = Friend()
+            
             // Собираем все первые буквы фамилий
             for (index,elemnet) in FriendsList.enumerated() {
                 if !elemnet.name.isEmpty {

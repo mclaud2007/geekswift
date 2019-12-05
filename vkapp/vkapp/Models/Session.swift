@@ -33,6 +33,10 @@ class Session {
 //        return false
     }
     
+    func setToken (token: String){
+        self.token = token
+    }
+    
     func logout (){
         self.token = nil
         self.userId = nil
