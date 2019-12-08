@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 class BigPhotosController: UIViewController {
     
@@ -14,7 +15,8 @@ class BigPhotosController: UIViewController {
     @IBOutlet weak var BigPhotoImageViewTmp: UIImageView!
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var PhotosLists = [UIImage(named: "photonotfound")]
+    var PhotosLists: Array<Photo> = [Photo(photoId: 0, photo: UIImage(named: "photonotfound")!, likes: nil, date: nil)]
+    
     var CurrentImageNumber: Int = 0
     var animationHasFinished: Bool = true
     
@@ -33,13 +35,24 @@ class BigPhotosController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         self.title = "Все фотографии"
+        var loadItem = 0
         
         // Показываем текущее фото
-        if let CurrentImage = PhotosLists[self.CurrentImageNumber] {
-            self.BigPhotoImageView.image = CurrentImage
-        } else {
-            self.BigPhotoImageView.image = PhotosLists[0]
+        if PhotosLists.indices.contains(self.CurrentImageNumber) {
+            loadItem = self.CurrentImageNumber
+        }
+        
+        // Есть ли фотография по запрошенному индексу
+        if PhotosLists.indices.contains(loadItem) {
+            if let photo = PhotosLists[loadItem].photoURL {
+                self.BigPhotoImageView.kf.setImage(with: URL(string: photo))
+            } else if let photo = PhotosLists[loadItem].photoImage {
+                self.BigPhotoImageView.image = photo
+            } else {
+                self.BigPhotoImageView.image = getNotFoundPhoto()
+            }
         }
     
         let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panCatch(_:)))
@@ -135,39 +148,47 @@ class BigPhotosController: UIViewController {
         if self.animationHasFinished == true {
             // Стартуя анимацию пока она не завершится, новую запускать нельзя
             self.animationHasFinished = false
-            
+
             // Получим текущую фотографию в зависимости от того в какую сторону свайпим
             let CurrentImageNum = self.getCurrentPhotoNum()
-            
+
             // Новую фотографию загружаем во второй ImageView, который будет выезжать
-            if let CurrentImage = self.PhotosLists[CurrentImageNum] {
-                self.BigPhotoImageViewTmp.image = CurrentImage
+            if self.PhotosLists.indices.contains(CurrentImageNum) {
+                let CurrentImage = self.PhotosLists[CurrentImageNum]
+                
+                if let photo = CurrentImage.photoURL {
+                    self.BigPhotoImageViewTmp.kf.setImage(with: URL(string: photo))
+                } else if let photo = CurrentImage.photoImage {
+                    self.BigPhotoImageViewTmp.image = photo
+                } else {
+                    self.BigPhotoImageViewTmp.image = UIImage(named: "photonotfound")!
+                }
             } else {
                 self.BigPhotoImageViewTmp.image = UIImage(named: "photonotfound")!
             }
-            
+
             // Скрываем фотографию за краем экрана
             if self.panDirect == .left {
                 self.BigPhotoImageViewTmp.transform = CGAffineTransform(translationX: -self.view.bounds.width, y: 0).concatenating(CGAffineTransform(scaleX: 0.5, y: 0.5))
             } else {
                 self.BigPhotoImageViewTmp.transform = CGAffineTransform(translationX: self.view.bounds.width, y: 0).concatenating(CGAffineTransform(scaleX: 0.5, y: 0.5))
             }
-            
+
             self.BigPhotoImageViewTmp.layer.zPosition = 100
             self.BigPhotoImageViewTmp.isHidden = false
-            
+
             // Создаем универсальную анимацию
             panInteractiveAnimator = UIViewPropertyAnimator(duration: 1, curve: .linear, animations: {
                 if self.panDirect == .left {
                     self.BigPhotoImageView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5).concatenating(CGAffineTransform(translationX: -2 * self.view.bounds.width, y: 0))
                     self.BigPhotoImageViewTmp.transform = .identity
-                    
+
                 } else {
                     self.BigPhotoImageView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5).concatenating(CGAffineTransform(translationX: 2 * self.view.bounds.width, y: 0))
                     self.BigPhotoImageViewTmp.transform = .identity
                 }
             })
-            
+
             // Код который запуститься по окончании анимации
             panInteractiveAnimator.addCompletion { position in
                 // Если анимация достигла конца надо заменить картинку
@@ -177,7 +198,7 @@ class BigPhotosController: UIViewController {
                     self.BigPhotoImageView.layer.zPosition = 100
                     self.CurrentImageNumber = self.getCurrentPhotoNum()
                 }
-                
+
                 // В конце или в начале надо вернуть временное изображение в начало
                 if position == .start || position == .end {
                     // Вернем все настройки временного фото в начало
@@ -185,11 +206,11 @@ class BigPhotosController: UIViewController {
                     self.BigPhotoImageViewTmp.layer.zPosition = 10
                     self.BigPhotoImageViewTmp.center.x -= self.view.bounds.width
                 }
-                
+
                 // И поставить признак того что анимация закончилась
                 self.animationHasFinished = true
             }
-            
+
             panInteractiveAnimator.startAnimation()
         }
     }

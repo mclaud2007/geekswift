@@ -16,4 +16,18 @@ class PhotosCell: UICollectionViewCell {
         self.FriendPhotoImageView.showImage(image: getNotFoundPhoto())
         self.FriendLike.initLikes(likes: -1, isLiked: false)
     }
+    
+    func configure(with photos: Photo, indexPath: IndexPath?){
+        // Фотография по идее есть
+        if let photo = photos.photoImage {
+            self.FriendPhotoImageView.showImage(image: photo, indexPath: indexPath)
+        } else if let photo = photos.photoURL {
+            self.FriendPhotoImageView.showImage(imageURL: photo, indexPath: indexPath)
+        } else {
+            self.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
+        }
+        
+        // Инициализируем лайки
+        self.FriendLike.initLikes(likes: photos.likes, isLiked: photos.isLiked)
+    }
 }

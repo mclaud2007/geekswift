@@ -10,10 +10,24 @@ import UIKit
 
 class GroupsCell: UITableViewCell {
     @IBOutlet weak var lblGroupsName: UILabel!
-    @IBOutlet weak var lblGroupsImage: UIImageView!
+    @IBOutlet weak var lblGroupsImage: AvatarView!
 
     override func prepareForReuse() {
         lblGroupsName.text = "..."
-        lblGroupsImage.image = UIImage(named: "photonotfound")
+        lblGroupsImage.showImage(image: UIImage(named: "photonotfound")!)
+    }
+    
+    public func configure(with group: Group){
+        // Название группы
+        lblGroupsName.text = group.name
+        
+        //  Фотография может быть как UIImage так и строка
+        if let image = group.image {
+            lblGroupsImage.showImage(image: image)
+        } else if let image = group.imageString {
+            lblGroupsImage.showImage(imageURL: image)
+        } else {
+            lblGroupsImage.showImage(image: UIImage(named: "photonotfound")!)
+        }
     }
 }

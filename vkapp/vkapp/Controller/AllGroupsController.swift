@@ -10,7 +10,7 @@ import UIKit
 
 class AllGroupsController: UITableViewController {
     
-    let GroupsListArray = [Groups(name: "2010-2015"), Groups(name: "2015-2019")]
+    let GroupsListArray = [Group(groupId: -20001, name: "Группа 1"), Group(groupId: -20002, name: "Группа 2")]
 
     override func viewDidLoad() {
         super.viewDidLoad()

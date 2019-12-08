@@ -8,11 +8,17 @@
 
 import UIKit
 
+protocol FriendsSearchControlProto {
+    func charSelected(sender: FriendsSearchControl) -> Void
+}
+
 class FriendsSearchControl: UIControl {
+    public var delegate: FriendsSearchControlProto!
+    
     public var selectedChar: String? {
         didSet {
             self.updateSelectedChar()
-            self.sendActions(for: .valueChanged)
+            self.delegate?.charSelected(sender: self)
         }
     }
     

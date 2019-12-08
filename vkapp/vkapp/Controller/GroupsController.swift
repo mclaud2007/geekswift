@@ -10,12 +10,9 @@ import UIKit
 
 class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    var GroupsList = [Groups(name: "80-е", image: UIImage(named: "eighties")),
-                      Groups(name: "90-е", image: UIImage(named: "nineties")),
-                      Groups(name: "2000-2010")
-    ]
+    var GroupsList = [Group]()
     
-    var GroupsFiltered: [Groups] = []
+    var GroupsFiltered: [Group] = []
     
     @IBOutlet weak var searchBar: UISearchBar! {
         didSet {
@@ -35,6 +32,18 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         navigationController?.setNavigationBarHidden(false, animated: false)
         self.title = "Группы"
+        
+        let groupList = Groups()
+        groupList.loadFromNetwork(){ result in
+            switch result {
+            case let .success(groups):
+                self.GroupsList = groups
+                self.tableView.reloadData()
+            case .failure(_):
+                self.showErrorMessage(message: "Произошла ошибка загрузки данных")
+            }
+        }
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -71,14 +80,8 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         }
 
         // Configure the cell...
-        cell.lblGroupsName.text = currentGroup.name
-        
-        if currentGroup.image != nil {
-            cell.lblGroupsImage.image = currentGroup.image
-        } else {
-            cell.lblGroupsImage.image = UIImage(named: "photonotfound")
-        }
-        
+        cell.configure(with: currentGroup)
+    
         return cell
     }
     
