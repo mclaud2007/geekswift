@@ -6,10 +6,10 @@
 //  Copyright © 2019 Григорий Мартюшин. All rights reserved.
 //
 
-import Foundation
 import Alamofire
+import RealmSwift
 
-class Session {
+class Session: Object {
     // Токен и userID можно получать только с сервере
     // в любой части приложения их можно либо получить
     // через getter's ниже, либо через новый запрос к
@@ -20,14 +20,14 @@ class Session {
         }
     }
     
-    private var userId: Int?
-    private var userAvatar: String?
-    private var userName: String?
-    private var userNickName: String?
+    @objc dynamic var userId: Int = 0
+    @objc dynamic var userAvatar: String?
+    @objc dynamic var userName: String?
+    @objc dynamic var userNickName: String?
     
     static let shared = Session()
     
-    private init () { }
+    required init () { }
     
     func getUserInfo () {
         if (self.token != nil) {
@@ -71,14 +71,14 @@ class Session {
     
     func logout (){
         self.token = nil
-        self.userId = nil
+        self.userId = 0
         self.userAvatar = nil
         self.userNickName = nil
         self.userName = nil
     }
     
     func getUserId() -> Int {
-        return self.userId ?? 0
+        return self.userId
     }
     
     func getToken() -> String {

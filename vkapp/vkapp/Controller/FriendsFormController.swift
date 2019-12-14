@@ -29,7 +29,11 @@ class FriendsFormController: UIViewController {
     }
     
     // Здесь будут список наших пользователей
-    var FriendsList: [Friend] = []
+    var FriendsList: [Friend] = [] {
+        didSet {
+            tableView.reloadData()
+        }
+    }
     
     // Отфильтрованный список пользователей
     var ListOfFilterdFriends: [Friend] = []
@@ -40,9 +44,6 @@ class FriendsFormController: UIViewController {
     // Список пользователей разделенных по буквам
     var ListOfFriendByAlphabet: Dictionary<String,[Int]> = ["All":[-1]]
     
-    // Сервис загрузки данных
-    let FriendsNetworkService = Friends()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -52,9 +53,50 @@ class FriendsFormController: UIViewController {
         // Регистрируем xib в качестве прототипа ячейки
         tableView.register(UINib(nibName: "FriendsCellProto", bundle: nil), forCellReuseIdentifier: "FriendsCellProto")
         
-        // Пытаемся загрузить данные
-        FriendsNetworkService.delegate = self
-        FriendsNetworkService.loadFromNetwork()
+        // Загружаем данные и перезагружаем tableView
+        VK.shared.getFriendsList() { (friendList,error) in
+            guard error == nil else { return }
+            
+            if let friends = friendList {
+                self.FriendsList = friends
+                
+                if self.FriendsList.count > 0 {
+                    // Собираем все первые буквы фамилий
+                    for (index,elemnet) in self.FriendsList.enumerated() {
+                        if !elemnet.name.isEmpty {
+                            let fullNameArr = elemnet.name.split(separator: " ")
+
+                            // Для простоты будем думать что формат у записи ФИ
+                            let firstName = fullNameArr[0]
+                            let lastName = fullNameArr.count > 1 ? fullNameArr.last : nil
+
+                            // Первая буква фамили или, если ее нет - то имени
+                            let firstLetter = String(lastName?.prefix(1) ?? firstName.prefix(1))
+
+                            // Если такой буквы у нас еще нет - добавим её
+                            if !self.ListOfFirstCharOfLastname.contains(firstLetter) {
+                                self.ListOfFirstCharOfLastname.append(firstLetter)
+                            }
+
+                            // Запоминаем пользователя в конкретной секции
+                            if self.ListOfFriendByAlphabet[firstLetter] == nil {
+                                self.ListOfFriendByAlphabet[firstLetter] = [index]
+                            } else {
+                                self.ListOfFriendByAlphabet[firstLetter]!.append(index)
+                            }
+                        }
+                    }
+
+                    // Друзья найдены - нужно инициализировать контрол для поиска по первой букве фамилии
+                    if (self.ListOfFirstCharOfLastname.count > 0){
+                        self.friendCharsControl.setChars(sChars: self.ListOfFirstCharOfLastname )
+                    }
+                    
+                    // Загружаем данные
+                    self.tableView.reloadData()
+                }
+            }
+        }
         
     }
     
@@ -241,56 +283,5 @@ extension FriendsFormController: AvatarViewProto {
             // Убираем выделение ячейки
             tableView.deselectRow(at: indexPath, animated: true)
         }
-    }
-}
-
-// MARK: Реализация делегата для реакции на загрузку данных
-extension FriendsFormController: FriendsModelProto {
-    func dataLoaded(data: [Friend]) {
-        FriendsList = data
-        
-        if FriendsList.count > 0 {
-            // Собираем все первые буквы фамилий
-            for (index,elemnet) in FriendsList.enumerated() {
-                if !elemnet.name.isEmpty {
-                    let fullNameArr = elemnet.name.split(separator: " ")
-
-                    // Для простоты будем думать что формат у записи ФИ
-                    let firstName = fullNameArr[0]
-                    let lastName = fullNameArr.count > 1 ? fullNameArr.last : nil
-
-                    // Первая буква фамили или, если ее нет - то имени
-                    let firstLetter = String(lastName?.prefix(1) ?? firstName.prefix(1))
-
-                    // Если такой буквы у нас еще нет - добавим её
-                    if !ListOfFirstCharOfLastname.contains(firstLetter) {
-                        ListOfFirstCharOfLastname.append(firstLetter)
-                    }
-
-                    // Запоминаем пользователя в конкретной секции
-                    if ListOfFriendByAlphabet[firstLetter] == nil {
-                        ListOfFriendByAlphabet[firstLetter] = [index]
-                    } else {
-                        ListOfFriendByAlphabet[firstLetter]!.append(index)
-                    }
-                }
-            }
-
-            // Друзья найдены - нужно инициализировать контрол для поиска по первой букве фамилии
-            if (ListOfFirstCharOfLastname.count > 0){
-                friendCharsControl.setChars(sChars: ListOfFirstCharOfLastname )
-            }
-            
-            // Загружаем данные
-            tableView.reloadData()
-        }
-    }
-    
-    func dataStartLoading() {
-        // Пока заглушка - потом придумаю зачем она
-    }
-    
-    func dataNotLoaded() {
-        showErrorMessage(message: "Загрузка не удалась. Попробуйте позже.")
     }
 }

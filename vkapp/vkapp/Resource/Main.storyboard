@@ -308,7 +308,7 @@
                         <barButtonItem key="backBarButtonItem" title="Back" id="sXd-bf-0Ys"/>
                         <barButtonItem key="leftBarButtonItem" title="Logout" id="hKL-0f-Bgl">
                             <connections>
-                                <segue destination="wzA-88-sQ7" kind="unwind" unwindAction="logoutClickWithSegue:" id="bWq-jb-OeD"/>
+                                <segue destination="wzA-88-sQ7" kind="unwind" unwindAction="logoutClickWithSegue:" id="mwV-a9-wVq"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
