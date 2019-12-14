@@ -31,90 +31,103 @@ extension FriendsPhotoController: LikeControlProto {
     }
 }
 
-class FriendsPhotoController: UICollectionViewController {
+extension FriendsPhotoController: AvatarViewProto {
+    func click(sender: AvatarView) {
+        if let indexPath = sender.CurrentIndexPath {
+            // Выберем ячейку, чтобы при подготовке сеги передались корректные данные
+            PhotoListCollectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredHorizontally)
+
+            // Выполняем сегу
+            performSegue(withIdentifier: "ShowBigPhotos", sender: self)
+
+            // Убираем выделение ячейки
+            PhotoListCollectionView.deselectItem(at: indexPath, animated: true)
+        }
+    }
+}
+
+class FriendsPhotoController: UIViewController {
+    // Id пользователя для, которого будем грузить фотки
+    public var FriendID: Int?
+    
+    // CollectionView с фотографиями
+    @IBOutlet var PhotoListCollectionView: UICollectionView! {
+        didSet {
+            PhotoListCollectionView.delegate = self
+            PhotoListCollectionView.dataSource = self
+        }
+    }
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var PhotosLists = [UIImage(named: "photonotfound")]
+    var PhotosLists: Array<Photo> = [Photo(photoId: 0, photo: UIImage(named: "photonotfound")!, likes: nil, date: nil)]
+    
     // Массив лайков под фотографиями или -1 - это значит оценок нет
     var Likes = [-1]
     // Массив уже отмеченных фотографий или -1 по умолчанию
     var Liked = [-1]
-
-    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return PhotosLists.count
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotosCell", for: indexPath) as? PhotosCell else {
-            preconditionFailure("Error")
-        }
     
-        // Configure the cell
-        if PhotosLists.indices.contains(indexPath.row),
-            let photos = PhotosLists[indexPath.row] {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // Пытаемся загрузить фотографии пользователя
+        if let friendID = self.FriendID {
+            let photoLoading = Photos(friendID)
             
-            // Фотография по идее есть
-            cell.FriendPhotoImageView.showImage(image: photos, indexPath: indexPath)
-            
-            // Объявляем делегата
-            cell.FriendLike.delegate = self
-            
-            // Ищем информацию о лайках
-            if Likes.count > indexPath.item && Likes.indices.contains(indexPath.item) {
-                if Likes[indexPath.item] > 0 {
-                    var isAlreadyLiked = false
-                    
-                    if (Liked.contains(where: { $0 == indexPath.item }) == true){
-                        isAlreadyLiked = true
-                    }
-                    
-                    // Лайки нашли - инициализируем контрол
-                    cell.FriendLike.initLikes(likes: Likes[indexPath.item], isLiked: isAlreadyLiked)
-                }
+            photoLoading.load() { result in
+                self.PhotosLists = result
+                self.PhotoListCollectionView.reloadData()
             }
-            
-        } else {
-            cell.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
-            cell.FriendLike.initLikes(likes: -1, isLiked: false)
-        }
-        
-        // Вешаем обработчик клика по аватарке
-        cell.FriendPhotoImageView.addTarget(self, action: #selector(catchAvatarClicked(_:)), for: .touchUpInside)
-        
-        return cell
-    }
-    
-    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "ShowBigPhotos", sender: self)
-    }
-    
-    @objc func catchAvatarClicked (_ sender: AvatarView){
-        if let indexPath = sender.CurrentIndexPath {
-            // Выберем ячейку, чтобы при подготовке сеги передались корректные данные
-            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredHorizontally)
-           
-            // Выполняем сегу
-            performSegue(withIdentifier: "ShowBigPhotos", sender: self)
-            
-            // Убираем выделение ячейки
-            collectionView.deselectItem(at: indexPath, animated: true)
         }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowBigPhotos" {
             if let destinationVC = segue.destination as? BigPhotosController,
-                let indexPath = collectionView.indexPathsForSelectedItems {
+                let indexPath = PhotoListCollectionView.indexPathsForSelectedItems {
                 destinationVC.PhotosLists = self.PhotosLists
-                
-                if let _ = self.PhotosLists[indexPath[0][1]] {
+
+                if self.PhotosLists.indices.contains(indexPath[0][1]) {
                     destinationVC.CurrentImageNumber = indexPath[0][1]
                 }
             }
         }
+    }
+}
+
+extension FriendsPhotoController: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return PhotosLists.count
+    }
+    
+    // MARK: Поготовка ячейки к выводу
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotosCell", for: indexPath) as? PhotosCell else {
+            preconditionFailure("Error")
+        }
+
+        // Configure the cell
+        if PhotosLists.indices.contains(indexPath.row) {
+            cell.configure(with: PhotosLists[indexPath.row], indexPath: indexPath)
+
+            // Объявляем делегата для лайков и фотографии
+            cell.FriendLike.delegate = self
+            cell.FriendPhotoImageView.delegate = self
+            
+        } else {
+            cell.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
+            cell.FriendLike.initLikes(likes: -1, isLiked: false)
+        }
+        
+        return cell
+    }
+}
+
+extension FriendsPhotoController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "ShowBigPhotos", sender: self)
     }
 }

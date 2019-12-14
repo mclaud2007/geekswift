@@ -110,30 +110,43 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="76"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="1q5-p3-c7P" userLabel="GroupImage">
-                                                    <rect key="frame" x="5" y="6" width="64" height="64"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" secondItem="1q5-p3-c7P" secondAttribute="height" multiplier="1:1" id="EPT-9v-Giv"/>
-                                                        <constraint firstAttribute="width" constant="64" id="cis-c1-aEC"/>
-                                                    </constraints>
-                                                </imageView>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qLo-nj-gcM">
-                                                    <rect key="frame" x="74" y="28" width="296" height="20.333333333333329"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qLo-nj-gcM">
+                                                    <rect key="frame" x="70" y="28" width="285" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LG5-Im-9gE" customClass="AvatarView" customModule="vkapp" customModuleProvider="target">
+                                                    <rect key="frame" x="10" y="10" width="50" height="56"/>
+                                                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="50" id="5QZ-n5-MyV"/>
+                                                        <constraint firstAttribute="width" secondItem="LG5-Im-9gE" secondAttribute="height" multiplier="1:1" priority="999" id="U5v-x7-ClS"/>
+                                                    </constraints>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="number" keyPath="shdowRadius">
+                                                            <real key="value" value="1"/>
+                                                        </userDefinedRuntimeAttribute>
+                                                        <userDefinedRuntimeAttribute type="number" keyPath="shadowOpacity">
+                                                            <real key="value" value="1"/>
+                                                        </userDefinedRuntimeAttribute>
+                                                        <userDefinedRuntimeAttribute type="color" keyPath="shadowColor">
+                                                            <color key="value" systemColor="systemGreenColor" red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        </userDefinedRuntimeAttribute>
+                                                    </userDefinedRuntimeAttributes>
+                                                </view>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="qLo-nj-gcM" firstAttribute="leading" secondItem="1q5-p3-c7P" secondAttribute="trailing" constant="5" id="3EJ-Xe-NC2"/>
-                                                <constraint firstItem="1q5-p3-c7P" firstAttribute="leading" secondItem="U8q-KJ-kjJ" secondAttribute="leading" constant="5" id="4tf-T6-cFK"/>
+                                                <constraint firstAttribute="bottom" secondItem="LG5-Im-9gE" secondAttribute="bottom" constant="10" id="CqS-AO-c3f"/>
                                                 <constraint firstItem="qLo-nj-gcM" firstAttribute="centerY" secondItem="U8q-KJ-kjJ" secondAttribute="centerY" id="Izl-FI-VK7"/>
-                                                <constraint firstItem="1q5-p3-c7P" firstAttribute="centerY" secondItem="U8q-KJ-kjJ" secondAttribute="centerY" id="KsP-6y-Rwd"/>
-                                                <constraint firstAttribute="trailing" secondItem="qLo-nj-gcM" secondAttribute="trailing" constant="5" id="hdR-uZ-Mla"/>
+                                                <constraint firstItem="LG5-Im-9gE" firstAttribute="leading" secondItem="U8q-KJ-kjJ" secondAttribute="leading" constant="10" id="YTh-AU-2Ao"/>
+                                                <constraint firstItem="LG5-Im-9gE" firstAttribute="top" secondItem="U8q-KJ-kjJ" secondAttribute="top" constant="10" id="gzX-E7-xni"/>
+                                                <constraint firstAttribute="trailing" secondItem="qLo-nj-gcM" secondAttribute="trailing" constant="20" id="hdR-uZ-Mla"/>
+                                                <constraint firstItem="qLo-nj-gcM" firstAttribute="leading" secondItem="LG5-Im-9gE" secondAttribute="trailing" constant="10" id="hy7-0c-1D6"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <outlet property="lblGroupsImage" destination="1q5-p3-c7P" id="g6N-Nd-h6m"/>
+                                            <outlet property="lblGroupsImage" destination="LG5-Im-9gE" id="IA8-aL-bGA"/>
                                             <outlet property="lblGroupsName" destination="qLo-nj-gcM" id="e7N-XE-6IW"/>
                                         </connections>
                                     </tableViewCell>
@@ -152,7 +165,7 @@
                     <navigationItem key="navigationItem" title="Title" id="t8s-0u-goU">
                         <barButtonItem key="leftBarButtonItem" title="Logout" id="hF3-4J-Glz">
                             <connections>
-                                <segue destination="lhR-lk-U9t" kind="unwind" unwindAction="logautClickWithSegue:" id="aQx-ls-BZn"/>
+                                <segue destination="lhR-lk-U9t" kind="unwind" unwindAction="logoutClickWithSegue:" id="Mxs-aZ-TtR"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="plus" catalog="system" id="bsK-fd-nd2">
@@ -295,7 +308,7 @@
                         <barButtonItem key="backBarButtonItem" title="Back" id="sXd-bf-0Ys"/>
                         <barButtonItem key="leftBarButtonItem" title="Logout" id="hKL-0f-Bgl">
                             <connections>
-                                <segue destination="wzA-88-sQ7" kind="unwind" unwindAction="logautClickWithSegue:" id="kmK-cH-nsd"/>
+                                <segue destination="wzA-88-sQ7" kind="unwind" unwindAction="logoutClickWithSegue:" id="bWq-jb-OeD"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -378,6 +391,7 @@
                     </collectionView>
                     <navigationItem key="navigationItem" title="Title" id="Bmr-dD-vf1"/>
                     <connections>
+                        <outlet property="PhotoListCollectionView" destination="XNv-X1-XKY" id="JHv-fw-st7"/>
                         <segue destination="qHR-I5-v1b" kind="show" identifier="ShowBigPhotos" id="KQK-ks-wLk"/>
                     </connections>
                 </collectionViewController>
@@ -467,7 +481,7 @@
                     <navigationItem key="navigationItem" title="Title" id="RlK-BR-tbu">
                         <barButtonItem key="leftBarButtonItem" title="Logout" id="udg-2C-rWd">
                             <connections>
-                                <segue destination="he4-Bn-q6U" kind="unwind" unwindAction="logautClickWithSegue:" id="2e7-Pm-3d9"/>
+                                <segue destination="he4-Bn-q6U" kind="unwind" unwindAction="logoutClickWithSegue:" id="TEY-bJ-Wdf"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

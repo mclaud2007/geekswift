@@ -7,12 +7,18 @@
 //
 
 import UIKit
+import Kingfisher
+
+protocol AvatarViewProto {
+    func click (sender: AvatarView) -> Void
+}
 
 class AvatarView: UIControl {
 
     var Image: UIImage!
     var ImageView: UIImageView!
     var CurrentIndexPath: IndexPath?
+    var delegate: AvatarViewProto!
     
     @IBInspectable var shadowColor: UIColor = UIColor.black
     @IBInspectable var shdowRadius: CGFloat = 5
@@ -49,7 +55,7 @@ class AvatarView: UIControl {
         
         // После того как анимация закончилась отправим эвент что аватар нажат
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
-            self.sendActions(for: .touchUpInside)
+            self.delegate?.click(sender: self)
         })
     }
     
@@ -77,6 +83,17 @@ class AvatarView: UIControl {
         layer.shadowColor = self.shadowColor.cgColor
         layer.shadowOpacity = self.shadowOpacity
         layer.shadowRadius = self.shdowRadius
+    }
+    
+    public func showImage(imageURL: String, indexPath: IndexPath? = nil){
+        // Меняем адрес картинки
+        if (imageURL.isEmpty){
+            self.ImageView.image = UIImage(named: "photonotfound")
+        } else {
+            self.ImageView.kf.setImage(with: URL(string: imageURL))
+        }
+        
+        self.CurrentIndexPath = indexPath ?? nil
     }
     
     public func showImage(image: UIImage, indexPath: IndexPath? = nil){
