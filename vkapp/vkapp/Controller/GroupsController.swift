@@ -33,8 +33,8 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         navigationController?.setNavigationBarHidden(false, animated: false)
         self.title = "Группы"
         
-        let groupList = Groups()
-        groupList.loadFromNetwork(){ result in
+        // Загрузка информации о группах
+        VK.shared.getGroupsList() { result in
             switch result {
             case let .success(groups):
                 self.GroupsList = groups

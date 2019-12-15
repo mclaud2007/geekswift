@@ -8,44 +8,6 @@
 
 import UIKit
 
-private let reuseIdentifier = "Cell"
-
-// MARK: расширение для подсчета лайков
-extension FriendsPhotoController: LikeControlProto {
-    func likeClicked (sender: LikeControl) {
-        if (sender.isLiked == true){
-            sender.likes -= 1
-            sender.isLiked = false
-
-        } else {
-            sender.likes += 1
-            sender.isLiked = true
-            
-            if (sender.likes == 0) {
-                sender.likes = 1
-            }
-        }
-        
-        // Обновляем лайки
-        sender.initLikes(likes: sender.likes, isLiked: sender.isLiked)
-    }
-}
-
-extension FriendsPhotoController: AvatarViewProto {
-    func click(sender: AvatarView) {
-        if let indexPath = sender.CurrentIndexPath {
-            // Выберем ячейку, чтобы при подготовке сеги передались корректные данные
-            PhotoListCollectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredHorizontally)
-
-            // Выполняем сегу
-            performSegue(withIdentifier: "ShowBigPhotos", sender: self)
-
-            // Убираем выделение ячейки
-            PhotoListCollectionView.deselectItem(at: indexPath, animated: true)
-        }
-    }
-}
-
 class FriendsPhotoController: UIViewController {
     // Id пользователя для, которого будем грузить фотки
     public var FriendID: Int?
@@ -71,9 +33,7 @@ class FriendsPhotoController: UIViewController {
         
         // Пытаемся загрузить фотографии пользователя
         if let friendID = self.FriendID {
-            let photoLoading = Photos(friendID)
-            
-            photoLoading.load() { result in
+            VK.shared.getPhotosByFriendId(friendId: friendID) { result in
                 self.PhotosLists = result
                 self.PhotoListCollectionView.reloadData()
             }
@@ -129,5 +89,42 @@ extension FriendsPhotoController: UICollectionViewDataSource {
 extension FriendsPhotoController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         performSegue(withIdentifier: "ShowBigPhotos", sender: self)
+    }
+}
+
+// MARK: расширение для подсчета лайков
+extension FriendsPhotoController: LikeControlProto {
+    func likeClicked (sender: LikeControl) {
+        if (sender.isLiked == true){
+            sender.likes -= 1
+            sender.isLiked = false
+
+        } else {
+            sender.likes += 1
+            sender.isLiked = true
+            
+            if (sender.likes == 0) {
+                sender.likes = 1
+            }
+        }
+        
+        // Обновляем лайки
+        sender.initLikes(likes: sender.likes, isLiked: sender.isLiked)
+    }
+}
+
+// реакция на клик по аватару
+extension FriendsPhotoController: AvatarViewProto {
+    func click(sender: AvatarView) {
+        if let indexPath = sender.CurrentIndexPath {
+            // Выберем ячейку, чтобы при подготовке сеги передались корректные данные
+            PhotoListCollectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredHorizontally)
+
+            // Выполняем сегу
+            performSegue(withIdentifier: "ShowBigPhotos", sender: self)
+
+            // Убираем выделение ячейки
+            PhotoListCollectionView.deselectItem(at: indexPath, animated: true)
+        }
     }
 }

@@ -110,7 +110,6 @@ extension LoginFormController: WKNavigationDelegate {
             return
         }
 
-        
         if url!.path == "/error" {
             // Очищаем сессию
             sessionData.logout()
