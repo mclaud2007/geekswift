@@ -21,7 +21,7 @@ class FriendsPhotoController: UIViewController {
     }
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var PhotosLists: Array<Photo> = [Photo(photoId: 0, photo: UIImage(named: "photonotfound")!, likes: nil, date: nil)]
+    var PhotosLists: [Photo] = [Photo(photoId: 0, photo: nil, likes: -1, date: nil)]
     
     // Массив лайков под фотографиями или -1 - это значит оценок нет
     var Likes = [-1]

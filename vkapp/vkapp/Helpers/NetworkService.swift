@@ -51,6 +51,47 @@ class VK {
         }
     }
     
+    // MARK: Поиск по группам
+    public func getGroupSearch(query: String, complition: @escaping (Result<[Group], Error>) -> Void) {
+        let token = Session.shared.getToken()
+        var List = [Group]()
+        
+        if !token.isEmpty {
+            let param: Parameters = [
+                "access_token": token,
+                "user_id": Session.shared.getUserId(),
+                "type": "group",
+                "q": query,
+                "count": 10,
+                "v": VK.shared.APIVersion
+            ]
+        
+            VK.shared.setCommand("groups.search", param: param) { response in
+                switch response.result {
+                    case let .success(data):
+                        let json = JSON(data)
+                        
+                        // что-то нашли
+                        if (json["response"]["count"].intValue > 0){
+                            for group in json["response"]["items"].arrayValue {
+                                if let id = group["id"].int,
+                                    let name = group["name"].string,
+                                    let photo = group["photo_50"].string {
+                                    
+                                    List.append(Group(groupId: id, name: name, image: photo))
+                                }
+                            }
+
+                            complition(.success(List))
+                        }
+                    case let .failure(error):
+                        complition(.failure(error))
+                    break
+                }
+            }
+        }
+    }
+    
     // MARK: Загрузка групп
     public func getGroupsList(complition: @escaping (Result<[Group], Error>) -> Void) {
         let token = Session.shared.getToken()

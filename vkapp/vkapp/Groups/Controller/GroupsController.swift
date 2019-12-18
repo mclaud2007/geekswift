@@ -12,6 +12,8 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     var GroupsList = [Group]()
     
+    var RecommendedGroups = [Group]()
+    
     var GroupsFiltered: [Group] = []
     
     @IBOutlet weak var searchBar: UISearchBar! {
@@ -43,7 +45,6 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
                 self.showErrorMessage(message: "Произошла ошибка загрузки данных")
             }
         }
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -52,15 +53,19 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return 2
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if GroupsFiltered.count > 0 {
-            return GroupsFiltered.count
+        if section == 1 {
+            if GroupsFiltered.count > 0 {
+                return GroupsFiltered.count
+            }
+            
+            return GroupsList.count
+        } else {
+            return RecommendedGroups.count
         }
-        
-        return GroupsList.count
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -73,10 +78,16 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
             preconditionFailure("Error")
         }
         
-        var currentGroup = GroupsList[indexPath.row]
+        var currentGroup: Group
         
-        if GroupsFiltered.count > 0 {
-            currentGroup = GroupsFiltered[indexPath.row]
+        if indexPath.section == 1 {
+            if GroupsFiltered.count > 0 {
+                currentGroup = GroupsFiltered[indexPath.row]
+            } else {
+                currentGroup = GroupsList[indexPath.row]
+            }
+        } else {
+            currentGroup = RecommendedGroups[indexPath.row]
         }
 
         // Configure the cell...
@@ -85,30 +96,52 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         return cell
     }
     
-    @IBAction func addGroupClick(segue: UIStoryboardSegue){
-        if segue.identifier == "addGroups" {
-            // Отсюда возмем название группы для добавления
-            let AllGroupsController = segue.source as! AllGroupsController
-            
-            if let indexPath = AllGroupsController.tableView.indexPathForSelectedRow {
-                let GroupToAdd = AllGroupsController.GroupsListArray[indexPath.row]
-                
-                if GroupsList.contains(where: { $0.name == GroupToAdd.name }) == false {
-                    GroupsList.append(GroupToAdd)
-                    tableView.reloadData()
-                }
-                
-            }
-            
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        if indexPath.section == 1 {
+            return true
+        } else {
+            return false
         }
     }
     
     // Override to support editing the table view.
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            GroupsList.remove(at: indexPath.row)
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
+            if indexPath.section == 0 {
+                return 
+            } else {
+                GroupsList.remove(at: indexPath.row)
+                // Delete the row from the data source
+                tableView.deleteRows(at: [indexPath], with: .fade)
+            }
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == 1 {
+            return "Ваши группы"
+        } else {
+            if RecommendedGroups.count > 0 {
+                return "Рекомендованные группы"
+            } else {
+                return ""
+            }
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.section == 0 {
+            if RecommendedGroups.count >= indexPath.row {
+                GroupsList.append(RecommendedGroups[indexPath.row])
+                RecommendedGroups.remove(at: indexPath.row)
+                tableView.reloadData()
+            } else {
+                tableView.deselectRow(at: indexPath, animated: false)
+                return
+            }
+        } else {
+            tableView.deselectRow(at: indexPath, animated: false)
+            return
         }
     }
 }
@@ -123,6 +156,21 @@ extension GroupsController: UISearchBarDelegate {
                 if Group.name.contains(searchText) {
                     GroupsFiltered.append(Group)
                 }
+            }
+            
+            // Загрузка информации о группах
+            VK.shared.getGroupSearch(query: searchText) { result in
+                switch result {
+                case let .success(groups):
+                    self.RecommendedGroups = groups
+                    self.tableView.reloadData()
+                case .failure(_):
+                    self.showErrorMessage(message: "Произошла ошибка загрузки данных")
+                }
+            }
+        } else {
+            if searchText.count == 0 {
+                RecommendedGroups.removeAll()
             }
         }
         
@@ -145,6 +193,8 @@ extension GroupsController: UISearchBarDelegate {
         
         // Очищаем фильтрованный список
         GroupsFiltered.removeAll()
+        RecommendedGroups.removeAll()
+        
         tableView.reloadData()
     }
 }

@@ -15,7 +15,7 @@ class BigPhotosController: UIViewController {
     @IBOutlet weak var BigPhotoImageViewTmp: UIImageView!
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var PhotosLists: Array<Photo> = [Photo(photoId: 0, photo: UIImage(named: "photonotfound")!, likes: nil, date: nil)]
+    var PhotosLists: [Photo] = [Photo(photoId: 0, photo: nil, likes: -1, date: nil)]
     
     var CurrentImageNumber: Int = 0
     var animationHasFinished: Bool = true
@@ -48,8 +48,6 @@ class BigPhotosController: UIViewController {
         if PhotosLists.indices.contains(loadItem) {
             if let photo = PhotosLists[loadItem].photoURL {
                 self.BigPhotoImageView.kf.setImage(with: URL(string: photo))
-            } else if let photo = PhotosLists[loadItem].photoImage {
-                self.BigPhotoImageView.image = photo
             } else {
                 self.BigPhotoImageView.image = getNotFoundPhoto()
             }
@@ -158,8 +156,6 @@ class BigPhotosController: UIViewController {
                 
                 if let photo = CurrentImage.photoURL {
                     self.BigPhotoImageViewTmp.kf.setImage(with: URL(string: photo))
-                } else if let photo = CurrentImage.photoImage {
-                    self.BigPhotoImageViewTmp.image = photo
                 } else {
                     self.BigPhotoImageViewTmp.image = UIImage(named: "photonotfound")!
                 }
