@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0707922A2392438B00F728BC /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070792292392438B00F728BC /* Session.swift */; };
+		0707922A2392438B00F728BC /* AppSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070792292392438B00F728BC /* AppSession.swift */; };
 		071097E72358E50100932A4E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071097E62358E50100932A4E /* AppDelegate.swift */; };
 		071097E92358E50100932A4E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071097E82358E50100932A4E /* SceneDelegate.swift */; };
 		071097F02358E50300932A4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 071097EF2358E50300932A4E /* Assets.xcassets */; };
@@ -43,7 +43,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		070792292392438B00F728BC /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		070792292392438B00F728BC /* AppSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSession.swift; sourceTree = "<group>"; };
 		071097E32358E50100932A4E /* vkapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vkapp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		071097E62358E50100932A4E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		071097E82358E50100932A4E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -278,7 +278,7 @@
 		0788EE392363422700379186 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				070792292392438B00F728BC /* Session.swift */,
+				070792292392438B00F728BC /* AppSession.swift */,
 				073770C3239BDBA500DB51CB /* User.swift */,
 			);
 			path = Models;
@@ -452,7 +452,7 @@
 				07F99D2A237B3DE4002E87ED /* LoadingViewControl.swift in Sources */,
 				0779F55E236EA77B008E0A51 /* AvatarView.swift in Sources */,
 				073770C2239BCA3200DB51CB /* NetworkService.swift in Sources */,
-				0707922A2392438B00F728BC /* Session.swift in Sources */,
+				0707922A2392438B00F728BC /* AppSession.swift in Sources */,
 				0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */,
 				0793234B236228B400394647 /* GroupsController.swift in Sources */,
 				07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */,

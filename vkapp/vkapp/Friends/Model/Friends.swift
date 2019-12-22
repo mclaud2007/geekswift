@@ -13,6 +13,10 @@ class Friend: Object {
     @objc dynamic var userId: Int = 0
     @objc dynamic var name: String = ""
     
+    override class func primaryKey() -> String? {
+        return "userId"
+    }
+    
     // Аватарка пользовтеля
     @objc dynamic var photo: String? = nil
     
@@ -26,6 +30,7 @@ class Friend: Object {
         self.userId = userId
         self.name = name
         self.photo = nil
+            
     }
     
     required init() {

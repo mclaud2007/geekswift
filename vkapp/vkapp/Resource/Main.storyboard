@@ -33,22 +33,8 @@
                                     <constraint firstAttribute="width" constant="60" id="aQb-CZ-9Fg"/>
                                 </constraints>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yhp-pR-BKS" userLabel="btnLogin">
-                                <rect key="frame" x="144" y="738" width="87" height="30"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="87" id="bha-MC-n8M"/>
-                                    <constraint firstAttribute="height" constant="30" id="xO9-a8-tPS"/>
-                                </constraints>
-                                <state key="normal" title="Вход">
-                                    <color key="titleShadowColor" cocoaTouchSystemColor="darkTextColor"/>
-                                </state>
-                                <connections>
-                                    <action selector="loginButtonClick:" destination="8mc-zv-NRf" eventType="touchUpInside" id="3XB-AR-ADC"/>
-                                </connections>
-                            </button>
                             <wkWebView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YQW-sh-yWQ" userLabel="VKLogin">
-                                <rect key="frame" x="20" y="111" width="335" height="597"/>
+                                <rect key="frame" x="20" y="111" width="335" height="647"/>
                                 <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <wkWebViewConfiguration key="configuration">
                                     <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
@@ -66,12 +52,10 @@
                             <constraint firstItem="nx5-l5-tLN" firstAttribute="trailing" secondItem="YQW-sh-yWQ" secondAttribute="trailing" constant="20" id="Xog-AD-zd8"/>
                             <constraint firstItem="vHc-ue-3Jg" firstAttribute="centerX" secondItem="nx5-l5-tLN" secondAttribute="centerX" id="hkg-aG-fcR"/>
                             <constraint firstItem="pts-IF-VjX" firstAttribute="leading" secondItem="pZR-7d-lxM" secondAttribute="leading" id="mwH-gH-WBM"/>
-                            <constraint firstItem="YQW-sh-yWQ" firstAttribute="bottom" secondItem="yhp-pR-BKS" secondAttribute="bottom" constant="-60" id="nSn-IT-Vxu"/>
-                            <constraint firstItem="yhp-pR-BKS" firstAttribute="centerX" secondItem="nx5-l5-tLN" secondAttribute="centerX" id="o08-7H-pXt"/>
                             <constraint firstAttribute="bottom" secondItem="pts-IF-VjX" secondAttribute="bottom" id="u4w-Qv-sJn"/>
                             <constraint firstItem="vHc-ue-3Jg" firstAttribute="centerY" secondItem="nx5-l5-tLN" secondAttribute="centerY" id="x5u-0c-64u"/>
                             <constraint firstItem="YQW-sh-yWQ" firstAttribute="top" secondItem="En5-GL-YFx" secondAttribute="bottom" constant="20" id="xP8-VD-Irg"/>
-                            <constraint firstItem="nx5-l5-tLN" firstAttribute="bottom" secondItem="yhp-pR-BKS" secondAttribute="bottom" constant="10" id="xwY-Rc-ms2"/>
+                            <constraint firstItem="nx5-l5-tLN" firstAttribute="bottom" secondItem="YQW-sh-yWQ" secondAttribute="bottom" constant="20" id="xuJ-EU-2nU"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="nx5-l5-tLN"/>
                     </view>

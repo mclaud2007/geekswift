@@ -17,7 +17,7 @@ class LoginFormController: UIViewController {
         }
     }
     
-    let sessionData = Session.shared
+    let sessionData = AppSession.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,13 +27,16 @@ class LoginFormController: UIViewController {
             self.view.backgroundColor = .black
         }
         
+        // Сначала попробуем получить токен из Realm
+        VKLogin.isHidden = true
+        
         // Сразу включим анимацию, потому как если пользователь залогинен мы пойдем дальше
         self.loadingControl.startAnimation()
         
-        // Токен надо будет где-то сохранить на устройстве, если он не пустой
-        // то идем сразу на экран друзей, в противном случае покажем кнопку
-        // вход, которая покажет WebView
-        if sessionData.getToken().isEmpty {
+        // Попытуаемся загрузить токен из реалм (либо он вернется либо вернется пустая строка)
+        let token = sessionData.getToken()
+        
+        if token.isEmpty {
             // Показываем окно браузера
             VKLogin.isHidden = false
             
@@ -44,8 +47,28 @@ class LoginFormController: UIViewController {
             VKLogin.load(request)
             
         } else {
-            self.loadingControl.stopAnimation()
-            self.showFriendScreen()
+            // Проверим токен на валидность
+            VK.shared.checkToken(token: token) { result in
+                if result == true {
+                    // Без паузы экран с друзьями не загружается :/
+                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
+                        self.loadingControl.stopAnimation()
+                        self.showFriendScreen()
+                    }
+                }
+                // Что-то пошло не так - все таки загрузим вебвью
+                else {
+                    // Показываем окно браузера
+                    self.VKLogin.isHidden = false
+                    
+                    // Получаем сформированный запрос для получения токена
+                    let request = VK.shared.getOAuthRequest()
+                    
+                    // Загружаем страницу логина в VK
+                    self.VKLogin.load(request)
+                }
+            }
+            
         }
         
     }
