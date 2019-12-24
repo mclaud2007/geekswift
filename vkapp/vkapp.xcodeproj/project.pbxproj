@@ -20,11 +20,12 @@
 		07326D3B2376FDEE00548A86 /* NewsFormController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07326D3A2376FDEE00548A86 /* NewsFormController.swift */; };
 		073770C2239BCA3200DB51CB /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 073770C1239BCA3200DB51CB /* NetworkService.swift */; };
 		073770C4239BDBA500DB51CB /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 073770C3239BDBA500DB51CB /* User.swift */; };
-		07572FD72389828100AB8E01 /* Animator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07572FD62389828100AB8E01 /* Animator.swift */; };
+		07572FD72389828100AB8E01 /* CustomInteractAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */; };
 		07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07572FD82389857000AB8E01 /* CustomNavigationController.swift */; };
 		0769B0F623645F8D0016E6D8 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F523645F8D0016E6D8 /* Group.swift */; };
 		0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F9236460FE0016E6D8 /* GroupsCell.swift */; };
 		0773D3602371BD85006AFAA3 /* FriendsSearchControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */; };
+		0775BC6A23B227FB0041FABC /* RealmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0775BC6923B227FB0041FABC /* RealmService.swift */; };
 		0779F55E236EA77B008E0A51 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0779F55D236EA77B008E0A51 /* AvatarView.swift */; };
 		0788EE38236341C500379186 /* Friends.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0788EE37236341C500379186 /* Friends.swift */; };
 		0788EE3B23634A0A00379186 /* FriendsPhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0788EE3A23634A0A00379186 /* FriendsPhotoController.swift */; };
@@ -57,12 +58,13 @@
 		07326D3A2376FDEE00548A86 /* NewsFormController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsFormController.swift; sourceTree = "<group>"; };
 		073770C1239BCA3200DB51CB /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		073770C3239BDBA500DB51CB /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
-		07572FD62389828100AB8E01 /* Animator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animator.swift; sourceTree = "<group>"; };
+		07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomInteractAnimator.swift; sourceTree = "<group>"; };
 		07572FD82389857000AB8E01 /* CustomNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNavigationController.swift; sourceTree = "<group>"; };
 		0769B0F3236450680016E6D8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0769B0F523645F8D0016E6D8 /* Group.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
 		0769B0F9236460FE0016E6D8 /* GroupsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsCell.swift; sourceTree = "<group>"; };
 		0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsSearchControl.swift; sourceTree = "<group>"; };
+		0775BC6923B227FB0041FABC /* RealmService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmService.swift; sourceTree = "<group>"; };
 		0779F55D236EA77B008E0A51 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		0788EE37236341C500379186 /* Friends.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Friends.swift; sourceTree = "<group>"; };
 		0788EE3A23634A0A00379186 /* FriendsPhotoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsPhotoController.swift; sourceTree = "<group>"; };
@@ -267,10 +269,11 @@
 		07572FD52389826100AB8E01 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
-				073770C1239BCA3200DB51CB /* NetworkService.swift */,
-				07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */,
-				07572FD62389828100AB8E01 /* Animator.swift */,
+				07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */,
 				07572FD82389857000AB8E01 /* CustomNavigationController.swift */,
+				073770C1239BCA3200DB51CB /* NetworkService.swift */,
+				0775BC6923B227FB0041FABC /* RealmService.swift */,
+				07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -454,6 +457,7 @@
 				073770C2239BCA3200DB51CB /* NetworkService.swift in Sources */,
 				0707922A2392438B00F728BC /* AppSession.swift in Sources */,
 				0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */,
+				0775BC6A23B227FB0041FABC /* RealmService.swift in Sources */,
 				0793234B236228B400394647 /* GroupsController.swift in Sources */,
 				07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */,
 				07326D372376F63F00548A86 /* NewsTableCell.swift in Sources */,
@@ -465,7 +469,7 @@
 				07E419C02360678A00EF92E6 /* UIViewController+Ext.swift in Sources */,
 				071097E92358E50100932A4E /* SceneDelegate.swift in Sources */,
 				07C3721D2377115600828D30 /* News.swift in Sources */,
-				07572FD72389828100AB8E01 /* Animator.swift in Sources */,
+				07572FD72389828100AB8E01 /* CustomInteractAnimator.swift in Sources */,
 				07F93DDD23644C7F00F6B3B0 /* FriendPhotosCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

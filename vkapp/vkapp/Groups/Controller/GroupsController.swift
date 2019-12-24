@@ -7,14 +7,21 @@
 //
 
 import UIKit
+import RealmSwift
 
 class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    var GroupsList = [Group]()
+    var GroupsList = [Group]() {
+        didSet {
+            self.tableView.reloadData()
+        }
+    }
     
     var RecommendedGroups = [Group]()
     
     var GroupsFiltered: [Group] = []
+    
+    var token: NotificationToken?
     
     @IBOutlet weak var searchBar: UISearchBar! {
         didSet {
@@ -35,16 +42,69 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         navigationController?.setNavigationBarHidden(false, animated: false)
         self.title = "Группы"
         
-        // Загрузка информации о группах
-        VK.shared.getGroupsList() { result in
-            switch result {
-            case let .success(groups):
-                self.GroupsList = groups
-                self.tableView.reloadData()
-            case .failure(_):
-                self.showErrorMessage(message: "Произошла ошибка загрузки данных")
+        do {
+            let groups = try RealmService.get(Group.self).sorted(byKeyPath: "name", ascending: true)
+            
+            // Подписываемся на изменения групп
+            self.token = groups.observe { [weak self] (changes: RealmCollectionChange) in
+                guard let self = self else { return }
+                
+                var localGroupsList = self.GroupsList
+                
+                switch changes {
+                case let .initial(result):
+                    localGroupsList.removeAll()
+                    
+                    for item in result {
+                        localGroupsList.append(item)
+                    }
+                    
+                case let .update(res, del, ins, mod):
+                    // Из базы пропала запись
+                    if (del.count > 0) {
+                        // Удаление из базы
+                        for i in 0..<del.count {
+                            if localGroupsList.indices.contains(del[i]) {
+                                localGroupsList.remove(at: del[i])
+                            }
+                        }
+                        
+                    } else if ins.count > 0 {
+                        // Добавление записи
+                        for i in 0..<ins.count {
+                            if res.indices.contains(ins[i]) {
+                                localGroupsList.append(res[ins[i]])
+                            }
+                        }
+                        
+                    } else if mod.count > 0 {
+                        // Запись обновилась
+                        for i in 0..<mod.count {
+                            if (localGroupsList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
+                                // Проще удалить старую запись
+                                localGroupsList.remove(at: mod[i])
+
+                                // И добавить новую
+                                localGroupsList.append(res[mod[i]])
+                            }
+                        }
+                    }
+                    
+                case let .error(err):
+                    self.showErrorMessage(message: err.localizedDescription)
+                }
+                
+                // Обновляем данные
+                self.GroupsList.removeAll()
+                self.GroupsList = localGroupsList
             }
+            
+        } catch let err {
+            showErrorMessage(message: err.localizedDescription)
         }
+        
+        // Загрузка информации о группах
+        VK.shared.getGroupsList()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -111,8 +171,6 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
                 return 
             } else {
                 GroupsList.remove(at: indexPath.row)
-                // Delete the row from the data source
-                tableView.deleteRows(at: [indexPath], with: .fade)
             }
         }
     }

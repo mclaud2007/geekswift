@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import RealmSwift
 
 class FriendsPhotoController: UIViewController {
     // Id пользователя для, которого будем грузить фотки
@@ -21,22 +22,86 @@ class FriendsPhotoController: UIViewController {
     }
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var PhotosLists: [Photo] = [Photo(friendID: 0, photoId: 0, photo: nil, likes: -1, date: nil)]
+    var PhotosLists = [Photo]() {
+        didSet {
+            self.PhotoListCollectionView.reloadData()
+        }
+    }
     
     // Массив лайков под фотографиями или -1 - это значит оценок нет
     var Likes = [-1]
     // Массив уже отмеченных фотографий или -1 по умолчанию
     var Liked = [-1]
     
+    var token: NotificationToken?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Пытаемся загрузить фотографии пользователя
         if let friendID = self.FriendID {
-            VK.shared.getPhotosByFriendId(friendId: friendID) { result in
-                self.PhotosLists = result
-                self.PhotoListCollectionView.reloadData()
+            do {
+                // Подписываемся на изменения фотографий
+                let photos = try RealmService.get(Photo.self).filter("friendID=\(friendID)").sorted(byKeyPath: "date", ascending: false)
+                
+                self.token = photos.observe({ [weak self] (changes: RealmCollectionChange) in
+                    guard let self = self else { return }
+                    
+                    var localPhotoList = self.PhotosLists
+                    
+                    switch changes {
+                    case let .initial(result):
+                        localPhotoList.removeAll()
+                        
+                        for item in result {
+                            localPhotoList.append(item)
+                        }
+                        
+                    case let .update(res, del, ins, mod):
+                        // Из базы пропала запись
+                        if (del.count > 0) {
+                            // Удаление из базы
+                            for i in 0..<del.count {
+                                if localPhotoList.indices.contains(del[i]) {
+                                    localPhotoList.remove(at: del[i])
+                                }
+                            }
+                            
+                        } else if ins.count > 0 {
+                            // Добавление записи
+                            for i in 0..<ins.count {
+                                if res.indices.contains(ins[i]) {
+                                    localPhotoList.append(res[ins[i]])
+                                }
+                            }
+                            
+                        } else if mod.count > 0 {
+                            // Запись обновилась
+                            for i in 0..<mod.count {
+                                if (localPhotoList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
+                                    // Проще удалить старую запись
+                                    localPhotoList.remove(at: mod[i])
+
+                                    // И добавить новую
+                                    localPhotoList.append(res[mod[i]])
+                                }
+                            }
+                        }
+                    case let .error(err):
+                        self.showErrorMessage(message: err.localizedDescription)
+                    }
+                    
+                    // Обновляем данные
+                    self.PhotosLists.removeAll()
+                    self.PhotosLists = localPhotoList
+                    
+                })
+            } catch let err {
+                showErrorMessage(message: err.localizedDescription)
             }
+            
+            // Запрашиваем данные
+            VK.shared.getPhotosByFriendId(friendId: friendID)
         }
     }
     
@@ -60,7 +125,7 @@ extension FriendsPhotoController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return PhotosLists.count
+        return self.PhotosLists.count
     }
     
     // MARK: Поготовка ячейки к выводу

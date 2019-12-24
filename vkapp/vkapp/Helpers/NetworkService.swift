@@ -125,7 +125,7 @@ class VK {
     }
     
     // MARK: Загрузка групп
-    public func getGroupsList(complition: @escaping (Result<[Group], Error>) -> Void) {
+    public func getGroupsList(complition: ((Result<[Group], Error>) -> Void)? = nil) {
         let token = AppSession.shared.getToken()
         var List = [Group]()
         
@@ -146,50 +146,50 @@ class VK {
                         // что-то нашли
                         if (json["response"]["count"].intValue > 0){
                             do {
-                               let config = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
-                               let realm = try Realm(configuration: config)
-                               
-                               // Попытаемся загрузить друзей
-                               let realmGroups = realm.objects(Group.self)
-                               
-                               // Начинаем транзакцию на запись
-                               realm.beginWrite()
+                                // Попытаемся загрузить друзей
+                                let realmGroups = try RealmService.get(Group.self)
                                 
-                                for group in json["response"]["items"].arrayValue {
-                                    if let id = group["id"].int,
-                                        let name = group["name"].string,
-                                        let photo = group["photo_50"].string {
-                                    
-                                        let groupToAdd = Group(groupId: id, name: name, image: photo)
-                                        List.append(groupToAdd)
+                                // В случае, если запись есть в базе, то ее нужно будет
+                                // обновить, а для этого нужно запустить транзакцию
+                                // а для этого ружен realm
+                                let realm = try RealmService.service()
+                                
+                                try realm.write {
+                                    for group in json["response"]["items"].arrayValue {
+                                        if let id = group["id"].int,
+                                            let name = group["name"].string,
+                                            let photo = group["photo_50"].string {
                                         
-                                        // Записываем инфу только если её нет в базе
-                                        if realmGroups.count > 0,
-                                            let rObj = realmGroups.filter("groupId=\(id)").first {
+                                            let groupToAdd = Group(groupId: id, name: name, image: photo)
+                                            List.append(groupToAdd)
                                             
-                                            if rObj.name != name {
-                                                rObj.name = name
+                                            // Записываем инфу только если её нет в базе
+                                            if realmGroups.count > 0,
+                                                let rObj = realmGroups.filter("groupId=\(id)").first {
+                                                
+                                                if rObj.name != name {
+                                                    rObj.name = name
+                                                }
+                                                
+                                                if rObj.imageString != photo {
+                                                    rObj.imageString = photo
+                                                }
+                                                
+                                            } else {
+                                                realm.add(groupToAdd, update: Realm.UpdatePolicy.modified)
                                             }
-                                            
-                                            if rObj.imageString != photo {
-                                                rObj.imageString = photo
-                                            }
-                                            
-                                        } else {
-                                            realm.add(groupToAdd.self)
                                         }
                                     }
                                 }
                                 
-                                try realm.commitWrite()
-                            } catch {
-                                print("getGroupsList realm crashed")
+                            } catch let error {
+                                 complition?(.failure(error))
                             }
 
-                            complition(.success(List))
+                            complition?(.success(List))
                         }
                     case let .failure(error):
-                        complition(.failure(error))
+                        complition?(.failure(error))
                     break
                 }
             }
@@ -197,7 +197,7 @@ class VK {
     }
     
     // MARK: Загрузка фото
-    func getPhotosByFriendId(friendId: Int, complition: @escaping ((_ data: [Photo]) -> Void)){
+    func getPhotosByFriendId(friendId: Int, complition: ((_ data: Result<[Photo], Error>) -> Void)? = nil){
         let token = AppSession.shared.getToken()
         var List = [Photo]()
         
@@ -219,15 +219,7 @@ class VK {
                     
                     if json["response"]["count"] > 0 {
                         do {
-                            let config = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
-                            let realm = try Realm(configuration: config)
-                            
-                            // Попытаемся загрузить друзей
-                            let realmPhotos = realm.objects(Photo.self)
-                            
-                            // Начинаем транзакцию на запись
-                            realm.beginWrite()
-                            
+                            // Записываем все полученные данные
                             for item in json["response"]["items"].arrayValue {
                                 let date = item["date"].intValue
                                 let id = item["id"].intValue
@@ -257,30 +249,20 @@ class VK {
                                 // Все данные получены инициализируем класс фото
                                 List.append(pObject)
                                 
-                                // Смотрим нет ли такой записи в реалм
-                                if realmPhotos.count > 0,
-                                    let rObj = realmPhotos.filter("friendID=\(friendId) AND id=\(id)").first {
-                                    rObj.photoURL = photo
-                                    rObj.likes = likes
-                                    rObj.isLiked = liked
-                                    rObj.date = date
-                                } else {
-                                    realm.add(pObject.self)
-                                }
-                                
+                                // Записываем данные в реалм
+                                try RealmService.save(items: pObject.self)
                             }
                             
-                            try realm.commitWrite()
-                            
-                        } catch {
-                            print("getPhotosByFriendId realm crashed")
-                        }
                         
-                        // Что-то нашли - запускаем замыкание
-                        complition(List)
+                            // Что-то нашли - запускаем замыкание
+                            complition?(.success(List))
+                            
+                        } catch let err {
+                            complition?(.failure(err))
+                        }
                     }
-                case .failure(_):
-                    break
+                case let .failure(err):
+                    complition?(.failure(err))
                 }
             }
         }
@@ -295,46 +277,43 @@ class VK {
             guard let friendItem = json["response"]["items"].array else { return nil }
             
             do {
-                let config = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
-                let realm = try Realm(configuration: config)
+                let realm = try RealmService.service()
                 
                 // Попытаемся загрузить друзей
-                let realmFriends = realm.objects(Friend.self)
+                let realmFriends = try RealmService.get(Friend.self)
                 
                 // Начинаем транзакцию на запись
-                realm.beginWrite()
-                
-                // Перебираем друзей и инициализируем массив
-                for friend in friendItem {
-                    // Все данные есть - можно заполнять
-                    if let firstName = friend["first_name"].string,
-                        let lastName = friend["last_name"].string,
-                        let id = friend["id"].int,
-                        let avatar = friend["photo_50"].string,
-                        friend["deactivated"].stringValue != "deleted"
-                    {
-                        
-                        let friendToAdd = Friend(userId: id, photo: avatar, name: firstName + " " + lastName)
-                        List.append(friendToAdd)
-                        
-                        // Запишем в realm, но только если такой записи там еще нет
-                        if realmFriends.count > 0,
-                            let rObj = realmFriends.filter("userId=\(id)").first {
+                try realm.write {
+                    // Перебираем друзей и инициализируем массив
+                    for friend in friendItem {
+                        // Все данные есть - можно заполнять
+                        if let firstName = friend["first_name"].string,
+                            let lastName = friend["last_name"].string,
+                            let id = friend["id"].int,
+                            let avatar = friend["photo_50"].string,
+                            friend["deactivated"].stringValue != "deleted"
+                        {
                             
-                            if rObj.photo != avatar {
-                                rObj.photo = avatar
-                            }
+                            let friendToAdd = Friend(userId: id, photo: avatar, name: firstName + " " + lastName)
+                            List.append(friendToAdd)
                             
-                            if rObj.name != firstName + " " + lastName {
-                                rObj.name = firstName + " " + lastName
+                            // Запишем в realm, но только если такой записи там еще нет
+                            if realmFriends.count > 0,
+                                let rObj = realmFriends.filter("userId=\(id)").first {
+                                
+                                if rObj.photo != avatar {
+                                    rObj.photo = avatar
+                                }
+                                
+                                if rObj.name != firstName + " " + lastName {
+                                    rObj.name = firstName + " " + lastName
+                                }
+                            } else {
+                                realm.add(friendToAdd.self)
                             }
-                        } else {
-                            realm.add(friendToAdd.self)
                         }
                     }
                 }
-                
-                try realm.commitWrite()
                 
             } catch {
                 print("ParseFriend: Realm crached")
@@ -345,7 +324,7 @@ class VK {
     }
     
     // MARK: Загрузка друзей
-    public func getFriendsList(completion: @escaping ([Friend]?, Error?) -> Void ) {
+    public func getFriendsList(completion: (([Friend]?, Error?) -> Void)? = nil) {
         let token = AppSession.shared.getToken()
         
         if !token.isEmpty {
@@ -362,10 +341,10 @@ class VK {
                 case let .success(data):
                     let json = JSON(data)
                     let friendList = VK.shared.parseFriend(from: json)
-                        completion(friendList, nil)
+                        completion?(friendList, nil)
                     
                 case let .failure(error):
-                    completion(nil, error)
+                    completion?(nil, error)
                 }
                 
             }
