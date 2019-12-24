@@ -9,6 +9,7 @@
 import Foundation
 import Alamofire
 import SwiftyJSON
+import RealmSwift
 
 class VK {
     private let APIUrl = "api.vk.com"
@@ -21,6 +22,7 @@ class VK {
     
     private let APISchema = "https"
     private let ClientID = "7238798"
+    private let ClientSecret = "FkU2VoEQb7vVr5esriPQ"
     
     // Сделаем синглом
     static let shared = VK()
@@ -37,7 +39,7 @@ class VK {
             URLQueryItem(name: "display", value: "mobile"),
             URLQueryItem(name: "redirect_url", value: OAuthBackLink),
             URLQueryItem(name: "response_type", value: "token"),
-            URLQueryItem(name: "scope", value: "262150")
+            URLQueryItem(name: "scope", value: "wall,photos,offline,friends,stories,status,groups")
         ]
         
         return URLRequest(url: urlComponents.url!)
@@ -51,21 +53,52 @@ class VK {
         }
     }
     
-    // MARK: Загрузка групп
-    public func getGroupsList(complition: @escaping (Result<[Group], Error>) -> Void) {
-        let token = Session.shared.getToken()
+    // MARK: Проверка токена на валидность
+    public func checkToken (token: String, complition: @escaping (Bool) -> Void) {
+        if !token.isEmpty {
+            let param: Parameters = [
+                "client_id": self.ClientID,
+                "client_secret": self.ClientSecret,
+                "token": token,
+                "v": self.APIVersion
+            ]
+            
+            VK.shared.setCommand("secure.checkToken", param: param) { response in
+                switch response.result {
+                case let .success(data):
+                    let json = JSON(data)
+                    
+                    if json["response"]["success"].intValue == 1 {
+                        complition(true)
+                    } else {
+                        complition(false)
+                    }
+                    
+                case .failure(_):
+                    complition(false)
+                }
+            }
+        } else {
+            complition(false)
+        }
+    }
+    
+    // MARK: Поиск по группам
+    public func getGroupSearch(query: String, complition: @escaping (Result<[Group], Error>) -> Void) {
+        let token = AppSession.shared.getToken()
         var List = [Group]()
         
         if !token.isEmpty {
             let param: Parameters = [
                 "access_token": token,
-                "user_id": Session.shared.getUserId(),
-                "extended": 1,
-                "fields": "photo_50,name",
+                "user_id": AppSession.shared.getUserId(),
+                "type": "group",
+                "q": query,
+                "count": 10,
                 "v": VK.shared.APIVersion
             ]
         
-            VK.shared.setCommand("groups.get", param: param) { response in
+            VK.shared.setCommand("groups.search", param: param) { response in
                 switch response.result {
                     case let .success(data):
                         let json = JSON(data)
@@ -91,9 +124,81 @@ class VK {
         }
     }
     
+    // MARK: Загрузка групп
+    public func getGroupsList(complition: @escaping (Result<[Group], Error>) -> Void) {
+        let token = AppSession.shared.getToken()
+        var List = [Group]()
+        
+        if !token.isEmpty {
+            let param: Parameters = [
+                "access_token": token,
+                "user_id": AppSession.shared.getUserId(),
+                "extended": 1,
+                "fields": "photo_50,name",
+                "v": VK.shared.APIVersion
+            ]
+        
+            VK.shared.setCommand("groups.get", param: param) { response in
+                switch response.result {
+                    case let .success(data):
+                        let json = JSON(data)
+                        
+                        // что-то нашли
+                        if (json["response"]["count"].intValue > 0){
+                            do {
+                               let config = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
+                               let realm = try Realm(configuration: config)
+                               
+                               // Попытаемся загрузить друзей
+                               let realmGroups = realm.objects(Group.self)
+                               
+                               // Начинаем транзакцию на запись
+                               realm.beginWrite()
+                                
+                                for group in json["response"]["items"].arrayValue {
+                                    if let id = group["id"].int,
+                                        let name = group["name"].string,
+                                        let photo = group["photo_50"].string {
+                                    
+                                        let groupToAdd = Group(groupId: id, name: name, image: photo)
+                                        List.append(groupToAdd)
+                                        
+                                        // Записываем инфу только если её нет в базе
+                                        if realmGroups.count > 0,
+                                            let rObj = realmGroups.filter("groupId=\(id)").first {
+                                            
+                                            if rObj.name != name {
+                                                rObj.name = name
+                                            }
+                                            
+                                            if rObj.imageString != photo {
+                                                rObj.imageString = photo
+                                            }
+                                            
+                                        } else {
+                                            realm.add(groupToAdd.self)
+                                        }
+                                    }
+                                }
+                                
+                                try realm.commitWrite()
+                            } catch {
+                                print("getGroupsList realm crashed")
+                            }
+
+                            complition(.success(List))
+                        }
+                    case let .failure(error):
+                        complition(.failure(error))
+                    break
+                }
+            }
+        }
+    }
+    
     // MARK: Загрузка фото
     func getPhotosByFriendId(friendId: Int, complition: @escaping ((_ data: [Photo]) -> Void)){
-        let token = Session.shared.getToken()
+        let token = AppSession.shared.getToken()
         var List = [Photo]()
         
         if !token.isEmpty {
@@ -113,31 +218,62 @@ class VK {
                     let json = JSON(data)
                     
                     if json["response"]["count"] > 0 {
-                        for item in json["response"]["items"].arrayValue {
-                            let date = item["date"].intValue
-                            let id = item["id"].intValue
-                            let likes = item["likes"]["count"].int ?? -1
-                            let liked = item["likes"]["user_likes"] == 0 ? false : true
-                            let sizes = item["sizes"].arrayValue
-                            var photo:String = ""
+                        do {
+                            let config = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
+                            let realm = try Realm(configuration: config)
                             
-                            // Теперь надо найти фотографию типа r
-                            if sizes.count > 0 {
-                                let photoArr = sizes.filter({ $0["type"].stringValue == "r" })
+                            // Попытаемся загрузить друзей
+                            let realmPhotos = realm.objects(Photo.self)
+                            
+                            // Начинаем транзакцию на запись
+                            realm.beginWrite()
+                            
+                            for item in json["response"]["items"].arrayValue {
+                                let date = item["date"].intValue
+                                let id = item["id"].intValue
+                                let likes = item["likes"]["count"].int ?? -1
+                                let liked = item["likes"]["user_likes"] == 0 ? false : true
+                                let sizes = item["sizes"].arrayValue
+                                var photo:String = ""
                                 
-                                if photoArr.count > 0 {
-                                    photo = photoArr[0]["url"].stringValue
-                                } else {
-                                    let photoArr = sizes.filter({ $0["type"].stringValue == "y" })
+                                // Теперь надо найти фотографию типа r
+                                if sizes.count > 0 {
+                                    let photoArr = sizes.filter({ $0["type"].stringValue == "r" })
                                     
                                     if photoArr.count > 0 {
                                         photo = photoArr[0]["url"].stringValue
+                                    } else {
+                                        let photoArr = sizes.filter({ $0["type"].stringValue == "y" })
+                                        
+                                        if photoArr.count > 0 {
+                                            photo = photoArr[0]["url"].stringValue
+                                        }
                                     }
                                 }
+                                
+                                // Создаем экземпляр объекта фото
+                                let pObject = Photo(friendID: friendId, photoId: id, photo: photo, likes: likes, liked: liked, date: date)
+                                
+                                // Все данные получены инициализируем класс фото
+                                List.append(pObject)
+                                
+                                // Смотрим нет ли такой записи в реалм
+                                if realmPhotos.count > 0,
+                                    let rObj = realmPhotos.filter("friendID=\(friendId) AND id=\(id)").first {
+                                    rObj.photoURL = photo
+                                    rObj.likes = likes
+                                    rObj.isLiked = liked
+                                    rObj.date = date
+                                } else {
+                                    realm.add(pObject.self)
+                                }
+                                
                             }
                             
-                            // Все данные получены инициализируем класс фото
-                            List.append(Photo(photoId: id, photo: photo, likes: likes, liked: liked, date: date))
+                            try realm.commitWrite()
+                            
+                        } catch {
+                            print("getPhotosByFriendId realm crashed")
                         }
                         
                         // Что-то нашли - запускаем замыкание
@@ -158,17 +294,50 @@ class VK {
         if json["response"]["count"].int != nil {
             guard let friendItem = json["response"]["items"].array else { return nil }
             
-            // Перебираем друзей и инициализируем массив
-            for friend in friendItem {
-                // Все данные есть - можно заполнять
-                if let firstName = friend["first_name"].string,
-                    let lastName = friend["last_name"].string,
-                    let id = friend["id"].int,
-                    let avatar = friend["photo_50"].string
-                {
-                    let friendToAdd = Friend(userId: id, photo: avatar, name: firstName + " " + lastName)
-                    List.append(friendToAdd)
+            do {
+                let config = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
+                let realm = try Realm(configuration: config)
+                
+                // Попытаемся загрузить друзей
+                let realmFriends = realm.objects(Friend.self)
+                
+                // Начинаем транзакцию на запись
+                realm.beginWrite()
+                
+                // Перебираем друзей и инициализируем массив
+                for friend in friendItem {
+                    // Все данные есть - можно заполнять
+                    if let firstName = friend["first_name"].string,
+                        let lastName = friend["last_name"].string,
+                        let id = friend["id"].int,
+                        let avatar = friend["photo_50"].string,
+                        friend["deactivated"].stringValue != "deleted"
+                    {
+                        
+                        let friendToAdd = Friend(userId: id, photo: avatar, name: firstName + " " + lastName)
+                        List.append(friendToAdd)
+                        
+                        // Запишем в realm, но только если такой записи там еще нет
+                        if realmFriends.count > 0,
+                            let rObj = realmFriends.filter("userId=\(id)").first {
+                            
+                            if rObj.photo != avatar {
+                                rObj.photo = avatar
+                            }
+                            
+                            if rObj.name != firstName + " " + lastName {
+                                rObj.name = firstName + " " + lastName
+                            }
+                        } else {
+                            realm.add(friendToAdd.self)
+                        }
+                    }
                 }
+                
+                try realm.commitWrite()
+                
+            } catch {
+                print("ParseFriend: Realm crached")
             }
         }
         
@@ -177,7 +346,7 @@ class VK {
     
     // MARK: Загрузка друзей
     public func getFriendsList(completion: @escaping ([Friend]?, Error?) -> Void ) {
-        let token = Session.shared.getToken()
+        let token = AppSession.shared.getToken()
         
         if !token.isEmpty {
             let param: Parameters = [
@@ -194,6 +363,158 @@ class VK {
                     let json = JSON(data)
                     let friendList = VK.shared.parseFriend(from: json)
                         completion(friendList, nil)
+                    
+                case let .failure(error):
+                    completion(nil, error)
+                }
+                
+            }
+        }
+    }
+    
+    public func parseNews(from json: JSON) -> [News] {
+        // Массив со списком источникв
+        var sourceList = [Int:[[String:String]]]()
+        
+        // Результат парсинга json
+        var NewsList = [News]()
+        
+        guard let items = json["response"]["items"].array else { return NewsList }
+        
+        // Новостей нет - дальше нет смысла смотреть
+        if items.count == 0 {
+            return NewsList
+        }
+        
+        // Вернулся список групп
+        if let groups = json["response"]["groups"].array,
+            groups.count > 0 {
+            
+            for group in groups {
+                if let gID = group["id"].int,
+                    let gName = group["name"].string,
+                    let gAvatar = group["photo_50"].string
+                {
+                    
+                    sourceList[gID] = [["name": gName], ["avatar": gAvatar]]
+                }
+            }
+            
+        }
+        
+        // Вернулся список профилей - источников новостей
+        if let profiles = json["response"]["profiles"].array,
+            profiles.count > 0 {
+            
+            for profile in profiles {
+                if let pID = profile["id"].int,
+                    let pFirstName = profile["first_name"].string,
+                    let pLastName = profile["last_name"].string,
+                    let pAvatar = profile["photo_50"].string
+                {
+                    sourceList[pID] = [["name": pFirstName + " " + pLastName], ["avatar": pAvatar]]
+                }
+            }
+        }
+        
+        // Сформируем список новостей
+        for item in items {
+            if var sourceId = item["source_id"].int,
+                let date = item["date"].int,
+                let text = item["text"].string,
+                !text.isEmpty
+            {
+                // Название новости - это паблик или профиль. По-умолчанию будет "Без названия" - дальше переопределим в случае успеха
+                var title = "Без названия"
+                var avatar: String?
+                var picture: String?
+                
+                // если источник < 0 - это группа
+                if sourceId < 0 {
+                    // Для поиска в списке истоников нужно положительное число
+                    sourceId = sourceId * -1
+                    
+                    if let sObj = sourceList[sourceId],
+                        let sName = sObj[0]["name"],
+                        let sAvatar = sObj[1]["avatar"] {
+                        
+                        title = sName
+                        avatar = sAvatar
+                    }
+                }
+                
+                if let attachments = item["attachments"].array {
+                    let photos = attachments.filter({ $0["type"].stringValue == "photo" })
+                    var pSizeArray = [JSON]()
+                    
+                    // Фотографии могут быть в ссылках
+                    if photos.count == 0 {
+                        let pLink = attachments.filter({ $0["type"].stringValue == "link" })
+                        
+                        if pLink.count > 0 {
+                            pSizeArray = pLink[0]["link"]["photo"]["sizes"].arrayValue
+                        }
+                    } else {
+                        pSizeArray = photos[0]["photo"]["sizes"].arrayValue
+                    }
+                    
+                    if pSizeArray.count > 0 {
+                        // Теперь найдем фотографии нужных размеров
+                        let pArr = pSizeArray.filter({ $0["type"].stringValue == "y" || $0["type"].stringValue == "l" || $0["type"].stringValue == "m" || $0["type"].stringValue == "r" })
+                        let pSizeCount = pArr.count
+                        
+                        // Что-то нашли
+                        if pSizeCount == 1 {
+                            picture = pArr[0]["url"].stringValue
+                        } else if pSizeCount > 1 {
+                            // Ищем размер y
+                            for i in 0..<pSizeCount {
+                                picture = pArr[i]["url"].stringValue
+                                
+                                // Если нашли размер y - дальше ничего не потребуется
+                                if pArr[i]["type"].stringValue == "y" {
+                                    break
+                                }
+                            }
+                        }
+                    }
+                }
+    
+                // Лайки просмотры комментарии
+                let likes = item["likes"]["count"].int ?? 0
+                let isLiked = (item["likes"]["user_likes"].intValue == 0 ? false : true)
+                let comments = item["comments"]["count"].int ?? 0
+                let views = item["views"]["count"].int ?? 0
+                let shared = item["reposts"]["count"].int ?? 0
+                
+                // Заполняем список новостей
+                NewsList.append(News(title: title, content: text, date: "22.12.2019", picture: picture, likes: likes, views: views, comments: comments, shared: shared, isLiked: isLiked, avatar: avatar))
+            }
+        }
+        
+        return NewsList
+    }
+    
+    // MARK: Загрузка новостей
+    public func getNewsList(completion: @escaping (([News]?, Error?) -> Void) ) {
+        let token = AppSession.shared.getToken()
+        
+        if !token.isEmpty {
+            let param: Parameters = [
+                "access_token": token,
+                "filters": "post",
+                "return_banned": 0,
+                "count": 20,
+                "v": VK.shared.APIVersion,
+                "fields":"nickname,photo_50"
+            ]
+            
+            // Получаем данные
+            VK.shared.setCommand("newsfeed.get", param: param) { response in
+                switch response.result {
+                case let .success(data):
+                    let json = JSON(data)
+                    completion(self.parseNews(from: json), nil)
                     
                 case let .failure(error):
                     completion(nil, error)

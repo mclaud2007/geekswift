@@ -14,7 +14,7 @@ class GroupsCell: UITableViewCell {
 
     override func prepareForReuse() {
         lblGroupsName.text = "..."
-        lblGroupsImage.showImage(image: UIImage(named: "photonotfound")!)
+        lblGroupsImage.showImage(image: getNotFoundPhoto())
     }
     
     public func configure(with group: Group){
@@ -22,12 +22,10 @@ class GroupsCell: UITableViewCell {
         lblGroupsName.text = group.name
         
         //  Фотография может быть как UIImage так и строка
-        if let image = group.image {
-            lblGroupsImage.showImage(image: image)
-        } else if let image = group.imageString {
+        if let image = group.imageString {
             lblGroupsImage.showImage(imageURL: image)
         } else {
-            lblGroupsImage.showImage(image: UIImage(named: "photonotfound")!)
+            lblGroupsImage.showImage(image: getNotFoundPhoto())
         }
     }
 }

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 // MARK: расширение для подсчета лайков
 extension NewsFormController: LikeControlProto {
@@ -30,7 +31,7 @@ extension NewsFormController: LikeControlProto {
 }
 
 class NewsFormController: UIViewController {
-    let NewsList = [
+    /*let NewsList = [
                     News(title: "Сервис Apple TV+ уже доступен",
                          content: "Сервис Apple TV+ доступен в приложении Apple TV по подписке за 199 рублей в месяц или бесплатно при покупке нового устройства Apple либо при подписке на тарифный план Apple Music для студентов",
                          date: "1.11.2019",
@@ -43,7 +44,8 @@ class NewsFormController: UIViewController {
                     picture: UIImage(named: "second_news")!,
                     likes: 5, views: 12, comments: 51, shared: 3,
                     isLiked: true, avatar: UIImage(named: "bruce")!)
-    ]
+    ]*/
+    var NewsList = [News]()
 
     @IBOutlet weak var tableView: UITableView! {
         didSet {
@@ -56,6 +58,13 @@ class NewsFormController: UIViewController {
         
         // Регистрируем xib в качестве прототипа ячейки
         tableView.register(UINib(nibName: "NewsTableCell", bundle: nil), forCellReuseIdentifier: "NewsTableCell")
+        
+        VK.shared.getNewsList() { (result, err)  in
+            if (err == nil && result != nil) {
+                self.NewsList = result!
+                self.tableView.reloadData()
+            }
+        }
         
         self.title = "Новости"
     }
@@ -83,8 +92,18 @@ extension NewsFormController: UITableViewDataSource {
         cell.lblComments.text = String(NewsCell.comments!)
         cell.lblLikeControl.delegate = self
         cell.lblLikeControl.initLikes(likes: NewsCell.likes!, isLiked: NewsCell.isLiked!)
-        cell.imgNewsPicture.image = NewsCell.picture
-        cell.imgAvatarView.showImage(image: NewsCell.avatar!)
+        
+        if let picture = NewsCell.picture {
+            cell.imgNewsPicture.kf.setImage(with: URL(string: picture))
+        } else {
+            cell.imgNewsPicture.image = getNotFoundPhoto()
+        }
+        
+        if let avatar = NewsCell.avatar {
+            cell.imgAvatarView.showImage(imageURL: avatar)
+        } else {
+            cell.imgAvatarView.showImage(image: getNotFoundPhoto())
+        }
         
         return cell
     }

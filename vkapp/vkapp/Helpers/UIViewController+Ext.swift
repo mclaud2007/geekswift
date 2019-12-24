@@ -40,5 +40,6 @@ extension VKAppService {
 }
 
 extension UIViewController: VKAppService {}
-extension FriendsCellProto: VKAppService {}
+//extension FriendsCellProto: VKAppService {}
 extension UICollectionViewCell: VKAppService {}
+extension UITableViewCell: VKAppService {}

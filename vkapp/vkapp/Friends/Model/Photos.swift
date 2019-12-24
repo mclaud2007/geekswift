@@ -12,33 +12,28 @@ import RealmSwift
 class Photo: Object {
     @objc dynamic var date: Int = 0
     @objc dynamic var id: Int
+    @objc dynamic var friendID: Int
     @objc dynamic var likes: Int
-    var photoURL: String?
-    var photoImage: UIImage?
+    @objc dynamic var photoURL: String? = nil
     @objc dynamic var isLiked: Bool = false
     
-    init(photoId id: Int, photo: String, likes: Int?, liked: Bool? = false, date: Int?) {
-        self.id = id
-        self.photoURL = photo
-        self.photoImage = nil
-        self.likes = likes ?? -1
-        self.date = date ?? 0
-        self.isLiked = liked!
+    override class func primaryKey() -> String? {
+        return "id"
     }
     
-    init(photoId id: Int, photo: UIImage, likes: Int?, liked: Bool? = false, date: Int?) {
+    init(friendID: Int, photoId id: Int, photo: String?, likes: Int?, liked: Bool? = false, date: Int?) {
         self.id = id
-        self.photoURL = nil
-        self.photoImage = photo
+        self.photoURL = photo
         self.likes = likes ?? -1
         self.date = date ?? 0
         self.isLiked = liked!
+        self.friendID = friendID
     }
     
     required init() {
         self.id = 0
+        self.friendID = 0
         self.photoURL = nil
-        self.photoImage = nil
         self.likes = -1
         self.date = 0
         self.isLiked = false

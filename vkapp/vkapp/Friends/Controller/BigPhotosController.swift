@@ -8,6 +8,7 @@
 
 import UIKit
 import Kingfisher
+import RealmSwift
 
 class BigPhotosController: UIViewController {
     
@@ -15,10 +16,11 @@ class BigPhotosController: UIViewController {
     @IBOutlet weak var BigPhotoImageViewTmp: UIImageView!
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var PhotosLists: Array<Photo> = [Photo(photoId: 0, photo: UIImage(named: "photonotfound")!, likes: nil, date: nil)]
+    var PhotosLists: [Photo] = [Photo(friendID: 0, photoId: 0, photo: nil, likes: -1, date: nil)]
     
     var CurrentImageNumber: Int = 0
     var animationHasFinished: Bool = true
+    var friendID: Int = 0
     
     // Направление свайпа
     enum panDirectionEnum {
@@ -39,24 +41,49 @@ class BigPhotosController: UIViewController {
         self.title = "Все фотографии"
         var loadItem = 0
         
-        // Показываем текущее фото
-        if PhotosLists.indices.contains(self.CurrentImageNumber) {
-            loadItem = self.CurrentImageNumber
-        }
-        
-        // Есть ли фотография по запрошенному индексу
-        if PhotosLists.indices.contains(loadItem) {
-            if let photo = PhotosLists[loadItem].photoURL {
-                self.BigPhotoImageView.kf.setImage(with: URL(string: photo))
-            } else if let photo = PhotosLists[loadItem].photoImage {
-                self.BigPhotoImageView.image = photo
-            } else {
-                self.BigPhotoImageView.image = getNotFoundPhoto()
+        // загружаем список фотографий из realm
+        do {
+            let config = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
+            let realm = try Realm(configuration: config)
+            
+            // Попытаемся загрузить друзей
+            let realmPhotos = realm.objects(Photo.self)
+            
+            if realmPhotos.count > 0 {
+                let rObjs = realmPhotos.filter("friendID=\(self.friendID)")
+                
+                if rObjs.count > 0 {
+                    // Список инициализирован пустым значением
+                    // Надо его удалить
+                    PhotosLists.removeAll()
+                    
+                    // Заполняем список
+                    for i in 0..<rObjs.count {
+                        PhotosLists.append(rObjs[i])
+                    }
+                    
+                    // Показываем текущее фото
+                    if PhotosLists.indices.contains(self.CurrentImageNumber) {
+                        loadItem = self.CurrentImageNumber
+                    }
+                    
+                    // Есть ли фотография по запрошенному индексу
+                    if PhotosLists.indices.contains(loadItem) {
+                        if let photo = PhotosLists[loadItem].photoURL {
+                            self.BigPhotoImageView.kf.setImage(with: URL(string: photo))
+                        } else {
+                            self.BigPhotoImageView.image = getNotFoundPhoto()
+                        }
+                    }
+                
+                    let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panCatch(_:)))
+                    self.view.addGestureRecognizer(panRecognizer)
+                }
             }
+            
+        } catch {
+            print("BigPhotosController RealmCrashed")
         }
-    
-        let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panCatch(_:)))
-        self.view.addGestureRecognizer(panRecognizer)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -158,8 +185,6 @@ class BigPhotosController: UIViewController {
                 
                 if let photo = CurrentImage.photoURL {
                     self.BigPhotoImageViewTmp.kf.setImage(with: URL(string: photo))
-                } else if let photo = CurrentImage.photoImage {
-                    self.BigPhotoImageViewTmp.image = photo
                 } else {
                     self.BigPhotoImageViewTmp.image = UIImage(named: "photonotfound")!
                 }

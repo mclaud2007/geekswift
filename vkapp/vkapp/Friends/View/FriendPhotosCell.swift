@@ -19,9 +19,7 @@ class PhotosCell: UICollectionViewCell {
     
     func configure(with photos: Photo, indexPath: IndexPath?){
         // Фотография по идее есть
-        if let photo = photos.photoImage {
-            self.FriendPhotoImageView.showImage(image: photo, indexPath: indexPath)
-        } else if let photo = photos.photoURL {
+        if let photo = photos.photoURL {
             self.FriendPhotoImageView.showImage(imageURL: photo, indexPath: indexPath)
         } else {
             self.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
