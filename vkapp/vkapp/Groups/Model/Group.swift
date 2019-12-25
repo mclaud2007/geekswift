@@ -14,6 +14,10 @@ class Group: Object {
     @objc dynamic var imageString: String? = nil
     @objc dynamic var groupId: Int
     
+    override class func primaryKey() -> String? {
+        "groupId"
+    }
+    
     init (groupId: Int, name: String, image: String?){
         self.groupId = groupId
         self.name = name

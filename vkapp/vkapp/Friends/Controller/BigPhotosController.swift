@@ -16,7 +16,7 @@ class BigPhotosController: UIViewController {
     @IBOutlet weak var BigPhotoImageViewTmp: UIImageView!
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var PhotosLists: [Photo] = [Photo(friendID: 0, photoId: 0, photo: nil, likes: -1, date: nil)]
+    var PhotosLists = [Photo]()
     
     var CurrentImageNumber: Int = 0
     var animationHasFinished: Bool = true
@@ -43,14 +43,11 @@ class BigPhotosController: UIViewController {
         
         // загружаем список фотографий из realm
         do {
-            let config = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
-            let realm = try Realm(configuration: config)
-            
-            // Попытаемся загрузить друзей
-            let realmPhotos = realm.objects(Photo.self)
+            let realmPhotos = try RealmService.get(Photo.self).filter("friendID=\(self.friendID)")
+                                              .sorted(byKeyPath: "date", ascending: false)
             
             if realmPhotos.count > 0 {
-                let rObjs = realmPhotos.filter("friendID=\(self.friendID)")
+                let rObjs = realmPhotos
                 
                 if rObjs.count > 0 {
                     // Список инициализирован пустым значением

@@ -40,8 +40,7 @@ class AppSession: Object {
     
     func getCacheData() -> Bool {
         do {
-            let realm = try Realm()
-            let sessData = realm.objects(AppSession.self)
+            let sessData = try RealmService.get(AppSession.self)
             
             if sessData.count > 0 {
                 // В базе есть данные не нужно делать запрос!
@@ -83,17 +82,18 @@ class AppSession: Object {
                         
                         do {
                             
-                            let realm = try Realm()
-                            realm.beginWrite()
+                            let realm = try RealmService.service()
                             
-                            let user_info = try decoder.decode(Users.self, from: data)
-                            self.access_token = self.token
-                            self.userId = user_info.response[0].id
-                            self.userAvatar = user_info.response[0].avatar
-                            self.userName = user_info.response[0].firstName + " " + user_info.response[0].lastName
-                            self.userNickName = user_info.response[0].nickname
-                            realm.add(self)
-                            try realm.commitWrite()
+                            try realm.write {
+                                let user_info = try decoder.decode(Users.self, from: data)
+                                self.access_token = self.token
+                                self.userId = user_info.response[0].id
+                                self.userAvatar = user_info.response[0].avatar
+                                self.userName = user_info.response[0].firstName + " " + user_info.response[0].lastName
+                                self.userNickName = user_info.response[0].nickname
+                                
+                                realm.add(self, update: Realm.UpdatePolicy.modified)
+                            }
                             
                         } catch {
                             break
@@ -122,21 +122,19 @@ class AppSession: Object {
     
     func logout (){
         do {
-            let realm = try Realm()
-            let result = realm.objects(AppSession.self).filter("userId = \(self.userId)")
+            let realm = try RealmService.service()
+            let result = try RealmService.get(AppSession.self).filter("userId = \(self.userId)")
             
-            realm.beginWrite()
-            
-            self.token = nil
-            self.userId = 0
-            self.userAvatar = nil
-            self.userNickName = nil
-            self.userName = nil
-            
-            realm.delete(result)
-            
-            realm.add(self)
-            try realm.commitWrite()
+            try realm.write {
+                self.token = nil
+                self.userId = 0
+                self.userAvatar = nil
+                self.userNickName = nil
+                self.userName = nil
+                
+                realm.delete(result)
+                realm.add(self)
+            }
             
         } catch let err {
             print("logout: Realm error \(err)")
@@ -149,8 +147,7 @@ class AppSession: Object {
     
     func getToken() -> String {
         do {
-            let realm = try Realm()
-            let result = realm.objects(AppSession.self)
+            let result = try RealmService.get(AppSession.self)
             
             // Нашли данные сессии в базе
             if result.count > 0 {

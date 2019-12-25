@@ -73,6 +73,24 @@ class LoginFormController: UIViewController {
         
     }
     
+    @IBAction func logoutClick(segue: UIStoryboardSegue) {
+        // Очищаем сессию
+        sessionData.logout()
+        
+        // Включаем вебвью
+        VKLogin.isHidden = false
+        
+        // Удаляем куки
+        wkLogout()
+        
+        // Загружаем страницу входа
+        let request = VK.shared.getOAuthRequest()
+        VKLogin.load(request)
+
+    }
+}
+
+extension LoginFormController {
     private func showFriendScreen(){
         let friendVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TabBarController")
         friendVC.modalTransitionStyle = .coverVertical
@@ -92,28 +110,6 @@ class LoginFormController: UIViewController {
                 }
             }
         }
-    }
-
-    @IBAction func loginButtonClick(_ sender: Any) {
-        VKLogin.isHidden = false
-    }
-    
-    @IBAction func logoutClick(segue: UIStoryboardSegue) {
-        // Очищаем сессию
-        sessionData.logout()
-        
-        // Включаем вебвью
-        VKLogin.isHidden = false
-        
-        // Удаляем куки
-        self.wkLogout()
-        
-        // Загружаем страницу входа
-        let request = VK.shared.getOAuthRequest()
-        VKLogin.load(request)
-        
-        // Переходим на главный экран
-        navigationController?.popToRootViewController(animated: true)
     }
 }
 

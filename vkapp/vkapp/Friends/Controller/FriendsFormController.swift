@@ -7,8 +7,10 @@
 //
 
 import UIKit
+import RealmSwift
 
 class FriendsFormController: UIViewController {
+    // Таблица пользователей
     @IBOutlet weak var tableView: UITableView! {
         didSet {
             tableView.delegate = self
@@ -16,12 +18,14 @@ class FriendsFormController: UIViewController {
         }
     }
     
+    // Контрол с выбором первых букв фамилий
     @IBOutlet weak var friendCharsControl: FriendsSearchControl! {
         didSet {
             friendCharsControl.delegate = self
         }
     }
     
+    // Поисковая строка
     @IBOutlet weak var searchBar: UISearchBar! {
         didSet {
             searchBar.delegate = self
@@ -29,20 +33,69 @@ class FriendsFormController: UIViewController {
     }
     
     // Здесь будут список наших пользователей
-    var FriendsList: [Friend] = [] {
+    var FriendsList = [Friend]() {
+        // При присвоении значения построем зависимые от этого списки
         didSet {
-            tableView.reloadData()
+            if self.FriendsList.count > 0 {
+                // Надо обнулить те массивы, что будем здесь заполнять
+                self.ListOfFirstCharOfLastname.removeAll()
+                self.ListOfFriendByAlphabet.removeAll()
+                
+                // Сначала накопим буквы - а потом инициализируем ими контрол
+                self.ListOfFirstCharOfLastname.removeAll()
+                var alphabetList = [String]()
+                
+                for (index,elemnet) in self.FriendsList.enumerated() {
+                    if !elemnet.name.isEmpty {
+                        let fullNameArr = elemnet.name.split(separator: " ")
+
+                        // Для простоты будем думать что формат у записи ФИ
+                        let firstName = fullNameArr[0]
+                        let lastName = fullNameArr.count > 1 ? fullNameArr.last : nil
+
+                        // Первая буква фамили или, если ее нет - то имени
+                        let firstLetter = String(lastName?.prefix(1) ?? firstName.prefix(1))
+
+                        // Если такой буквы у нас еще нет - добавим её
+                        if !alphabetList.contains(firstLetter) {
+                            alphabetList.append(firstLetter)
+                        }
+
+                        // Запоминаем пользователя в конкретной секции
+                        if self.ListOfFriendByAlphabet[firstLetter] == nil {
+                            self.ListOfFriendByAlphabet[firstLetter] = [index]
+                        } else {
+                            self.ListOfFriendByAlphabet[firstLetter]!.append(index)
+                        }
+                    }
+                }
+                
+                // Теперь инициализируем списком контрол
+                self.ListOfFirstCharOfLastname = alphabetList
+            }
+            
+            self.tableView.reloadData()
         }
     }
     
     // Отфильтрованный список пользователей
-    var ListOfFilterdFriends: [Friend] = []
+    var ListOfFilterdFriends = [Friend]()
     
     // Список букв пользователей для контрола
-    var ListOfFirstCharOfLastname: [String] = []
+    var ListOfFirstCharOfLastname = [String]() {
+        didSet {
+            // Друзья найдены - нужно инициализировать контрол для поиска по первой букве фамилии
+            if (self.ListOfFirstCharOfLastname.count > 0){
+                self.friendCharsControl.setChars(sChars: self.ListOfFirstCharOfLastname)
+            }
+        }
+    }
     
     // Список пользователей разделенных по буквам
     var ListOfFriendByAlphabet: Dictionary<String,[Int]> = ["All":[-1]]
+    
+    // Токен изменений реалма
+    var token: NotificationToken?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,53 +106,95 @@ class FriendsFormController: UIViewController {
         // Регистрируем xib в качестве прототипа ячейки
         tableView.register(UINib(nibName: "FriendsCellProto", bundle: nil), forCellReuseIdentifier: "FriendsCellProto")
         
-        // Загружаем данные и перезагружаем tableView
-        VK.shared.getFriendsList() { (friendList,error) in
-            guard error == nil else { return }
+        // Подписываемся на изменение данных
+        do {
+            let realmFriendList = try RealmService.get(Friend.self).sorted(byKeyPath: "name", ascending: true)
             
-            if let friends = friendList {
-                self.FriendsList = friends
+            self.token = realmFriendList.observe { [weak self] (changes: RealmCollectionChange) in
+                guard let self = self else { return }
                 
-                if self.FriendsList.count > 0 {
-                    // Собираем все первые буквы фамилий
-                    for (index,elemnet) in self.FriendsList.enumerated() {
-                        if !elemnet.name.isEmpty {
-                            let fullNameArr = elemnet.name.split(separator: " ")
-
-                            // Для простоты будем думать что формат у записи ФИ
-                            let firstName = fullNameArr[0]
-                            let lastName = fullNameArr.count > 1 ? fullNameArr.last : nil
-
-                            // Первая буква фамили или, если ее нет - то имени
-                            let firstLetter = String(lastName?.prefix(1) ?? firstName.prefix(1))
-
-                            // Если такой буквы у нас еще нет - добавим её
-                            if !self.ListOfFirstCharOfLastname.contains(firstLetter) {
-                                self.ListOfFirstCharOfLastname.append(firstLetter)
+                // Меняем сначала в локальной переменной
+                var localFriendsList = self.FriendsList
+                
+                switch changes {
+                case let .initial(results):
+                    if results.count > 0 {
+                        // Собираем список друзей
+                        for item in results {
+                            localFriendsList.append(item)
+                        }
+                    }
+                    
+                case let .update(res, del, ins, mod):
+                    // Из базы пропала запись
+                    if (del.count > 0) {
+                        // Удаление из базы
+                        for i in 0..<del.count {
+                            if localFriendsList.indices.contains(del[i]) {
+                                localFriendsList.remove(at: del[i])
                             }
+                        }
+                        
+                    } else if ins.count > 0 {
+                        // Добавление записи
+                        for i in 0..<ins.count {
+                            if res.indices.contains(ins[i]) {
+                                localFriendsList.append(res[ins[i]])
+                            }
+                        }
+                        
+                    } else if mod.count > 0 {
+                        // Запись обновилась
+                        for i in 0..<mod.count {
+                            if (localFriendsList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
+                                // Проще удалить старую запись
+                                localFriendsList.remove(at: mod[i])
 
-                            // Запоминаем пользователя в конкретной секции
-                            if self.ListOfFriendByAlphabet[firstLetter] == nil {
-                                self.ListOfFriendByAlphabet[firstLetter] = [index]
-                            } else {
-                                self.ListOfFriendByAlphabet[firstLetter]!.append(index)
+                                // И добавить новую
+                                localFriendsList.append(res[mod[i]])
                             }
                         }
                     }
-
-                    // Друзья найдены - нужно инициализировать контрол для поиска по первой букве фамилии
-                    if (self.ListOfFirstCharOfLastname.count > 0){
-                        self.friendCharsControl.setChars(sChars: self.ListOfFirstCharOfLastname )
-                    }
                     
-                    // Загружаем данные
-                    self.tableView.reloadData()
+                case let .error(err):
+                    self.showErrorMessage(message: err.localizedDescription)
                 }
+                
+                // Обновляем данные
+                self.FriendsList.removeAll()
+                self.FriendsList = localFriendsList
+                
             }
+            
+        } catch let err {
+            self.showErrorMessage(message: err.localizedDescription)
         }
         
+        // Загружаем данные и перезагружаем tableView
+        VK.shared.getFriendsList()
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowPhotos",
+            let destinationVC = segue.destination as? FriendsPhotoController,
+            let indexPath = tableView.indexPathForSelectedRow {
+            
+            // Выбираем пользователя из секции и ячейки
+            if let CurrentFriend = getCurrentFriend(section: indexPath.section, row: indexPath.row) {
+                // Устанавливаем название экрана
+                destinationVC.title = CurrentFriend.name
+                
+                // Единственное что требуется - это передать id пользователя
+                destinationVC.FriendID = CurrentFriend.userId
+
+            } else {
+                showErrorMessage(message: "Данные не найдены")
+            }
+        }
+    }
+}
+
+extension FriendsFormController {
     // MARK: Получаем текущего пользователя из массива по секции и ключу
     public func getCurrentFriend(section: Int, row: Int) -> Friend? {
         if ListOfFilterdFriends.count > 0 {
@@ -128,25 +223,6 @@ class FriendsFormController: UIViewController {
         }
         
         return nil
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "ShowPhotos",
-            let destinationVC = segue.destination as? FriendsPhotoController,
-            let indexPath = tableView.indexPathForSelectedRow {
-            
-            // Выбираем пользователя из секции и ячейки
-            if let CurrentFriend = getCurrentFriend(section: indexPath.section, row: indexPath.row) {
-                // Устанавливаем название экрана
-                destinationVC.title = CurrentFriend.name
-                
-                // Единственное что требуется - это передать id пользователя
-                destinationVC.FriendID = CurrentFriend.userId
-
-            } else {
-                showErrorMessage(message: "Данные не найдены")
-            }
-        }
     }
 }
 

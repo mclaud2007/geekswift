@@ -38,6 +38,15 @@ class FriendsSearchControl: UIControl {
     }
     
     public func setChars (sChars: [String]){
+        // Очистим список - иначе будет задвоение
+        if self.buttons.count > 0 {
+            for items in self.stackView.arrangedSubviews {
+                items.removeFromSuperview()
+            }
+            
+            self.buttons.removeAll()
+        }
+        
         self.friendsLastNameCharsArray = sChars
         //self.friendChars.append("All")
         
