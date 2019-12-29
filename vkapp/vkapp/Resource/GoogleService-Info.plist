@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>592730360552-e74nt51v7t1jomdpj1f6v2h0f0c6g1rd.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.592730360552-e74nt51v7t1jomdpj1f6v2h0f0c6g1rd</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC9aMKAljPSpvdTerluevXiv6i8CbASo5g</string>
+	<key>GCM_SENDER_ID</key>
+	<string>592730360552</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>mcemga.vkapp</string>
+	<key>PROJECT_ID</key>
+	<string>geekbrains-2912</string>
+	<key>STORAGE_BUCKET</key>
+	<string>geekbrains-2912.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:592730360552:ios:ff01d5279bd4fbeaa8575d</string>
+	<key>DATABASE_URL</key>
+	<string>https://geekbrains-2912.firebaseio.com</string>
+</dict>
+</plist>

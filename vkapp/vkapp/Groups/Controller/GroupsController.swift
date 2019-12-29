@@ -8,6 +8,8 @@
 
 import UIKit
 import RealmSwift
+import FirebaseAuth
+import FirebaseDatabase
 
 class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
@@ -191,6 +193,15 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         if indexPath.section == 0 {
             if RecommendedGroups.count >= indexPath.row {
                 GroupsList.append(RecommendedGroups[indexPath.row])
+                
+                // Записываем группу в Firebase
+                if let uid = Auth.auth().currentUser?.uid {
+                    let gid = UUID.init().uuidString
+                    let ref = Database.database().reference(withPath: "db/group-\(gid)")
+                    ref.setValue(["userId": uid, "groupName": RecommendedGroups[indexPath.row].name])
+                }
+                
+                
                 RecommendedGroups.remove(at: indexPath.row)
                 tableView.reloadData()
             } else {

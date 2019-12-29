@@ -11,7 +11,7 @@ import RealmSwift
 
 class FriendsPhotoController: UIViewController {
     // Id пользователя для, которого будем грузить фотки
-    public var FriendID: Int?
+    public var friendID: Int?
     
     // CollectionView с фотографиями
     @IBOutlet var PhotoListCollectionView: UICollectionView! {
@@ -39,7 +39,7 @@ class FriendsPhotoController: UIViewController {
         super.viewDidLoad()
         
         // Пытаемся загрузить фотографии пользователя
-        if let friendID = self.FriendID {
+        if let friendID = self.friendID {
             do {
                 // Подписываемся на изменения фотографий
                 let photos = try RealmService.get(Photo.self).filter("friendID=\(friendID)").sorted(byKeyPath: "date", ascending: false)
@@ -109,7 +109,7 @@ class FriendsPhotoController: UIViewController {
         if segue.identifier == "ShowBigPhotos" {
             if let destinationVC = segue.destination as? BigPhotosController,
                 let indexPath = PhotoListCollectionView.indexPathsForSelectedItems {
-                destinationVC.friendID = self.FriendID!
+                destinationVC.friendID = self.friendID!
                
                 if self.PhotosLists.indices.contains(indexPath[0][1]) {
                     destinationVC.CurrentImageNumber = indexPath[0][1]

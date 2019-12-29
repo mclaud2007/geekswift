@@ -8,6 +8,8 @@
 
 import UIKit
 import WebKit
+import FirebaseAuth
+import FirebaseDatabase
 
 class LoginFormController: UIViewController {
     @IBOutlet var loadingControl: LoadingViewControl!
@@ -18,6 +20,8 @@ class LoginFormController: UIViewController {
     }
     
     let sessionData = AppSession.shared
+    
+    private let ref = Database.database().reference(withPath: "db/users")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,16 +40,28 @@ class LoginFormController: UIViewController {
         // Попытуаемся загрузить токен из реалм (либо он вернется либо вернется пустая строка)
         let token = sessionData.getToken()
         
+        // Авторизация через Firebase
+        Auth.auth().signInAnonymously { (user, error) in
+            if let error = error,
+                user == nil
+            {
+                self.showErrorMessage(message: error.localizedDescription)
+            } else {
+                self.ref.setValue(["id": user?.user.uid])
+            }
+        }
+        
+        // Стандартная авторизация через VK
         if token.isEmpty {
             // Показываем окно браузера
             VKLogin.isHidden = false
-            
+
             // Получаем сформированный запрос для получения токена
             let request = VK.shared.getOAuthRequest()
-            
+
             // Загружаем страницу логина в VK
             VKLogin.load(request)
-            
+
         } else {
             // Проверим токен на валидность
             VK.shared.checkToken(token: token) { result in
@@ -60,15 +76,15 @@ class LoginFormController: UIViewController {
                 else {
                     // Показываем окно браузера
                     self.VKLogin.isHidden = false
-                    
+
                     // Получаем сформированный запрос для получения токена
                     let request = VK.shared.getOAuthRequest()
-                    
+
                     // Загружаем страницу логина в VK
                     self.VKLogin.load(request)
                 }
             }
-            
+
         }
         
     }
@@ -82,6 +98,13 @@ class LoginFormController: UIViewController {
         
         // Удаляем куки
         wkLogout()
+        
+        // Выход из firebase
+        do {
+            try Auth.auth().signOut()
+        } catch {
+            print("Ошибка выхода из firebase")
+        }
         
         // Загружаем страницу входа
         let request = VK.shared.getOAuthRequest()

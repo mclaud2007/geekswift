@@ -11,4 +11,7 @@ target 'vkapp' do
   pod 'Kingfisher', '~> 5.2.0'
   pod 'Realm', '~> 4.1.1'
   pod 'RealmSwift', '~> 4.1.1'
+  pod 'Firebase/Core'
+  pod 'Firebase/Auth'
+  pod 'Firebase/Database'
 end

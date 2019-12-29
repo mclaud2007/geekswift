@@ -20,6 +20,7 @@
 		07326D3B2376FDEE00548A86 /* NewsFormController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07326D3A2376FDEE00548A86 /* NewsFormController.swift */; };
 		073770C2239BCA3200DB51CB /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 073770C1239BCA3200DB51CB /* NetworkService.swift */; };
 		073770C4239BDBA500DB51CB /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 073770C3239BDBA500DB51CB /* User.swift */; };
+		073AB3BF23B8752700DE98E3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 073AB3BE23B8752700DE98E3 /* GoogleService-Info.plist */; };
 		07572FD72389828100AB8E01 /* CustomInteractAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */; };
 		07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07572FD82389857000AB8E01 /* CustomNavigationController.swift */; };
 		0769B0F623645F8D0016E6D8 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F523645F8D0016E6D8 /* Group.swift */; };
@@ -58,6 +59,7 @@
 		07326D3A2376FDEE00548A86 /* NewsFormController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsFormController.swift; sourceTree = "<group>"; };
 		073770C1239BCA3200DB51CB /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		073770C3239BDBA500DB51CB /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		073AB3BE23B8752700DE98E3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomInteractAnimator.swift; sourceTree = "<group>"; };
 		07572FD82389857000AB8E01 /* CustomNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNavigationController.swift; sourceTree = "<group>"; };
 		0769B0F3236450680016E6D8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -292,6 +294,7 @@
 			children = (
 				07326D392376F64E00548A86 /* XIB */,
 				0769B0F3236450680016E6D8 /* Info.plist */,
+				073AB3BE23B8752700DE98E3 /* GoogleService-Info.plist */,
 				071097EF2358E50300932A4E /* Assets.xcassets */,
 				071097F12358E50300932A4E /* LaunchScreen.storyboard */,
 				07A956A823620D120065741F /* Main.storyboard */,
@@ -396,6 +399,7 @@
 				071097F32358E50300932A4E /* LaunchScreen.storyboard in Resources */,
 				071097F02358E50300932A4E /* Assets.xcassets in Resources */,
 				07326D382376F63F00548A86 /* NewsTableCell.xib in Resources */,
+				073AB3BF23B8752700DE98E3 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
