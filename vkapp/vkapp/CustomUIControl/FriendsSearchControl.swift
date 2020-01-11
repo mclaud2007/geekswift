@@ -13,6 +13,7 @@ protocol FriendsSearchControlProto {
 }
 
 class FriendsSearchControl: UIControl {
+    // MARK: Properties
     public var delegate: FriendsSearchControlProto!
     
     public var selectedChar: String? {
@@ -22,33 +23,50 @@ class FriendsSearchControl: UIControl {
         }
     }
     
-    var friendsLastNameCharsArray: [String?] = []
+    var friendsLastNameCharsArray = [String?]()
     var stackView: UIStackView!
-    private var buttons: [UIButton] = []
     
+    private var buttons = [UIButton]()
+
+    // MARK: Lifcycle
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupView()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        stackView.frame = bounds
+    }
+    
+    // MARK: Custom methods
     private func setupView(){
-        self.stackView = UIStackView()
+        stackView = UIStackView()
         
-        self.stackView.axis = .vertical
-        self.stackView.alignment = .center
-        self.translatesAutoresizingMaskIntoConstraints = false
-        self.stackView.distribution = .fillEqually
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.translatesAutoresizingMaskIntoConstraints = true
+        stackView.distribution = .equalSpacing
         
-        self.addSubview(self.stackView)
+        addSubview(self.stackView)
     }
     
     public func setChars (sChars: [String]){
         // Очистим список - иначе будет задвоение
-        if self.buttons.count > 0 {
-            for items in self.stackView.arrangedSubviews {
+        if buttons.count > 0 {
+            for items in stackView.arrangedSubviews {
                 items.removeFromSuperview()
             }
             
-            self.buttons.removeAll()
+            buttons.removeAll()
         }
         
-        self.friendsLastNameCharsArray = sChars
-        //self.friendChars.append("All")
+        friendsLastNameCharsArray = sChars
         
         // Здесь будем хранить предыдущую кнопку для расчета констрейнтов
         var prevButton: UIButton?
@@ -59,22 +77,23 @@ class FriendsSearchControl: UIControl {
                 let button = UIButton(type: .system)
                 
                 button.setTitle(sChar, for: .normal)
-                button.setTitleColor(.link, for: .normal)
+                button.setTitleColor(DefaultStyle.self.Colors.tint, for: .normal)
                 button.setTitleColor(.white, for: .selected)
                 button.addTarget(self, action: #selector(setChar), for: .touchUpInside)
+                button.translatesAutoresizingMaskIntoConstraints = false
                 
                 // Задаем размеры созданной кнопки
                 let widthConstraint = button.widthAnchor.constraint(equalToConstant: 30)
                 widthConstraint.priority = UILayoutPriority(rawValue: 999)
                 widthConstraint.isActive = true
-
+                
                 let heightConstraint = button.heightAnchor.constraint(equalToConstant: 30)
                 heightConstraint.priority = UILayoutPriority(rawValue: 999)
                 heightConstraint.isActive = true
                 
                 // Добавляем в массив кнопок и размещаем на stackView
-                self.buttons.append(button)
-                self.stackView.addArrangedSubview(button)
+                buttons.append(button)
+                stackView.addArrangedSubview(button)
                 
                 // Уже была создана кнопка ранее, верх расчитаем от её низа
                 if let _ = prevButton {
@@ -83,7 +102,7 @@ class FriendsSearchControl: UIControl {
                     topConstraint.isActive = true
                 } else {
                     // В противном случае верх считаем от верха stackView
-                    let topConstraint = button.topAnchor.constraint(equalTo: self.stackView.layoutMarginsGuide.topAnchor)
+                    let topConstraint = button.topAnchor.constraint(equalTo: stackView.layoutMarginsGuide.topAnchor)
                     topConstraint.priority = UILayoutPriority(rawValue: 999)
                     topConstraint.isActive = true
                 }
@@ -98,40 +117,21 @@ class FriendsSearchControl: UIControl {
     }
     
     @objc public func setChar(_ sender: UIButton){
-        guard let index = self.buttons.firstIndex(of: sender) else { return }
+        guard let index = buttons.firstIndex(of: sender) else { return }
         
         if friendsLastNameCharsArray.indices.contains(index) {
-            self.selectedChar = friendsLastNameCharsArray[index]
+            selectedChar = friendsLastNameCharsArray[index]
         } else {
             return
         }
     }
     
     public func updateSelectedChar(){
-        for (index, button) in self.buttons.enumerated() {
-            if self.friendsLastNameCharsArray.indices.contains(index) {
-                let sChar = self.friendsLastNameCharsArray[index]
-            
-                if sChar != "All" {
-                    button.isSelected = sChar == self.selectedChar
-                }
+        for (index, button) in buttons.enumerated() {
+            if friendsLastNameCharsArray.indices.contains(index) {
+                let sChar = friendsLastNameCharsArray[index]
+                button.isSelected = sChar == selectedChar
             }
         }
-    }
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        self.setupView()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        self.setupView()
-    }
-    
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        self.stackView.frame = bounds
     }
 }

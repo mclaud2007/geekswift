@@ -208,7 +208,6 @@ class VK {
                 "extended": 1,
                 "need_hidden": 0,
                 "skip_hidden": 1,
-                "count": 20,
                 "v": VK.shared.APIVersion
             ]
             
@@ -293,13 +292,18 @@ class VK {
                             let avatar = friend["photo_50"].string,
                             friend["deactivated"].stringValue != "deleted"
                         {
+                            let cityName = friend["city"]["title"].stringValue
                             
-                            let friendToAdd = Friend(userId: id, photo: avatar, name: firstName + " " + lastName)
+                            let friendToAdd = Friend(userId: id, photo: avatar, name: firstName + " " + lastName, city: cityName)
                             List.append(friendToAdd)
                             
                             // Запишем в realm, но только если такой записи там еще нет
                             if realmFriends.count > 0,
                                 let rObj = realmFriends.filter("userId=\(id)").first {
+                                
+                                if rObj.city != cityName {
+                                    rObj.city = cityName
+                                }
                                 
                                 if rObj.photo != avatar {
                                     rObj.photo = avatar
@@ -332,7 +336,7 @@ class VK {
                 "access_token": token,
                 "order": "hints",
                 "v": VK.shared.APIVersion,
-                "fields":"nickname,photo_50"
+                "fields":"nickname,photo_50,city"
             ]
             
             // Получаем данные
@@ -399,7 +403,7 @@ class VK {
         // Сформируем список новостей
         for item in items {
             if var sourceId = item["source_id"].int,
-                let date = item["date"].int,
+                let date = item["date"].double,
                 let text = item["text"].string,
                 !text.isEmpty
             {
@@ -466,8 +470,15 @@ class VK {
                 let views = item["views"]["count"].int ?? 0
                 let shared = item["reposts"]["count"].int ?? 0
                 
+                let humanDate = Date(timeIntervalSince1970: date)
+                let dateFormatter = DateFormatter()
+                dateFormatter.timeStyle = .none //Set time style
+                dateFormatter.dateStyle = DateFormatter.Style.medium //Set date style
+                dateFormatter.timeZone = .current
+                let localDate = dateFormatter.string(from: humanDate)
+                
                 // Заполняем список новостей
-                NewsList.append(News(title: title, content: text, date: "22.12.2019", picture: picture, likes: likes, views: views, comments: comments, shared: shared, isLiked: isLiked, avatar: avatar))
+                NewsList.append(News(title: title, content: text, date: localDate, picture: picture, likes: likes, views: views, comments: comments, shared: shared, isLiked: isLiked, avatar: avatar))
             }
         }
         

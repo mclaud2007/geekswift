@@ -1,6 +1,6 @@
 //
 //  LoginFormController.swift
-//  weather
+//  VKApp
 //
 //  Created by Григорий Мартюшин on 17.10.2019.
 //  Copyright © 2019 Григорий Мартюшин. All rights reserved.
@@ -10,14 +10,19 @@ import UIKit
 import WebKit
 
 class LoginFormController: UIViewController {
+    // MARK: Контроллер анимации
     @IBOutlet var loadingControl: LoadingViewControl!
-    @IBOutlet weak var VKLogin: WKWebView! {
+    
+    // MARK: WebKit для работы логина
+    @IBOutlet weak var wkVKLogin: WKWebView! {
         didSet {
-            VKLogin.navigationDelegate = self
+            wkVKLogin.navigationDelegate = self
         }
     }
     
     let sessionData = AppSession.shared
+    
+    let networkService = VK.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,7 +33,7 @@ class LoginFormController: UIViewController {
         }
         
         // Сначала попробуем получить токен из Realm
-        VKLogin.isHidden = true
+        wkVKLogin.isHidden = true
         
         // Сразу включим анимацию, потому как если пользователь залогинен мы пойдем дальше
         self.loadingControl.startAnimation()
@@ -38,17 +43,17 @@ class LoginFormController: UIViewController {
         
         if token.isEmpty {
             // Показываем окно браузера
-            VKLogin.isHidden = false
+            wkVKLogin.isHidden = false
             
             // Получаем сформированный запрос для получения токена
             let request = VK.shared.getOAuthRequest()
             
             // Загружаем страницу логина в VK
-            VKLogin.load(request)
+            wkVKLogin.load(request)
             
         } else {
             // Проверим токен на валидность
-            VK.shared.checkToken(token: token) { result in
+            networkService.checkToken(token: token) { result in
                 if result == true {
                     // Без паузы экран с друзьями не загружается :/
                     DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
@@ -59,13 +64,13 @@ class LoginFormController: UIViewController {
                 // Что-то пошло не так - все таки загрузим вебвью
                 else {
                     // Показываем окно браузера
-                    self.VKLogin.isHidden = false
+                    self.wkVKLogin.isHidden = false
                     
                     // Получаем сформированный запрос для получения токена
-                    let request = VK.shared.getOAuthRequest()
+                    let request = self.networkService.getOAuthRequest()
                     
                     // Загружаем страницу логина в VK
-                    self.VKLogin.load(request)
+                    self.wkVKLogin.load(request)
                 }
             }
             
@@ -78,14 +83,14 @@ class LoginFormController: UIViewController {
         sessionData.logout()
         
         // Включаем вебвью
-        VKLogin.isHidden = false
+        wkVKLogin.isHidden = false
         
         // Удаляем куки
         wkLogout()
         
         // Загружаем страницу входа
         let request = VK.shared.getOAuthRequest()
-        VKLogin.load(request)
+        wkVKLogin.load(request)
 
     }
 }
@@ -100,7 +105,7 @@ extension LoginFormController {
     
     func wkLogout (){
         // Хранилище кук
-        let storage = VKLogin.configuration.websiteDataStore.httpCookieStore
+        let storage = wkVKLogin.configuration.websiteDataStore.httpCookieStore
         
         // Для логаута нам надо удалить куки
         storage.getAllCookies { cookies in
@@ -134,14 +139,14 @@ extension LoginFormController: WKNavigationDelegate {
             sessionData.logout()
             
             // Включаем вебвью
-            VKLogin.isHidden = false
+            wkVKLogin.isHidden = false
             
             // Удаляем куки
             self.wkLogout()
             
             // Загружаем страницу входа
             let request = VK.shared.getOAuthRequest()
-            VKLogin.load(request)
+            wkVKLogin.load(request)
             
             // Ну и обрадуем пользователя
             showErrorMessage(message: "Произошла ошибка получения токена. Попробуйте ввести логин и пароль еще раз.")
@@ -160,7 +165,7 @@ extension LoginFormController: WKNavigationDelegate {
                 }
             
                 if let token = params["access_token"] {
-                    VKLogin.isHidden = true
+                    wkVKLogin.isHidden = true
                     
                     // Обновляем токен в сессии
                     sessionData.setToken(token: token)
