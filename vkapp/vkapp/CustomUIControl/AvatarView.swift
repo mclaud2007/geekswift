@@ -14,15 +14,15 @@ protocol AvatarViewProto {
 }
 
 class AvatarView: UIControl {
-
-    var Image: UIImage!
-    var ImageView: UIImageView!
-    var CurrentIndexPath: IndexPath?
+    var avatarImageView: UIImageView!
+    var currentIndexPath: IndexPath?
     var delegate: AvatarViewProto!
+    var isClicked = false
     
     @IBInspectable var shadowColor: UIColor = UIColor.black
     @IBInspectable var shdowRadius: CGFloat = 5
     @IBInspectable var shadowOpacity: Float = 0.5
+    @IBInspectable var haveShadow: Bool = true
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -43,62 +43,70 @@ class AvatarView: UIControl {
     }
     
     @objc private func startAnimation(){
-        let animation = CASpringAnimation(keyPath: "transform.scale")
-        animation.toValue = 0.85
-        animation.autoreverses = true
-        animation.duration = 0.55
-        animation.stiffness = 85
-        animation.mass = 0.85
-        animation.damping = 0.3
-        animation.initialVelocity = 5
-        self.layer.add(animation, forKey: nil)
-        
-        // После того как анимация закончилась отправим эвент что аватар нажат
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
-            self.delegate?.click(sender: self)
-        })
+        if isClicked == false {
+            // Аватарку кликнули - пока не закончится анимация, кликать больше нельзя
+            isClicked = true
+            
+            let animation = CASpringAnimation(keyPath: "transform.scale")
+            animation.toValue = 0.85
+            animation.autoreverses = true
+            animation.duration = 0.55
+            animation.stiffness = 85
+            animation.mass = 0.85
+            animation.damping = 0.3
+            animation.initialVelocity = 5
+            self.layer.add(animation, forKey: nil)
+            
+            // После того как анимация закончилась отправим эвент что аватар нажат
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
+                self.isClicked = false
+                self.delegate?.click(sender: self)
+            })
+        }
     }
     
     private func setupView(){
         // Слой с тенью
         layer.shadowOffset = .zero
         
-        self.ImageView = UIImageView()
-        self.ImageView.clipsToBounds = true
-        self.ImageView.layer.masksToBounds = true
-        self.ImageView.contentMode = .scaleAspectFill
+        self.avatarImageView = UIImageView()
+        self.avatarImageView.clipsToBounds = true
+        self.avatarImageView.layer.masksToBounds = true
+        self.avatarImageView.contentMode = .scaleAspectFill
         
-        self.addSubview(self.ImageView)
+        self.addSubview(self.avatarImageView)
     }
     
     override func layoutSubviews() {
         // перерисовка тут т.е. надо настроить размеры именно здесь
-        self.ImageView.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height)
-        self.ImageView.layer.cornerRadius = floor(bounds.width / 2)
+        avatarImageView.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height)
         
         // Слой с тенью
-        layer.cornerRadius = floor(bounds.width / 2)
+        if haveShadow == true {
+            avatarImageView.layer.cornerRadius = floor(bounds.width / 2)
+            layer.cornerRadius = floor(bounds.width / 2)
         
-        // Если вынести эти параметры - перестанет срабатывать IBInspectable :/
-        layer.shadowColor = self.shadowColor.cgColor
-        layer.shadowOpacity = self.shadowOpacity
-        layer.shadowRadius = self.shdowRadius
+            // Если вынести эти параметры - перестанет срабатывать IBInspectable :/
+            layer.shadowColor = self.shadowColor.cgColor
+            layer.shadowOpacity = self.shadowOpacity
+            layer.shadowRadius = self.shdowRadius
+        }
     }
     
     public func showImage(imageURL: String, indexPath: IndexPath? = nil){
         // Меняем адрес картинки
         if (imageURL.isEmpty){
-            self.ImageView.image = UIImage(named: "photonotfound")
+            self.avatarImageView.image = UIImage(named: "photonotfound")
         } else {
-            self.ImageView.kf.setImage(with: URL(string: imageURL))
+            self.avatarImageView.kf.setImage(with: URL(string: imageURL))
         }
         
-        self.CurrentIndexPath = indexPath ?? nil
+        self.currentIndexPath = indexPath ?? nil
     }
     
     public func showImage(image: UIImage, indexPath: IndexPath? = nil){
         // Меняем адрес картинки
-        self.ImageView.image = image
-        self.CurrentIndexPath = indexPath ?? nil
+        self.avatarImageView.image = image
+        self.currentIndexPath = indexPath ?? nil
     }
 }

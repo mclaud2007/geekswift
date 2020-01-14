@@ -1,6 +1,6 @@
 //
-//  BigPhotosController.swift
-//  weather
+//  FriendBigPhoto.swift
+//  VKApp
 //
 //  Created by Григорий Мартюшин on 17.11.2019.
 //  Copyright © 2019 Григорий Мартюшин. All rights reserved.
@@ -72,6 +72,9 @@ class BigPhotosController: UIViewController {
                             self.BigPhotoImageView.image = getNotFoundPhoto()
                         }
                     }
+                    
+                    // Если вся инфа найдена, то заменим название экрана
+                    self.title = "\(loadItem+1) из \(PhotosLists.count)"
                 
                     let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panCatch(_:)))
                     self.view.addGestureRecognizer(panRecognizer)
@@ -81,6 +84,13 @@ class BigPhotosController: UIViewController {
         } catch {
             print("BigPhotosController RealmCrashed")
         }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // Локализуем кнопку назад
+        navigationController?.navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -254,6 +264,9 @@ class BigPhotosController: UIViewController {
                 retNumber = 0
             }
         }
+        
+        // Если вся инфа найдена, то заменим название экрана
+        self.title = "\(retNumber+1) из \(PhotosLists.count)"
         
         return retNumber
     }

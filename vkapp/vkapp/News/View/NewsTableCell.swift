@@ -31,4 +31,26 @@ class NewsTableCell: UITableViewCell {
         lblShare.text = "0"
         lblComments.text = "0"
     }
+    
+    func configure (with newsCell: News, indexPath: IndexPath?) {
+        lblNewsTitle.text = newsCell.title
+        lblNewsDate.text = newsCell.date
+        lblNewsContent.text = newsCell.content
+        lblShare.text = String(newsCell.shared!)
+        lblViews.text = String(newsCell.views!)
+        lblComments.text = String(newsCell.comments!)
+        lblLikeControl.initLikes(likes: newsCell.likes!, isLiked: newsCell.isLiked!)
+        
+        if let picture = newsCell.picture {
+            imgNewsPicture.kf.setImage(with: URL(string: picture))
+        } else {
+            imgNewsPicture.image = getNotFoundPhoto()
+        }
+        
+        if let avatar = newsCell.avatar {
+            imgAvatarView.showImage(imageURL: avatar)
+        } else {
+            imgAvatarView.showImage(image: getNotFoundPhoto())
+        }
+    }
 }

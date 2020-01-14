@@ -1,6 +1,6 @@
 //
-//  FriendsPhotoController.swift
-//  weather
+//  FriendPhotoList.swift
+//  VKApp
 //
 //  Created by Григорий Мартюшин on 25.10.2019.
 //  Copyright © 2019 Григорий Мартюшин. All rights reserved.
@@ -10,133 +10,198 @@ import UIKit
 import RealmSwift
 
 class FriendsPhotoController: UIViewController {
-    // Id пользователя для, которого будем грузить фотки
-    public var FriendID: Int?
-    
+    // MARK: Outlet
     // CollectionView с фотографиями
-    @IBOutlet var PhotoListCollectionView: UICollectionView! {
+    @IBOutlet var photoListCollectionView: UICollectionView! {
         didSet {
-            PhotoListCollectionView.delegate = self
-            PhotoListCollectionView.dataSource = self
+            photoListCollectionView.delegate = self
+            photoListCollectionView.dataSource = self
         }
     }
+    
+    // Аватарка пользователя
+    @IBOutlet var friendAvatarPhoto: AvatarView! {
+        didSet {
+            friendAvatarPhoto.delegate = self
+        }
+    }
+    
+    // Имя пользователя
+    @IBOutlet var lblFriandName: UILabel!
+    
+    // Подложка для аватара и имени пользователя
+    @IBOutlet var viewBackground: UIView!
+    
+    // Город проживания пользоателя
+    @IBOutlet weak var lblCityName: UILabel!
+    
+    // MARK: Properties
+    // Пользователь, которого выбрали в списке
+    public var selectedFriend: Friend? = nil
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var PhotosLists = [Photo]() {
+    var photosLists = [Photo]() {
         didSet {
-            self.PhotoListCollectionView.reloadData()
+            self.photoListCollectionView.reloadData()
         }
     }
-    
-    // Массив лайков под фотографиями или -1 - это значит оценок нет
-    var Likes = [-1]
-    // Массив уже отмеченных фотографий или -1 по умолчанию
-    var Liked = [-1]
     
     var token: NotificationToken?
     
+    // Имя сеги для перехода на большую фотографию
+    let bigPhotoSegueName: String = "ShowBigPhotos"
+    let reuseIdentifier: String = "PhotosCell"
+    let sectionInsets = UIEdgeInsets(top: 5.0, left: 10.0, bottom: 5.0, right: 10.0)
+    
+    var alreadyShown = 0
+    var currentRowCriteria: CGFloat = 3
+    
+    // MARK: Lifecycles
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Пытаемся загрузить фотографии пользователя
-        if let friendID = self.FriendID {
-            do {
-                // Подписываемся на изменения фотографий
-                let photos = try RealmService.get(Photo.self).filter("friendID=\(friendID)").sorted(byKeyPath: "date", ascending: false)
-                
-                self.token = photos.observe({ [weak self] (changes: RealmCollectionChange) in
-                    guard let self = self else { return }
-                    
-                    var localPhotoList = self.PhotosLists
-                    
-                    switch changes {
-                    case let .initial(result):
-                        localPhotoList.removeAll()
-                        
-                        for item in result {
-                            localPhotoList.append(item)
-                        }
-                        
-                    case let .update(res, del, ins, mod):
-                        // Из базы пропала запись
-                        if (del.count > 0) {
-                            // Удаление из базы
-                            for i in 0..<del.count {
-                                if localPhotoList.indices.contains(del[i]) {
-                                    localPhotoList.remove(at: del[i])
-                                }
-                            }
-                            
-                        } else if ins.count > 0 {
-                            // Добавление записи
-                            for i in 0..<ins.count {
-                                if res.indices.contains(ins[i]) {
-                                    localPhotoList.append(res[ins[i]])
-                                }
-                            }
-                            
-                        } else if mod.count > 0 {
-                            // Запись обновилась
-                            for i in 0..<mod.count {
-                                if (localPhotoList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
-                                    // Проще удалить старую запись
-                                    localPhotoList.remove(at: mod[i])
-
-                                    // И добавить новую
-                                    localPhotoList.append(res[mod[i]])
-                                }
-                            }
-                        }
-                    case let .error(err):
-                        self.showErrorMessage(message: err.localizedDescription)
-                    }
-                    
-                    // Обновляем данные
-                    self.PhotosLists.removeAll()
-                    self.PhotosLists = localPhotoList
-                    
-                })
-            } catch let err {
-                showErrorMessage(message: err.localizedDescription)
+        if let friend = selectedFriend {
+            // Меняем название экрана
+            self.title = friend.name
+            
+            // Пишем имя пользователя
+            lblFriandName.text = friend.name
+            
+            // И город проживания
+            lblCityName.text = friend.city
+            
+            // Перекрасим задник у подложки с аватаром текущего пользователя
+            if isDarkMode {
+                viewBackground.backgroundColor = UIColor.darkGray
             }
             
+            // И ставим его фотографию
+            if let photo = friend.photo {
+                let curPhotoIndexPath = IndexPath(item: 0, section: 0)
+                friendAvatarPhoto.showImage(imageURL: photo, indexPath: curPhotoIndexPath)
+            } else {
+                friendAvatarPhoto.showImage(image: getNotFoundPhoto())
+            }
+            
+            // Подписываемся на изменения реалм
+            subscribeToRealmChanges(by: friend.userId)
+            
             // Запрашиваем данные
-            VK.shared.getPhotosByFriendId(friendId: friendID)
+            VK.shared.getPhotosByFriendId(friendId: friend.userId)
+            
+            // Локализуем кнопку назад
+            navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
+            navigationItem.backBarButtonItem?.tintColor = DefaultStyle.self.Colors.tint
+            
+        } else {
+            navigationController?.popViewController(animated: true)
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // Локализуем кнопку назад
+        navigationController?.navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "ShowBigPhotos" {
+        if segue.identifier == bigPhotoSegueName {
             if let destinationVC = segue.destination as? BigPhotosController,
-                let indexPath = PhotoListCollectionView.indexPathsForSelectedItems {
-                destinationVC.friendID = self.FriendID!
+                let indexPath = photoListCollectionView.indexPathsForSelectedItems,
+                let selectFriend = selectedFriend {
+                destinationVC.friendID = selectFriend.userId
                
-                if self.PhotosLists.indices.contains(indexPath[0][1]) {
+                if self.photosLists.indices.contains(indexPath[0][1]) {
                     destinationVC.CurrentImageNumber = indexPath[0][1]
                 }
             }
         }
     }
+    
+    fileprivate func subscribeToRealmChanges (by friendID: Int) {
+        do {
+            // Получаем список фотографий из реалма
+            let photos = try RealmService.get(Photo.self).filter("friendID=\(friendID)").sorted(byKeyPath: "date", ascending: false)
+            
+            // И подписываемся на изменения данных в нем
+            self.token = photos.observe({ [weak self] (changes: RealmCollectionChange) in
+                guard let self = self else { return }
+                
+                var localPhotoList = self.photosLists
+                
+                switch changes {
+                case let .initial(result):
+                    localPhotoList.removeAll()
+                    
+                    for item in result {
+                        localPhotoList.append(item)
+                    }
+                    
+                case let .update(res, del, ins, mod):
+                    // Из базы пропала запись
+                    if (del.count > 0) {
+                        // Удаление из базы
+                        for i in 0..<del.count {
+                            if localPhotoList.indices.contains(del[i]) {
+                                localPhotoList.remove(at: del[i])
+                            }
+                        }
+                        
+                    } else if ins.count > 0 {
+                        // Добавление записи
+                        for i in 0..<ins.count {
+                            if res.indices.contains(ins[i]) {
+                                localPhotoList.append(res[ins[i]])
+                            }
+                        }
+                        
+                    } else if mod.count > 0 {
+                        // Запись обновилась
+                        for i in 0..<mod.count {
+                            if (localPhotoList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
+                                // Проще удалить старую запись
+                                localPhotoList.remove(at: mod[i])
+                                
+                                // И добавить новую
+                                localPhotoList.append(res[mod[i]])
+                            }
+                        }
+                    }
+                case let .error(err):
+                    self.showErrorMessage(message: err.localizedDescription)
+                }
+                
+                // Обновляем данные
+                self.photosLists.removeAll()
+                self.photosLists = localPhotoList
+                
+            })
+        } catch let err {
+            showErrorMessage(message: err.localizedDescription)
+        }
+    }
 }
 
+// MARK: DataSource
 extension FriendsPhotoController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.PhotosLists.count
+        return self.photosLists.count
     }
     
-    // MARK: Поготовка ячейки к выводу
+    // Поготовка ячейки к выводу
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotosCell", for: indexPath) as? PhotosCell else {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as? PhotosCell else {
             preconditionFailure("Error")
         }
 
         // Configure the cell
-        if PhotosLists.indices.contains(indexPath.row) {
-            cell.configure(with: PhotosLists[indexPath.row], indexPath: indexPath)
+        if photosLists.indices.contains(indexPath.row) {
+            cell.configure(with: photosLists[indexPath.row], indexPath: indexPath)
 
             // Объявляем делегата для лайков и фотографии
             cell.FriendLike.delegate = self
@@ -151,13 +216,44 @@ extension FriendsPhotoController: UICollectionViewDataSource {
     }
 }
 
-extension FriendsPhotoController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "ShowBigPhotos", sender: self)
+extension FriendsPhotoController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
+        if (alreadyShown == 2 && currentRowCriteria == 2) {
+            currentRowCriteria = 3
+            alreadyShown = 0
+        } else if (alreadyShown == 3 && currentRowCriteria == 3) {
+            currentRowCriteria = 2
+            alreadyShown = 0
+        }
+        
+        // Считаем сколько показали
+        alreadyShown += 1
+    
+        let paddingSpace = sectionInsets.left * (1 + 1)
+        let widthPerItem = (view.bounds.width / currentRowCriteria) - paddingSpace
+        
+        return CGSize(width: widthPerItem, height: widthPerItem)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return sectionInsets
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+    
+        return sectionInsets.left
     }
 }
 
-// MARK: расширение для подсчета лайков
+// MARK: Collection View Delegate
+extension FriendsPhotoController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        performSegue(withIdentifier: bigPhotoSegueName, sender: self)
+    }
+}
+
+// MARK: Like control delegate
 extension FriendsPhotoController: LikeControlProto {
     func likeClicked (sender: LikeControl) {
         if (sender.isLiked == true){
@@ -178,18 +274,18 @@ extension FriendsPhotoController: LikeControlProto {
     }
 }
 
-// реакция на клик по аватару
+// MARK: Avatar View Delegate
 extension FriendsPhotoController: AvatarViewProto {
     func click(sender: AvatarView) {
-        if let indexPath = sender.CurrentIndexPath {
+        if let indexPath = sender.currentIndexPath {
             // Выберем ячейку, чтобы при подготовке сеги передались корректные данные
-            PhotoListCollectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredHorizontally)
+            photoListCollectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredHorizontally)
 
             // Выполняем сегу
-            performSegue(withIdentifier: "ShowBigPhotos", sender: self)
+            performSegue(withIdentifier: bigPhotoSegueName, sender: self)
 
             // Убираем выделение ячейки
-            PhotoListCollectionView.deselectItem(at: indexPath, animated: true)
+            photoListCollectionView.deselectItem(at: indexPath, animated: true)
         }
     }
 }

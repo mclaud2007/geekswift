@@ -1,0 +1,15 @@
+/* 
+  Localazible.strings
+  vkapp
+
+  Created by Григорий Мартюшин on 03.01.2020.
+  Copyright © 2020 Григорий Мартюшин. All rights reserved.
+*/
+"Friends"="Friebds";
+"Groups"="Groups";
+"News"="News";
+"Your groups"="Your groups";
+"Recomended groups"="Recomended groups";
+"Search"="Search";
+"Logout"="Logout";
+"Back"="Back";
