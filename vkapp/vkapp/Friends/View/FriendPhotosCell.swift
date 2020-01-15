@@ -13,17 +13,13 @@ class PhotosCell: UICollectionViewCell {
     @IBOutlet weak var FriendLike: LikeControl!
     
     override func prepareForReuse() {
-        self.FriendPhotoImageView.showImage(image: getNotFoundPhoto())
+        self.FriendPhotoImageView.showImage(imageURL: "")
         self.FriendLike.initLikes(likes: -1, isLiked: false)
     }
     
     func configure(with photos: Photo, indexPath: IndexPath?){
         // Фотография по идее есть
-        if let photo = photos.photoURL {
-            self.FriendPhotoImageView.showImage(imageURL: photo, indexPath: indexPath)
-        } else {
-            self.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
-        }
+        self.FriendPhotoImageView.showImage(imageURL: photos.photoUrlString ?? "", indexPath: indexPath)
         
         // Инициализируем лайки
         self.FriendLike.initLikes(likes: photos.likes, isLiked: photos.isLiked)

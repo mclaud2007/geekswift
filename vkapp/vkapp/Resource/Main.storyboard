@@ -422,8 +422,8 @@
                         <barButtonItem key="backBarButtonItem" title="Back" id="J8C-Ks-HvC"/>
                     </navigationItem>
                     <connections>
-                        <outlet property="BigPhotoImageView" destination="ZE6-og-gsr" id="hix-QC-Nv9"/>
-                        <outlet property="BigPhotoImageViewTmp" destination="JAe-tX-3fo" id="QAj-Dg-oMb"/>
+                        <outlet property="bigPhotoImageView" destination="ZE6-og-gsr" id="hix-QC-Nv9"/>
+                        <outlet property="bigPhotoImageViewTmp" destination="JAe-tX-3fo" id="QAj-Dg-oMb"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SIf-ay-NU4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

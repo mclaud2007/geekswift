@@ -231,10 +231,10 @@
 			isa = PBXGroup;
 			children = (
 				07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */,
-				071097E52358E50100932A4E /* vkapp */,
-				071097E42358E50100932A4E /* Products */,
-				FA1DEA5FF83E4A19148D58F9 /* Pods */,
 				7F7EC26BF591DB6FE8EE5CF1 /* Frameworks */,
+				FA1DEA5FF83E4A19148D58F9 /* Pods */,
+				071097E42358E50100932A4E /* Products */,
+				071097E52358E50100932A4E /* vkapp */,
 			);
 			sourceTree = "<group>";
 		};
@@ -334,7 +334,6 @@
 				086844FCB301EA4EC36393E3 /* Pods-vkapp.debug.xcconfig */,
 				4CBF0ACB56B7490F3853A599 /* Pods-vkapp.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};

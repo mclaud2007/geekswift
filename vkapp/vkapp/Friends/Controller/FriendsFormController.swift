@@ -174,11 +174,8 @@ class FriendsFormController: UIViewController {
                         // Запись обновилась
                         for i in 0..<mod.count {
                             if (localFriendsList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
-                                // Проще удалить старую запись
-                                localFriendsList.remove(at: mod[i])
-
                                 // И добавить новую
-                                localFriendsList.append(res[mod[i]])
+                                localFriendsList[mod[i]] = res[mod[i]]
                             }
                         }
                     }

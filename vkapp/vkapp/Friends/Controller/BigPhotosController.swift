@@ -12,18 +12,18 @@ import RealmSwift
 
 class BigPhotosController: UIViewController {
     
-    @IBOutlet weak var BigPhotoImageView: UIImageView!
-    @IBOutlet weak var BigPhotoImageViewTmp: UIImageView!
+    @IBOutlet weak var bigPhotoImageView: UIImageView!
+    @IBOutlet weak var bigPhotoImageViewTmp: UIImageView!
     
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var PhotosLists = [Photo]()
+    var photosList = [Photo]()
     
-    var CurrentImageNumber: Int = 0
+    var currentImageNumber: Int = 0
     var animationHasFinished: Bool = true
     var friendID: Int = 0
     
     // Направление свайпа
-    enum panDirectionEnum {
+    enum Direction {
         case left
         case right
         case bottom
@@ -31,55 +31,55 @@ class BigPhotosController: UIViewController {
     }
     
     // Присвоем значение по-умолчанию - потом поменяем
-    var panDirect: panDirectionEnum = .left
+    var panDirect: Direction = .left
     
     var panInteractiveAnimator: UIViewPropertyAnimator!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.title = "Все фотографии"
-        var loadItem = 0
+        title = "Все фотографии"
         
         // загружаем список фотографий из realm
         do {
             let realmPhotos = try RealmService.get(Photo.self).filter("friendID=\(self.friendID)")
                                               .sorted(byKeyPath: "date", ascending: false)
             
-            if realmPhotos.count > 0 {
-                let rObjs = realmPhotos
+            // Фотографий нет
+            guard realmPhotos.count > 0 else { return }
+            
+            //  Навсякий очистим список
+            photosList.removeAll()
+            
+            // Заполняем список
+            for i in 0..<realmPhotos.count {
+                photosList.append(realmPhotos[i])
+            }
+            
+            // Если текущего фото не существует - вместо него начнем с первого
+            if !photosList.indices.contains(currentImageNumber) {
+                currentImageNumber = 0
+            }
+            
+            // Если фотографии по индексу нет - смысла продолжать тоже нет
+            guard photosList.indices.contains(currentImageNumber) else { return }
+            
+            // Загружаем фотографию
+            bigPhotoImageView.kf.setImage(with: photosList[currentImageNumber].photoUrl, placeholder: nil, options: nil, progressBlock: nil) { result in
                 
-                if rObjs.count > 0 {
-                    // Список инициализирован пустым значением
-                    // Надо его удалить
-                    PhotosLists.removeAll()
-                    
-                    // Заполняем список
-                    for i in 0..<rObjs.count {
-                        PhotosLists.append(rObjs[i])
-                    }
-                    
-                    // Показываем текущее фото
-                    if PhotosLists.indices.contains(self.CurrentImageNumber) {
-                        loadItem = self.CurrentImageNumber
-                    }
-                    
-                    // Есть ли фотография по запрошенному индексу
-                    if PhotosLists.indices.contains(loadItem) {
-                        if let photo = PhotosLists[loadItem].photoURL {
-                            self.BigPhotoImageView.kf.setImage(with: URL(string: photo))
-                        } else {
-                            self.BigPhotoImageView.image = getNotFoundPhoto()
-                        }
-                    }
-                    
-                    // Если вся инфа найдена, то заменим название экрана
-                    self.title = "\(loadItem+1) из \(PhotosLists.count)"
-                
-                    let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panCatch(_:)))
-                    self.view.addGestureRecognizer(panRecognizer)
+                switch result {
+                case .success(let data):
+                    self.bigPhotoImageView.image = data.image
+                case .failure:
+                    self.bigPhotoImageView.image = self.getNotFoundPhoto()
                 }
             }
+            
+            // Если вся инфа найдена, то заменим название экрана
+            title = "\(currentImageNumber+1) из \(photosList.count)"
+            
+            let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panCatch(_:)))
+            view.addGestureRecognizer(panRecognizer)
             
         } catch {
             print("BigPhotosController RealmCrashed")
@@ -97,8 +97,8 @@ class BigPhotosController: UIViewController {
         super.viewWillAppear(animated)
         
         // Изображение которое будет использоваться для появления из-за края экрана прячем
-        self.BigPhotoImageViewTmp.center.x -= self.view.bounds.width
-        self.BigPhotoImageViewTmp.isHidden = true
+        bigPhotoImageViewTmp.center.x -= self.view.bounds.width
+        bigPhotoImageViewTmp.isHidden = true
     }
     
     @objc func panCatch( _ sender: UIPanGestureRecognizer){
@@ -119,16 +119,16 @@ class BigPhotosController: UIViewController {
                 }
             }
             
-            if self.panDirect != .none && self.panDirect != .bottom {
-                self.startAnimation()
-            } else if self.panDirect == .bottom {
-                self.goBack()
+            if panDirect != .none && panDirect != .bottom {
+                startAnimation()
+            } else if panDirect == .bottom {
+                goBack()
             }
             
         case .changed:
-            guard let propertyAnimator = self.panInteractiveAnimator else { return }
+            guard let propertyAnimator = panInteractiveAnimator else { return }
             
-            switch self.panDirect {
+            switch panDirect {
             case .right:
                 let percent = min(max(0, sender.translation(in: view).x / 500), 1)
                 propertyAnimator.fractionComplete = percent
@@ -139,27 +139,27 @@ class BigPhotosController: UIViewController {
                 let percent = min(max(0, sender.translation(in: view).y / 500), 1)
                 propertyAnimator.fractionComplete = percent
             case .none:
-                let transition = sender.translation(in: self.view)
+                let transition = sender.translation(in: view)
                 
                 // Определяем направление движения
                 if transition.x < 0 {
-                    self.panDirect = .left
-                    self.startAnimation()
+                    panDirect = .left
+                    startAnimation()
                 } else if transition.x > 0 {
-                    self.panDirect = .right
-                    self.startAnimation()
+                    panDirect = .right
+                    startAnimation()
                 } else {
                     if transition.y > 0 {
-                        self.panDirect = .bottom
-                        self.goBack()
+                        panDirect = .bottom
+                        goBack()
                     } else {
-                        self.panDirect = .none
+                        panDirect = .none
                     }
                 }
             }
             
         case .ended:
-            guard let propertyAnimator = self.panInteractiveAnimator else { return }
+            guard let propertyAnimator = panInteractiveAnimator else { return }
             
             if propertyAnimator.fractionComplete > 0.20 {
                 propertyAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0.5)
@@ -174,50 +174,50 @@ class BigPhotosController: UIViewController {
     }
     
     private func goBack(){
-        self.navigationController?.popViewController(animated: true)
+        navigationController?.popViewController(animated: true)
     }
     
     private func startAnimation(){
         // Если направление движения лево/право
-        if self.animationHasFinished == true {
+        if animationHasFinished == true {
             // Стартуя анимацию пока она не завершится, новую запускать нельзя
-            self.animationHasFinished = false
+            animationHasFinished = false
 
             // Получим текущую фотографию в зависимости от того в какую сторону свайпим
-            let CurrentImageNum = self.getCurrentPhotoNum()
+            let currentImageNum = getCurrentPhotoNum()
 
             // Новую фотографию загружаем во второй ImageView, который будет выезжать
-            if self.PhotosLists.indices.contains(CurrentImageNum) {
-                let CurrentImage = self.PhotosLists[CurrentImageNum]
+            if photosList.indices.contains(currentImageNum) {
+                let CurrentImage = photosList[currentImageNum]
                 
-                if let photo = CurrentImage.photoURL {
-                    self.BigPhotoImageViewTmp.kf.setImage(with: URL(string: photo))
+                if let photo = CurrentImage.photoUrlString {
+                    bigPhotoImageViewTmp.kf.setImage(with: URL(string: photo))
                 } else {
-                    self.BigPhotoImageViewTmp.image = UIImage(named: "photonotfound")!
+                    bigPhotoImageViewTmp.image = UIImage(named: "photonotfound")!
                 }
             } else {
-                self.BigPhotoImageViewTmp.image = UIImage(named: "photonotfound")!
+                bigPhotoImageViewTmp.image = UIImage(named: "photonotfound")!
             }
 
             // Скрываем фотографию за краем экрана
-            if self.panDirect == .left {
-                self.BigPhotoImageViewTmp.transform = CGAffineTransform(translationX: -self.view.bounds.width, y: 0).concatenating(CGAffineTransform(scaleX: 0.5, y: 0.5))
+            if panDirect == .left {
+                bigPhotoImageViewTmp.transform = CGAffineTransform(translationX: -view.bounds.width, y: 0).concatenating(CGAffineTransform(scaleX: 0.5, y: 0.5))
             } else {
-                self.BigPhotoImageViewTmp.transform = CGAffineTransform(translationX: self.view.bounds.width, y: 0).concatenating(CGAffineTransform(scaleX: 0.5, y: 0.5))
+                bigPhotoImageViewTmp.transform = CGAffineTransform(translationX: view.bounds.width, y: 0).concatenating(CGAffineTransform(scaleX: 0.5, y: 0.5))
             }
 
-            self.BigPhotoImageViewTmp.layer.zPosition = 100
-            self.BigPhotoImageViewTmp.isHidden = false
+            bigPhotoImageViewTmp.layer.zPosition = 100
+            bigPhotoImageViewTmp.isHidden = false
 
             // Создаем универсальную анимацию
             panInteractiveAnimator = UIViewPropertyAnimator(duration: 1, curve: .linear, animations: {
                 if self.panDirect == .left {
-                    self.BigPhotoImageView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5).concatenating(CGAffineTransform(translationX: -2 * self.view.bounds.width, y: 0))
-                    self.BigPhotoImageViewTmp.transform = .identity
+                    self.bigPhotoImageView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5).concatenating(CGAffineTransform(translationX: -2 * self.view.bounds.width, y: 0))
+                    self.bigPhotoImageViewTmp.transform = .identity
 
                 } else {
-                    self.BigPhotoImageView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5).concatenating(CGAffineTransform(translationX: 2 * self.view.bounds.width, y: 0))
-                    self.BigPhotoImageViewTmp.transform = .identity
+                    self.bigPhotoImageView.transform = CGAffineTransform(scaleX: 0.5, y: 0.5).concatenating(CGAffineTransform(translationX: 2 * self.view.bounds.width, y: 0))
+                    self.bigPhotoImageViewTmp.transform = .identity
                 }
             })
 
@@ -225,18 +225,18 @@ class BigPhotosController: UIViewController {
             panInteractiveAnimator.addCompletion { position in
                 // Если анимация достигла конца надо заменить картинку
                 if position == .end {
-                    self.BigPhotoImageView.image = self.BigPhotoImageViewTmp.image
-                    self.BigPhotoImageView.transform = .identity
-                    self.BigPhotoImageView.layer.zPosition = 100
-                    self.CurrentImageNumber = self.getCurrentPhotoNum()
+                    self.bigPhotoImageView.image = self.bigPhotoImageViewTmp.image
+                    self.bigPhotoImageView.transform = .identity
+                    self.bigPhotoImageView.layer.zPosition = 100
+                    self.currentImageNumber = self.getCurrentPhotoNum()
                 }
 
                 // В конце или в начале надо вернуть временное изображение в начало
                 if position == .start || position == .end {
                     // Вернем все настройки временного фото в начало
-                    self.BigPhotoImageViewTmp.image = nil
-                    self.BigPhotoImageViewTmp.layer.zPosition = 10
-                    self.BigPhotoImageViewTmp.center.x -= self.view.bounds.width
+                    self.bigPhotoImageViewTmp.image = nil
+                    self.bigPhotoImageViewTmp.layer.zPosition = 10
+                    self.bigPhotoImageViewTmp.center.x -= self.view.bounds.width
                 }
 
                 // И поставить признак того что анимация закончилась
@@ -248,25 +248,25 @@ class BigPhotosController: UIViewController {
     }
     
     private func getCurrentPhotoNum() -> Int {
-        let PhotosCount = PhotosLists.count - 1
-        var retNumber = self.CurrentImageNumber
+        let PhotosCount = photosList.count - 1
+        var retNumber = currentImageNumber
 
-        if self.panDirect == .right {
-            if self.CurrentImageNumber > 0 {
-                retNumber = self.CurrentImageNumber - 1
+        if panDirect == .right {
+            if currentImageNumber > 0 {
+                retNumber = currentImageNumber - 1
             } else {
                 retNumber = PhotosCount
             }
-        } else if self.panDirect == .left {
-            if (self.CurrentImageNumber + 1) <= PhotosCount {
-                retNumber = self.CurrentImageNumber + 1
+        } else if panDirect == .left {
+            if (currentImageNumber + 1) <= PhotosCount {
+                retNumber = currentImageNumber + 1
             } else {
                 retNumber = 0
             }
         }
         
         // Если вся инфа найдена, то заменим название экрана
-        self.title = "\(retNumber+1) из \(PhotosLists.count)"
+        title = "\(retNumber+1) из \(photosList.count)"
         
         return retNumber
     }
