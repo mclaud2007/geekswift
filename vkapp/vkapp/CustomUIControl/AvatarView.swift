@@ -98,7 +98,14 @@ class AvatarView: UIControl {
         if (imageURL.isEmpty){
             self.avatarImageView.image = UIImage(named: "photonotfound")
         } else {
-            self.avatarImageView.kf.setImage(with: URL(string: imageURL))
+            self.avatarImageView.kf.setImage(with: URL(string: imageURL), placeholder: UIImage(named: "photonotfound"), options: nil, progressBlock: nil) { result in
+                switch result {
+                case let .success(data):
+                    self.avatarImageView.image = data.image
+                case .failure:
+                    self.avatarImageView.image = UIImage(named: "photonotfound")
+                }
+            }
         }
         
         self.currentIndexPath = indexPath ?? nil

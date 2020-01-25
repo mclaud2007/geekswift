@@ -422,8 +422,8 @@
                         <barButtonItem key="backBarButtonItem" title="Back" id="J8C-Ks-HvC"/>
                     </navigationItem>
                     <connections>
-                        <outlet property="BigPhotoImageView" destination="ZE6-og-gsr" id="hix-QC-Nv9"/>
-                        <outlet property="BigPhotoImageViewTmp" destination="JAe-tX-3fo" id="QAj-Dg-oMb"/>
+                        <outlet property="bigPhotoImageView" destination="ZE6-og-gsr" id="hix-QC-Nv9"/>
+                        <outlet property="bigPhotoImageViewTmp" destination="JAe-tX-3fo" id="QAj-Dg-oMb"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SIf-ay-NU4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -457,9 +457,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="GtN-gG-CCN">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="singleLineEtched" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="GtN-gG-CCN">
                                 <rect key="frame" x="0.0" y="88" width="414" height="725"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>

@@ -60,6 +60,9 @@ class FriendsPhotoController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        alreadyShown = 0
+        currentRowCriteria = 3
+        
         if let friend = selectedFriend {
             // Меняем название экрана
             self.title = friend.name
@@ -113,7 +116,7 @@ class FriendsPhotoController: UIViewController {
                 destinationVC.friendID = selectFriend.userId
                
                 if self.photosLists.indices.contains(indexPath[0][1]) {
-                    destinationVC.CurrentImageNumber = indexPath[0][1]
+                    destinationVC.currentImageNumber = indexPath[0][1]
                 }
             }
         }
@@ -160,11 +163,8 @@ class FriendsPhotoController: UIViewController {
                         // Запись обновилась
                         for i in 0..<mod.count {
                             if (localPhotoList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
-                                // Проще удалить старую запись
-                                localPhotoList.remove(at: mod[i])
-                                
-                                // И добавить новую
-                                localPhotoList.append(res[mod[i]])
+                                // Заменим запись
+                                localPhotoList[mod[i]] = res[mod[i]]
                             }
                         }
                     }
@@ -199,14 +199,13 @@ extension FriendsPhotoController: UICollectionViewDataSource {
             preconditionFailure("Error")
         }
 
+        // Объявляем делегата для лайков и фотографии
+        cell.FriendLike.delegate = self
+        cell.FriendPhotoImageView.delegate = self
+
         // Configure the cell
         if photosLists.indices.contains(indexPath.row) {
             cell.configure(with: photosLists[indexPath.row], indexPath: indexPath)
-
-            // Объявляем делегата для лайков и фотографии
-            cell.FriendLike.delegate = self
-            cell.FriendPhotoImageView.delegate = self
-            
         } else {
             cell.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
             cell.FriendLike.initLikes(likes: -1, isLiked: false)
@@ -226,6 +225,11 @@ extension FriendsPhotoController: UICollectionViewDelegateFlowLayout {
             currentRowCriteria = 2
             alreadyShown = 0
         }
+        
+        
+        print(indexPath)
+        print(alreadyShown)
+        print(currentRowCriteria)
         
         // Считаем сколько показали
         alreadyShown += 1

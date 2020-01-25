@@ -355,134 +355,147 @@ class VK {
         }
     }
     
-    public func parseNews(from json: JSON) -> [News] {
+    public func parseNews(from json: JSON, complition: @escaping ([News]) -> Void) {
         // Массив со списком источникв
         var sourceList = [Int:[[String:String]]]()
         
         // Результат парсинга json
         var NewsList = [News]()
         
-        guard let items = json["response"]["items"].array else { return NewsList }
+        guard let items = json["response"]["items"].array else { return complition(NewsList) }
+        
+        // Группа для обработки профиля и групп
+        let parsingDataGroupDispatch = DispatchGroup()
         
         // Новостей нет - дальше нет смысла смотреть
         if items.count == 0 {
-            return NewsList
+            complition(NewsList)
         }
         
-        // Вернулся список групп
-        if let groups = json["response"]["groups"].array,
-            groups.count > 0 {
-            
-            for group in groups {
-                if let gID = group["id"].int,
-                    let gName = group["name"].string,
-                    let gAvatar = group["photo_50"].string
-                {
-                    
-                    sourceList[gID] = [["name": gName], ["avatar": gAvatar]]
-                }
-            }
-            
-        }
-        
-        // Вернулся список профилей - источников новостей
-        if let profiles = json["response"]["profiles"].array,
-            profiles.count > 0 {
-            
-            for profile in profiles {
-                if let pID = profile["id"].int,
-                    let pFirstName = profile["first_name"].string,
-                    let pLastName = profile["last_name"].string,
-                    let pAvatar = profile["photo_50"].string
-                {
-                    sourceList[pID] = [["name": pFirstName + " " + pLastName], ["avatar": pAvatar]]
-                }
-            }
-        }
-        
-        // Сформируем список новостей
-        for item in items {
-            if var sourceId = item["source_id"].int,
-                let date = item["date"].double,
-                let text = item["text"].string,
-                !text.isEmpty
-            {
-                // Название новости - это паблик или профиль. По-умолчанию будет "Без названия" - дальше переопределим в случае успеха
-                var title = "Без названия"
-                var avatar: String?
-                var picture: String?
+        // Закинем разбор групп и профилей в отдельный поток
+        DispatchQueue.global().async(group: parsingDataGroupDispatch) {
+            // Вернулся список групп
+            if let groups = json["response"]["groups"].array,
+                groups.count > 0 {
                 
-                // если источник < 0 - это группа
-                if sourceId < 0 {
-                    // Для поиска в списке истоников нужно положительное число
-                    sourceId = sourceId * -1
-                    
-                    if let sObj = sourceList[sourceId],
-                        let sName = sObj[0]["name"],
-                        let sAvatar = sObj[1]["avatar"] {
+                for group in groups {
+                    if let gID = group["id"].int,
+                        let gName = group["name"].string,
+                        let gAvatar = group["photo_50"].string
+                    {
                         
-                        title = sName
-                        avatar = sAvatar
+                        sourceList[gID] = [["name": gName], ["avatar": gAvatar]]
                     }
                 }
+            }
+            
+            // Вернулся список профилей - источников новостей
+            if let profiles = json["response"]["profiles"].array,
+                profiles.count > 0 {
                 
-                if let attachments = item["attachments"].array {
-                    let photos = attachments.filter({ $0["type"].stringValue == "photo" })
-                    var pSizeArray = [JSON]()
+                for profile in profiles {
+                    if let pID = profile["id"].int,
+                        let pFirstName = profile["first_name"].string,
+                        let pLastName = profile["last_name"].string,
+                        let pAvatar = profile["photo_50"].string
+                    {
+                        sourceList[pID] = [["name": pFirstName + " " + pLastName], ["avatar": pAvatar]]
+                    }
+                }
+            }
+        }
+        
+        // Для сбора новостей заведем отдельный поток
+        let parsingNewsDispatchGroup = DispatchQueue(label: "parsingNewsQueue")
+        
+        parsingDataGroupDispatch.notify(queue: parsingNewsDispatchGroup) {
+            // Сформируем список новостей
+            for item in items {
+                if var sourceId = item["source_id"].int,
+                    let date = item["date"].double,
+                    let text = item["text"].string,
+                    !text.isEmpty
+                {
+                    // Название новости - это паблик или профиль. По-умолчанию будет "Без названия" - дальше переопределим в случае успеха
+                    var title = "Без названия"
+                    var avatar: String?
+                    var picture: String?
                     
-                    // Фотографии могут быть в ссылках
-                    if photos.count == 0 {
-                        let pLink = attachments.filter({ $0["type"].stringValue == "link" })
+                    // если источник < 0 - это группа
+                    if sourceId < 0 {
+                        // Для поиска в списке истоников нужно положительное число
+                        sourceId = sourceId * -1
                         
-                        if pLink.count > 0 {
-                            pSizeArray = pLink[0]["link"]["photo"]["sizes"].arrayValue
+                        if let sObj = sourceList[sourceId],
+                            let sName = sObj[0]["name"],
+                            let sAvatar = sObj[1]["avatar"] {
+                            
+                            title = sName
+                            avatar = sAvatar
                         }
-                    } else {
-                        pSizeArray = photos[0]["photo"]["sizes"].arrayValue
                     }
                     
-                    if pSizeArray.count > 0 {
-                        // Теперь найдем фотографии нужных размеров
-                        let pArr = pSizeArray.filter({ $0["type"].stringValue == "y" || $0["type"].stringValue == "l" || $0["type"].stringValue == "m" || $0["type"].stringValue == "r" })
-                        let pSizeCount = pArr.count
+                    if let attachments = item["attachments"].array {
+                        let photos = attachments.filter({ $0["type"].stringValue == "photo" })
+                        var pSizeArray = [JSON]()
                         
-                        // Что-то нашли
-                        if pSizeCount == 1 {
-                            picture = pArr[0]["url"].stringValue
-                        } else if pSizeCount > 1 {
-                            // Ищем размер y
-                            for i in 0..<pSizeCount {
-                                picture = pArr[i]["url"].stringValue
-                                
-                                // Если нашли размер y - дальше ничего не потребуется
-                                if pArr[i]["type"].stringValue == "y" {
-                                    break
+                        // Фотографии могут быть в ссылках
+                        if photos.count == 0 {
+                            let pLink = attachments.filter({ $0["type"].stringValue == "link" })
+                            
+                            if pLink.count > 0 {
+                                pSizeArray = pLink[0]["link"]["photo"]["sizes"].arrayValue
+                            }
+                        } else {
+                            pSizeArray = photos[0]["photo"]["sizes"].arrayValue
+                        }
+                        
+                        if pSizeArray.count > 0 {
+                            // Теперь найдем фотографии нужных размеров
+                            let pArr = pSizeArray.filter({ $0["type"].stringValue == "y" || $0["type"].stringValue == "l" || $0["type"].stringValue == "m" || $0["type"].stringValue == "r" })
+                            let pSizeCount = pArr.count
+                            
+                            // Что-то нашли
+                            if pSizeCount == 1 {
+                                picture = pArr[0]["url"].stringValue
+                            } else if pSizeCount > 1 {
+                                // Ищем размер y
+                                for i in 0..<pSizeCount {
+                                    picture = pArr[i]["url"].stringValue
+                                    
+                                    // Если нашли размер y - дальше ничего не потребуется
+                                    if pArr[i]["type"].stringValue == "y" {
+                                        break
+                                    }
                                 }
                             }
                         }
                     }
+                    
+                    // Лайки просмотры комментарии
+                    let likes = item["likes"]["count"].int ?? 0
+                    let isLiked = (item["likes"]["user_likes"].intValue == 0 ? false : true)
+                    let comments = item["comments"]["count"].int ?? 0
+                    let views = item["views"]["count"].int ?? 0
+                    let shared = item["reposts"]["count"].int ?? 0
+                    
+                    let humanDate = Date(timeIntervalSince1970: date)
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.timeStyle = .none //Set time style
+                    dateFormatter.dateStyle = DateFormatter.Style.medium //Set date style
+                    dateFormatter.timeZone = .current
+                    let localDate = dateFormatter.string(from: humanDate)
+                    
+                    // Заполняем список новостей
+                    NewsList.append(News(title: title, content: text, date: localDate, picture: picture, likes: likes, views: views, comments: comments, shared: shared, isLiked: isLiked, avatar: avatar))
                 }
-    
-                // Лайки просмотры комментарии
-                let likes = item["likes"]["count"].int ?? 0
-                let isLiked = (item["likes"]["user_likes"].intValue == 0 ? false : true)
-                let comments = item["comments"]["count"].int ?? 0
-                let views = item["views"]["count"].int ?? 0
-                let shared = item["reposts"]["count"].int ?? 0
-                
-                let humanDate = Date(timeIntervalSince1970: date)
-                let dateFormatter = DateFormatter()
-                dateFormatter.timeStyle = .none //Set time style
-                dateFormatter.dateStyle = DateFormatter.Style.medium //Set date style
-                dateFormatter.timeZone = .current
-                let localDate = dateFormatter.string(from: humanDate)
-                
-                // Заполняем список новостей
-                NewsList.append(News(title: title, content: text, date: localDate, picture: picture, likes: likes, views: views, comments: comments, shared: shared, isLiked: isLiked, avatar: avatar))
+            }
+            
+            // Комплишен нужно вызывать в основном потоке - иначе будет ошибка (с обновлением TableView)
+            DispatchQueue.main.async {
+                complition(NewsList)
             }
         }
-        
-        return NewsList
     }
     
     // MARK: Загрузка новостей
@@ -504,7 +517,10 @@ class VK {
                 switch response.result {
                 case let .success(data):
                     let json = JSON(data)
-                    completion(self.parseNews(from: json), nil)
+                    
+                    self.parseNews(from: json) { NewsList in
+                        completion(NewsList, nil)
+                    }
                     
                 case let .failure(error):
                     completion(nil, error)

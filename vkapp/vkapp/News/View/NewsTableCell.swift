@@ -14,38 +14,18 @@ class NewsTableCell: UITableViewCell {
     @IBOutlet weak var lblNewsTitle: UILabel!
     @IBOutlet weak var lblNewsDate: UILabel!
     @IBOutlet weak var lblNewsContent: UILabel!
-    @IBOutlet weak var imgNewsPicture: UIImageView!
-    @IBOutlet weak var lblLikeControl: LikeControl!
-    @IBOutlet weak var lblViews: UILabel!
-    @IBOutlet weak var lblShare: UILabel!
-    @IBOutlet weak var lblComments: UILabel!
     
     override func prepareForReuse() {
         imgAvatarView.showImage(image: UIImage(named: "photonotfound")!)
-        imgNewsPicture.image = UIImage(named: "69850")!
         lblNewsTitle.text = "..."
         lblNewsDate.text = "..."
         lblNewsContent.text = "..."
-        lblLikeControl.initLikes(likes: 0, isLiked: false)
-        lblViews.text = "0"
-        lblShare.text = "0"
-        lblComments.text = "0"
     }
     
     func configure (with newsCell: News, indexPath: IndexPath?) {
         lblNewsTitle.text = newsCell.title
         lblNewsDate.text = newsCell.date
         lblNewsContent.text = newsCell.content
-        lblShare.text = String(newsCell.shared!)
-        lblViews.text = String(newsCell.views!)
-        lblComments.text = String(newsCell.comments!)
-        lblLikeControl.initLikes(likes: newsCell.likes!, isLiked: newsCell.isLiked!)
-        
-        if let picture = newsCell.picture {
-            imgNewsPicture.kf.setImage(with: URL(string: picture))
-        } else {
-            imgNewsPicture.image = getNotFoundPhoto()
-        }
         
         if let avatar = newsCell.avatar {
             imgAvatarView.showImage(imageURL: avatar)
