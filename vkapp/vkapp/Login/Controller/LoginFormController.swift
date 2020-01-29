@@ -21,61 +21,60 @@ class LoginFormController: UIViewController {
     }
     
     let sessionData = AppSession.shared
-    
-    let networkService = VK.shared
+    let vkService = VKService.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Если это найтмод, то цвет background'а будет черный
         if isDarkMode {
-            self.view.backgroundColor = .black
+            view.backgroundColor = .black
         }
         
         // Сначала попробуем получить токен из Realm
         wkVKLogin.isHidden = true
         
         // Сразу включим анимацию, потому как если пользователь залогинен мы пойдем дальше
-        self.loadingControl.startAnimation()
+        loadingControl.startAnimation()
         
-        // Попытуаемся загрузить токен из реалм (либо он вернется либо вернется пустая строка)
-        let token = sessionData.getToken()
-        
-        if token.isEmpty {
-            // Показываем окно браузера
-            wkVKLogin.isHidden = false
-            
-            // Получаем сформированный запрос для получения токена
-            let request = VK.shared.getOAuthRequest()
-            
-            // Загружаем страницу логина в VK
-            wkVKLogin.load(request)
-            
-        } else {
-            // Проверим токен на валидность
-            networkService.checkToken(token: token) { result in
-                if result == true {
-                    // Без паузы экран с друзьями не загружается :/
-                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
-                        self.loadingControl.stopAnimation()
-                        self.showFriendScreen()
+        // Проверять токены будем в бэкграунде
+        DispatchQueue.global().async {
+            // Попытуаемся загрузить токен из реалм (либо он вернется либо вернется пустая строка)
+            if let token = self.sessionData.getToken() {
+                self.vkService.checkToken(token: token) { result in
+                    // Дальше работаем в главном поток
+                    DispatchQueue.main.async {
+                        if result == true {
+                            self.loadingControl.stopAnimation()
+                            self.showFriendScreen()
+                            
+                        } else {
+                            // Показываем окно браузера
+                            self.wkVKLogin.isHidden = false
+                            
+                            // Получаем сформированный запрос для получения токена
+                            let request = self.vkService.getOAuthRequest()
+                            
+                            // Загружаем страницу логина в VK
+                            self.wkVKLogin.load(request)
+                        }
+                        
                     }
                 }
-                // Что-то пошло не так - все таки загрузим вебвью
-                else {
+            } else {
+                // Дальше работаем в главном поток
+                DispatchQueue.main.async {
                     // Показываем окно браузера
                     self.wkVKLogin.isHidden = false
                     
                     // Получаем сформированный запрос для получения токена
-                    let request = self.networkService.getOAuthRequest()
+                    let request = self.vkService.getOAuthRequest()
                     
                     // Загружаем страницу логина в VK
                     self.wkVKLogin.load(request)
                 }
             }
-            
         }
-        
     }
     
     @IBAction func logoutClick(segue: UIStoryboardSegue) {
@@ -89,7 +88,7 @@ class LoginFormController: UIViewController {
         wkLogout()
         
         // Загружаем страницу входа
-        let request = VK.shared.getOAuthRequest()
+        let request = vkService.getOAuthRequest()
         wkVKLogin.load(request)
 
     }
@@ -133,6 +132,12 @@ extension LoginFormController: WKNavigationDelegate {
             decisionHandler(.allow)
             return
         }
+        
+        // Запускаем анимацию
+        loadingControl.startAnimation()
+        
+        // Прячем веб-вью - оно нам больше не нужно
+        wkVKLogin.isHidden = true
 
         if url!.path == "/error" {
             // Очищаем сессию
@@ -142,10 +147,10 @@ extension LoginFormController: WKNavigationDelegate {
             wkVKLogin.isHidden = false
             
             // Удаляем куки
-            self.wkLogout()
+            wkLogout()
             
             // Загружаем страницу входа
-            let request = VK.shared.getOAuthRequest()
+            let request = vkService.getOAuthRequest()
             wkVKLogin.load(request)
             
             // Ну и обрадуем пользователя
@@ -165,14 +170,12 @@ extension LoginFormController: WKNavigationDelegate {
                 }
             
                 if let token = params["access_token"] {
-                    wkVKLogin.isHidden = true
-                    
                     // Обновляем токен в сессии
                     sessionData.setToken(token: token)
                     
                     // Тормозим анимацию и переходим на экран со списком друзей
-                    self.loadingControl.stopAnimation()
-                    self.showFriendScreen()
+                    loadingControl.stopAnimation()
+                    showFriendScreen()
                     
                 } else {
                     showErrorMessage(message: "Не удалось получить токен")

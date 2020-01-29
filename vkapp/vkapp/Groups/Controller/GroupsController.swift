@@ -44,7 +44,8 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         super.viewDidLoad()
         
         navigationController?.setNavigationBarHidden(false, animated: false)
-        self.title = NSLocalizedString("Groups", comment: "")
+        title = NSLocalizedString("Groups", comment: "")
+        
         btnLogout.title = NSLocalizedString("Logout", comment: "")
         btnLogout.tintColor = DefaultStyle.self.Colors.tint
         
@@ -52,7 +53,20 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         subscribeToRealmChanges()
         
         // Загрузка информации о группах
-        VK.shared.getGroupsList()
+        VKService.shared.getGroupsList { result in
+            switch result {
+            case let .success(groupsList):
+                do {
+                    for group in groupsList {
+                        try RealmService.save(items: group)
+                    }
+                } catch let err {
+                    self.showErrorMessage(message: err.localizedDescription)
+                }
+            case let .failure(err):
+                self.showErrorMessage(message: err.localizedDescription)
+            }
+        }
     }
     
     // MARK: Data source
@@ -213,20 +227,19 @@ extension GroupsController: UISearchBarDelegate {
             searchBar.showsCancelButton = true
             
             // Загрузка информации о группах
-            VK.shared.getGroupSearch(query: searchText) { result in
+            VKService.shared.getGroupSearch(query: searchText) { result in
                 switch result {
                 case let .success(groups):
                     self.recommendedGroups = groups
                     self.tableView.reloadData()
                 case .failure(_):
-                    self.showErrorMessage(message: "Произошла ошибка загрузки данных")
+                    break
                 }
             }
         } else {
             if searchText.count == 0 {
                 // Спрячем кнопку отмены
                 searchBar.showsCancelButton = false
-                
                 recommendedGroups.removeAll()
             } else {
                 // Покажем кнопку отмены

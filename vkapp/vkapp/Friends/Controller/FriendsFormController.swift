@@ -87,10 +87,23 @@ class FriendsFormController: UIViewController {
 
         // Загружаем данные в реалм, а его обсервер (объявлен выше) обновит список пользователей,
         // который в свою очередь вызовет обновление зависимых от него списков и обновит tableView
-        VK.shared.getFriendsList()
+        VKService.shared.getFriendsList { result in
+            switch result {
+            case let .success(friendList):
+                do {
+                    for friend in friendList {
+                        try RealmService.save(items: friend)
+                    }
+                } catch let err {
+                    self.showErrorMessage(message: err.localizedDescription)
+                }
+            case let .failure(err):
+                self.showErrorMessage(message: err.localizedDescription)
+            }
+        }
         
         // Устанавливаем название экрана
-        self.title = NSLocalizedString("Friends", comment: "")
+        title = NSLocalizedString("Friends", comment: "")
         
         // Локализуем кнопку назад
         navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
@@ -384,11 +397,11 @@ extension FriendsFormController: UITableViewDataSource {
         if let currentFriend = getCurrentFriend(section: indexPath.section, row: indexPath.row) {
             // Configure the cell...
             cell.configure(with: currentFriend, indexPath: indexPath)
-            cell.FriendPhotoImageView.delegate = self
+            cell.friendPhotoImageView.delegate = self
             
         } else {
             cell.lblFriendsName.text = "Not found!"
-            cell.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
+            cell.friendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
         }
         
         return cell

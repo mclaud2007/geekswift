@@ -32,16 +32,21 @@ class NewsFormController: UIViewController {
         // Xib для строчки поделитс
         tableView.register(UINib(nibName: "NewsShareCell", bundle: nil), forCellReuseIdentifier: "NewsTableShare")
         
-        VK.shared.getNewsList() { (result, err)  in
-            if (err == nil && result != nil) {
-                self.newsList = result!
-                self.tableView.reloadData()
-            }
-        }
-        
-        self.title = NSLocalizedString("News", comment: "")
+        // Локлизация
+        title = NSLocalizedString("News", comment: "")
         btnLogout.title = NSLocalizedString("Logout", comment: "")
         btnLogout.tintColor = DefaultStyle.self.Colors.tint
+        
+        // Загружаем новости
+        VKService.shared.getNewsList() { result  in
+            switch result {
+            case let .success(newsList):
+                self.newsList = newsList
+                self.tableView.reloadData()
+            case let .failure(err):
+                self.showErrorMessage(message: err.localizedDescription)
+            }
+        }
     }
 }
 

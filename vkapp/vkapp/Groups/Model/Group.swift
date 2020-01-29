@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import SwiftyJSON
 
 class Group: Object {
     @objc dynamic var name: String
@@ -16,6 +17,12 @@ class Group: Object {
     
     override class func primaryKey() -> String? {
         "groupId"
+    }
+    
+    init (from json: JSON) {
+        self.groupId = json["id"].intValue
+        self.name = json["name"].stringValue
+        self.imageString = json["photo_50"].stringValue
     }
     
     init (groupId: Int, name: String, image: String?){

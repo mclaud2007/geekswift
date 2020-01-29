@@ -39,10 +39,28 @@ class FriendsPhotoController: UIViewController {
     // Пользователь, которого выбрали в списке
     public var selectedFriend: Friend? = nil
     
+    // Здесь будем хранить наш кастомный лайоут [Index.Row => CustomSectionRowCount]
+    fileprivate var customLayout = [Int:CGFloat]()
+    
     // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
     var photosLists = [Photo]() {
         didSet {
-            self.photoListCollectionView.reloadData()
+            self.customLayout = [Int:CGFloat]()
+            
+            // Сформируем лайоут
+            for i in 0..<self.photosLists.count {
+                if (alreadyShown == 2 && currentRowCriteria == 2) {
+                    currentRowCriteria = 3
+                    alreadyShown = 0
+                } else if (alreadyShown == 3 && currentRowCriteria == 3) {
+                    currentRowCriteria = 2
+                    alreadyShown = 0
+                }
+                
+                // Считаем сколько показали
+                alreadyShown += 1
+                self.customLayout[i] = currentRowCriteria
+            }
         }
     }
     
@@ -90,7 +108,20 @@ class FriendsPhotoController: UIViewController {
             subscribeToRealmChanges(by: friend.userId)
             
             // Запрашиваем данные
-            VK.shared.getPhotosByFriendId(friendId: friend.userId)
+            VKService.shared.getPhotosBy(friendId: friend.userId) { result in
+                switch result {
+                case let .success(photosList):
+                    do {
+                        for photo in photosList {
+                            try RealmService.save(items: photo)
+                        }
+                    } catch let err {
+                        self.showErrorMessage(message: err.localizedDescription)
+                    }
+                case let .failure(err):
+                    self.showErrorMessage(message: err.localizedDescription)
+                }
+            }
             
             // Локализуем кнопку назад
             navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
@@ -131,14 +162,12 @@ class FriendsPhotoController: UIViewController {
             self.token = photos.observe({ [weak self] (changes: RealmCollectionChange) in
                 guard let self = self else { return }
                 
-                var localPhotoList = self.photosLists
-                
                 switch changes {
                 case let .initial(result):
-                    localPhotoList.removeAll()
+                    self.photosLists.removeAll()
                     
                     for item in result {
-                        localPhotoList.append(item)
+                        self.photosLists.append(item)
                     }
                     
                 case let .update(res, del, ins, mod):
@@ -146,8 +175,8 @@ class FriendsPhotoController: UIViewController {
                     if (del.count > 0) {
                         // Удаление из базы
                         for i in 0..<del.count {
-                            if localPhotoList.indices.contains(del[i]) {
-                                localPhotoList.remove(at: del[i])
+                            if self.photosLists.indices.contains(del[i]) {
+                                self.photosLists.remove(at: del[i])
                             }
                         }
                         
@@ -155,16 +184,16 @@ class FriendsPhotoController: UIViewController {
                         // Добавление записи
                         for i in 0..<ins.count {
                             if res.indices.contains(ins[i]) {
-                                localPhotoList.append(res[ins[i]])
+                                self.photosLists.append(res[ins[i]])
                             }
                         }
                         
                     } else if mod.count > 0 {
                         // Запись обновилась
                         for i in 0..<mod.count {
-                            if (localPhotoList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
+                            if (self.photosLists.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
                                 // Заменим запись
-                                localPhotoList[mod[i]] = res[mod[i]]
+                                self.photosLists[mod[i]] = res[mod[i]]
                             }
                         }
                     }
@@ -172,9 +201,8 @@ class FriendsPhotoController: UIViewController {
                     self.showErrorMessage(message: err.localizedDescription)
                 }
                 
-                // Обновляем данные
-                self.photosLists.removeAll()
-                self.photosLists = localPhotoList
+                // Обновляем коллекцию
+                self.photoListCollectionView.reloadData()
                 
             })
         } catch let err {
@@ -200,15 +228,15 @@ extension FriendsPhotoController: UICollectionViewDataSource {
         }
 
         // Объявляем делегата для лайков и фотографии
-        cell.FriendLike.delegate = self
-        cell.FriendPhotoImageView.delegate = self
+        cell.friendLike.delegate = self
+        cell.friendPhotoImageView.delegate = self
 
         // Configure the cell
         if photosLists.indices.contains(indexPath.row) {
             cell.configure(with: photosLists[indexPath.row], indexPath: indexPath)
         } else {
-            cell.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
-            cell.FriendLike.initLikes(likes: -1, isLiked: false)
+            cell.friendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
+            cell.friendLike.initLikes(likes: -1, isLiked: false)
         }
         
         return cell
@@ -218,24 +246,11 @@ extension FriendsPhotoController: UICollectionViewDataSource {
 extension FriendsPhotoController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        if (alreadyShown == 2 && currentRowCriteria == 2) {
-            currentRowCriteria = 3
-            alreadyShown = 0
-        } else if (alreadyShown == 3 && currentRowCriteria == 3) {
-            currentRowCriteria = 2
-            alreadyShown = 0
-        }
-        
-        
-        print(indexPath)
-        print(alreadyShown)
-        print(currentRowCriteria)
-        
-        // Считаем сколько показали
-        alreadyShown += 1
+        // Смотрим сколько выводить фотографий в данной ячейке
+        currentRowCriteria = self.customLayout[indexPath.row] ?? 2
     
         let paddingSpace = sectionInsets.left * (1 + 1)
-        let widthPerItem = (view.bounds.width / currentRowCriteria) - paddingSpace
+        let widthPerItem = (photoListCollectionView.frame.width / currentRowCriteria) - paddingSpace
         
         return CGSize(width: widthPerItem, height: widthPerItem)
     }
