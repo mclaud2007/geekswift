@@ -27,12 +27,7 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     // MARK: Properties
-    // Список групп пользователя
-    var groupsList = [Group]() {
-        didSet {
-            self.tableView.reloadData()
-        }
-    }
+    var realmGroupsList: Results<Group>?
     
     // Рекомендованные групп
     var recommendedGroups = [Group]()
@@ -76,7 +71,11 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 1 {
-            return groupsList.count
+            if let groupsList = self.realmGroupsList {
+                return groupsList.count
+            } else {
+                return 0
+            }
         } else {
             return recommendedGroups.count
         }
@@ -94,7 +93,9 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         var currentGroup: Group
         
-        if indexPath.section == 1 {
+        if let groupsList = self.realmGroupsList,
+            indexPath.section == 1
+        {
             currentGroup = groupsList[indexPath.row]
         } else {
             currentGroup = recommendedGroups[indexPath.row]
@@ -117,10 +118,18 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     // Override to support editing the table view.
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            if indexPath.section == 0 {
-                return 
+            if indexPath.section == 1,
+                let groupsList = self.realmGroupsList,
+                let objectToDelete = groupsList.filter("groupId=\(groupsList[indexPath.row].groupId)").first
+            {
+                
+                do {
+                    try RealmService.delete(object: objectToDelete)
+                } catch let err {
+                    self.showErrorMessage(message: err.localizedDescription)
+                }
             } else {
-                groupsList.remove(at: indexPath.row)
+                return
             }
         }
     }
@@ -141,9 +150,13 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 {
             if recommendedGroups.indices.contains(indexPath.row) {
-                groupsList.append(recommendedGroups[indexPath.row])
-                recommendedGroups.remove(at: indexPath.row)
-                tableView.reloadData()
+                do {
+                    try RealmService.save(items: recommendedGroups[indexPath.row])
+                    recommendedGroups.remove(at: indexPath.row)
+                    tableView.reloadData()
+                } catch let err {
+                    self.showErrorMessage(message: err.localizedDescription)
+                }
             } else {
                 tableView.deselectRow(at: indexPath, animated: false)
                 return
@@ -157,60 +170,21 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     // MARK: Cestom methods
     fileprivate func subscribeToRealmChanges () {
         do {
-            let groups = try RealmService.get(Group.self).sorted(byKeyPath: "name", ascending: true)
+            self.realmGroupsList = try RealmService.get(Group.self).sorted(byKeyPath: "name", ascending: true)
             
-            // Подписываемся на изменения групп
-            self.token = groups.observe { [weak self] (changes: RealmCollectionChange) in
-                guard let self = self else { return }
-                
-                var localGroupsList = self.groupsList
-                
-                switch changes {
-                case let .initial(result):
-                    localGroupsList.removeAll()
+            if let groups = self.realmGroupsList {
+                // Подписываемся на изменения групп
+                self.token = groups.observe { [weak self] (changes: RealmCollectionChange) in
+                    guard let self = self else { return }
                     
-                    for item in result {
-                        localGroupsList.append(item)
-                    }
-                    
-                case let .update(res, del, ins, mod):
-                    // Из базы пропала запись
-                    if (del.count > 0) {
-                        // Удаление из базы
-                        for i in 0..<del.count {
-                            if localGroupsList.indices.contains(del[i]) {
-                                localGroupsList.remove(at: del[i])
-                            }
-                        }
+                    switch changes {
+                    case .initial(_), .update(_, _, _, _):
+                        self.tableView.reloadData()
                         
-                    } else if ins.count > 0 {
-                        // Добавление записи
-                        for i in 0..<ins.count {
-                            if res.indices.contains(ins[i]) {
-                                localGroupsList.append(res[ins[i]])
-                            }
-                        }
-                        
-                    } else if mod.count > 0 {
-                        // Запись обновилась
-                        for i in 0..<mod.count {
-                            if (localGroupsList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
-                                // Проще удалить старую запись
-                                localGroupsList.remove(at: mod[i])
-
-                                // И добавить новую
-                                localGroupsList.append(res[mod[i]])
-                            }
-                        }
+                    case let .error(err):
+                        self.showErrorMessage(message: err.localizedDescription)
                     }
-                    
-                case let .error(err):
-                    self.showErrorMessage(message: err.localizedDescription)
                 }
-                
-                // Обновляем данные
-                self.groupsList.removeAll()
-                self.groupsList = localGroupsList
             }
             
         } catch let err {

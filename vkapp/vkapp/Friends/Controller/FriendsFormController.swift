@@ -13,7 +13,6 @@ import SwiftyJSON
 
 class FriendsFormController: UIViewController {
     // MARK: Outlets
-    
     // Таблица пользователей
     @IBOutlet weak var tableView: UITableView! {
         didSet {
@@ -41,17 +40,7 @@ class FriendsFormController: UIViewController {
     }
     
     // MARK: Properties
-    // Здесь будут список наших пользователей
-    var friendList = [Friend]() {
-        // При присвоении значения построем зависимые от этого списки
-        didSet {
-            // Обновляем разбиение друзей по буквам
-            self.updateFriendCharactersMap()
-            
-            // И перезагружаем данные в таблице
-            self.tableView.reloadData()
-        }
-    }
+    var realmFriendsResults: Results<Friend>?
     
     // Отфильтрованный список пользователей
     var listOfFilteredFriends = [Friend]()
@@ -83,37 +72,22 @@ class FriendsFormController: UIViewController {
         
         // Регистрируем xib в качестве прототипа ячейки
         tableView.register(UINib(nibName: "FriendsCellProto", bundle: nil), forCellReuseIdentifier: "FriendsCellProto")
-        
-        // Подписываемся на изменение данных
-        subscribeToRealmChanges()
 
         // Загружаем данные в реалм, а его обсервер (объявлен выше) обновит список пользователей,
         // который в свою очередь вызовет обновление зависимых от него списков и обновит tableView
-        VKService.shared.getFriendsList().then { [weak self] data -> Promise<[Friend]> in
-            guard let self = self else { preconditionFailure("error") }
-            
-            return Promise { seal in
-                let json = JSON(data)
-                
-                if let friends = self.parseFriends(with: json) {
-                    seal.fulfill(friends)
-                } else {
-                    seal.reject(VKService.VKError.FriendListIsEmpty)
-                }
+        VKService.shared.getFriendsList()
+            .map(on: DispatchQueue.global()) { json -> [Friend] in
+                return try self.parseFriends(with: json)
+        }.done(on: DispatchQueue.main) { friendList in
+            for friend in friendList {
+                try RealmService.save(items: friend)
             }
-        }
-        .done { friendList in
-            do {
-                for friend in friendList {
-                    try RealmService.save(items: friend)
-                }
-            } catch let err {
-                self.showErrorMessage(message: err.localizedDescription)
-            }
-        }
-        .catch { err in
+        }.catch { err in
             self.showErrorMessage(message: err.localizedDescription)
         }
+        
+        // Подписываемся на изменение данных
+        subscribeToRealmChanges()
         
         // Устанавливаем название экрана
         title = NSLocalizedString("Friends", comment: "")
@@ -157,7 +131,8 @@ class FriendsFormController: UIViewController {
         searchBar.endEditing(true)
     }
     
-    fileprivate func parseFriends(with json: JSON) -> [Friend]? {
+    // Разбираем массив JSON полученный от VKService
+    fileprivate func parseFriends(with json: JSON) throws -> [Friend] {
         if json["response"]["count"].intValue > 0,
             let friends = json["response"]["items"].array {
     
@@ -180,70 +155,34 @@ class FriendsFormController: UIViewController {
             
             if friendList.count > 0 {
                 return friendList
+            } else {
+                throw VKService.VKError.FriendListIsEmpty
             }
         }
         
-        return nil
+        throw VKService.VKError.FriendListIsEmpty
     }
     
     // Подписываемся на изменения данных в реалм
     fileprivate func subscribeToRealmChanges () {
         do {
-            let realmFriendList = try RealmService.get(Friend.self)
-
-            // Подпишемся на обновление списка
-            self.token = realmFriendList.observe { [weak self] (changes: RealmCollectionChange) in
-                guard let self = self else { return }
-                
-                // Меняем сначала в локальной переменной
-                var localFriendsList = self.friendList
-                
-                switch changes {
-                case let .initial(results):
-                    if results.count > 0 {
-                        // Собираем список друзей
-                        for item in results {
-                            localFriendsList.append(item)
-                        }
-                    }
+            self.realmFriendsResults = try RealmService.get(Friend.self)
+            
+            if let realmFriends = self.realmFriendsResults {
+                // Подпишемся на обновление списка
+                self.token = realmFriends.observe { [weak self] (changes: RealmCollectionChange) in
+                    guard let self = self else { return }
                     
-                case let .update(res, del, ins, mod):
-                    // Из базы пропала запись
-                    if (del.count > 0) {
-                        // Удаление из базы
-                        for i in 0..<del.count {
-                            if localFriendsList.indices.contains(del[i]) {
-                                localFriendsList.remove(at: del[i])
-                            }
-                        }
-                        
-                    } else if ins.count > 0 {
-                        // Добавление записи
-                        for i in 0..<ins.count {
-                            if res.indices.contains(ins[i]) {
-                                localFriendsList.append(res[ins[i]])
-                            }
-                        }
-                        
-                    } else if mod.count > 0 {
-                        // Запись обновилась
-                        for i in 0..<mod.count {
-                            if (localFriendsList.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
-                                // И добавить новую
-                                localFriendsList[mod[i]] = res[mod[i]]
-                            }
-                        }
+                    switch changes {
+                    case .initial(_),.update(_,_,_,_):
+                        self.updateFriendCharactersMap()
+                        self.tableView.reloadData()
+                    case let .error(err):
+                        self.showErrorMessage(message: err.localizedDescription)
                     }
-                    
-                case let .error(err):
-                    self.showErrorMessage(message: err.localizedDescription)
                 }
-                
-                // Обновляем список друзей
-                self.friendList.removeAll()
-                
-                // Внутри групп отсортируем по имни
-                self.friendList = localFriendsList.sorted(by: { $0.name.prefix(1) < $1.name.prefix(1) })
+            } else {
+                self.showErrorMessage(message: VKService.VKError.FriendListIsEmpty.localizedDescription)
             }
             
         } catch let err {
@@ -261,7 +200,9 @@ class FriendsFormController: UIViewController {
         if isFiltered == true {
             firstCharOfLastName = Array(Set(listOfFilteredFriends.compactMap { $0.name.split(separator: " ").last?.first }.map { String($0) })).sorted(by: { $0 < $1 })
         } else {
-            firstCharOfLastName = Array(Set(friendList.compactMap { $0.name.split(separator: " ").last?.first }.map { String($0) })).sorted(by: { $0 < $1 })
+            if let friendList = realmFriendsResults {
+                firstCharOfLastName = Array(Set(friendList.compactMap { $0.name.split(separator: " ").last?.first }.map { String($0) })).sorted { $0 < $1  }
+            }
         }
         
         // Обновляем словарь со списком друзей разбитых по буквам
@@ -294,7 +235,13 @@ class FriendsFormController: UIViewController {
     
     // В зависимости от флага получаем тот или иной список друзей
     public func getLocalFriendList () -> [Friend] {
-        (isFiltered == false ? friendList : listOfFilteredFriends)
+        if isFiltered == false,
+            let realmFriendResult = self.realmFriendsResults
+        {
+            return Array(realmFriendResult.sorted(byKeyPath: "name", ascending: true))
+        } else {
+            return listOfFilteredFriends
+        }
     }
     
     // Получаем текущего пользователя из массива по секции и ключу
@@ -352,15 +299,17 @@ extension FriendsFormController: UISearchBarDelegate {
             // Выставим флаг фильтрации
             isFiltered = true
             
-            if friendList.count > 0 {
-                for friend in friendList {
+            if let friendsList = realmFriendsResults,
+                    friendsList.count > 0
+            {
+                for friend in friendsList {
                     // Фамилия содержит подстроку вбитую в поиск
                     if let firstCharOfLastName = friend.name.split(separator: " ").last,
                         firstCharOfLastName.lowercased().contains(searchText.lowercased()) == true {
                         listOfFilteredFriends.append(friend)
                     }
                 }
-                
+
                 listOfFilteredFriends = listOfFilteredFriends.sorted(by: { $0.name.prefix(1) < $1.name.prefix(1) })
             }
         } else {

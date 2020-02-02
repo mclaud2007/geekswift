@@ -15,6 +15,7 @@ class RealmService {
     
     static func get<T: Object>(_ type: T.Type) throws -> Results<T> {
         let realm = try Realm(configuration: RealmDeleteMigration)
+        print(realm.configuration.fileURL!)
         return realm.objects(type)
     }
     
@@ -23,6 +24,14 @@ class RealmService {
         
         try realm.write {
             realm.add(items.self, update: Realm.UpdatePolicy.modified)
+        }
+    }
+    
+    static func delete<T: Object>(object: T) throws {
+        let realm = try Realm(configuration: RealmDeleteMigration)
+        
+        try realm.write {
+            realm.delete(object)
         }
     }
     

@@ -172,8 +172,6 @@ class VKService {
     }
     
     public func getGroupsList(complition: ((Swift.Result<[Group], Error>) -> Void)? = nil) {
-        var localGroupList = [Group]()
-        
         let param: Parameters = [
             "user_id": AppSession.shared.getUserId(),
             "extended": 1,
@@ -196,34 +194,6 @@ class VKService {
         }
         
         opq.addOperation(parse)
-    
-        /*VKService.shared.setCommand("groups.get", param: param) { response in
-            switch response.result {
-            case let .success(data):
-                let json = JSON(data)
-                
-                if json["response"]["count"].intValue > 0 {
-                    for group in json["response"]["items"].arrayValue {
-                        if group["id"].int != nil,
-                            group["name"].string != nil,
-                            group["photo_50"].string != nil
-                        {
-                            localGroupList.append(Group(from: group))
-                        }
-                    }
-                    
-                    if localGroupList.count > 0 {
-                        complition?(.success(localGroupList))
-                    } else {
-                        complition?(.failure(VKError.GroupsListIsEmpty))
-                    }
-                } else {
-                    complition?(.failure(VKError.GroupsListIsEmpty))
-                }
-            case let .failure(err):
-                complition?(.failure(err))
-            }
-        }*/
     }
     
     // Получаем нужные нам размеры фото
@@ -311,55 +281,6 @@ class VKService {
             }
         }
     }
-//    public func getFriendsList(completion: ((Result<[Friend], Error>) -> Void)? = nil) {
-//        let param: Parameters = [
-//            "order": "hints",
-//            "fields":"nickname,photo_50,city"
-//        ]
-//
-//        // Получаем данные
-//        VKService.shared.setCommand("friends.get", param: param) { response in
-//            switch response.result {
-//            case let .success(data):
-//                let json = JSON(data)
-//
-//                if json["response"]["count"].intValue > 0,
-//                    let friends = json["response"]["items"].array {
-//
-//                    // Список найденых пользователей
-//                    var friendList = [Friend]()
-//
-//                    // Создаем список пользователей
-//                    for friend in friends {
-//                        if let firstName = friend["first_name"].string,
-//                            let lastName = friend["last_name"].string,
-//                            let uID = friend["id"].int,
-//                            let avatarUrlString = friend["photo_50"].string,
-//                            friend["deactivated"].stringValue != "deleted"
-//                        {
-//                            let city = friend["city"]["title"].stringValue
-//
-//                            friendList.append(Friend(userId: uID, photo: avatarUrlString, name: firstName + " " + lastName, city: city))
-//                        }
-//                    }
-//
-//                    // На всякий случай, может чего не нашли
-//                    if friendList.count > 0 {
-//                        completion?(.success(friendList))
-//                    } else {
-//                        completion?(.failure(VKError.FriendListIsEmpty))
-//                    }
-//                } else {
-//                    completion?(.failure(VKError.FriendListIsEmpty))
-//                }
-//
-//            case let .failure(error):
-//                completion?(.failure(error))
-//            }
-//
-//        }
-//
-//    }
     
     // MARK: Проверка токена на валидность
     public func checkToken (token: String?, complition: @escaping (Bool) -> Void) {
