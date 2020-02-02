@@ -9,6 +9,7 @@
 import Foundation
 import Alamofire
 import SwiftyJSON
+import PromiseKit
 
 class VKService {
     private let vkAPIUrl = "api.vk.com"
@@ -105,7 +106,7 @@ class VKService {
         }
     }
     
-    public func getNewsList(completion: @escaping ((Result<[News], Error>) -> Void) ) {
+    public func getNewsList(completion: @escaping ((Swift.Result<[News], Error>) -> Void) ) {
         let param: Parameters = [
             "filters": "post",
             "return_banned": 0,
@@ -129,7 +130,7 @@ class VKService {
         }
     }
     
-    public func getGroupSearch(query: String, complition: @escaping (Result<[Group], Error>) -> Void) {
+    public func getGroupSearch(query: String, complition: @escaping (Swift.Result<[Group], Error>) -> Void) {
         var localGroupList = [Group]()
         
         let param: Parameters = [
@@ -170,7 +171,7 @@ class VKService {
         
     }
     
-    public func getGroupsList(complition: ((Result<[Group], Error>) -> Void)? = nil) {
+    public func getGroupsList(complition: ((Swift.Result<[Group], Error>) -> Void)? = nil) {
         var localGroupList = [Group]()
         
         let param: Parameters = [
@@ -245,7 +246,7 @@ class VKService {
     }
     
     // Загружаем фотографии пользователя
-    func getPhotosBy(friendId: Int, completion: ((Result<[Photo], Error>) -> Void)? = nil){
+    func getPhotosBy(friendId: Int, completion: ((Swift.Result<[Photo], Error>) -> Void)? = nil){
         var localPhotoList = [Photo]()
     
         let param: Parameters = [
@@ -292,55 +293,73 @@ class VKService {
     }
     
     // Загрузука списка друзей
-    public func getFriendsList(completion: ((Result<[Friend], Error>) -> Void)? = nil) {
-        let param: Parameters = [
-            "order": "hints",
-            "fields":"nickname,photo_50,city"
-        ]
-        
-        // Получаем данные
-        VKService.shared.setCommand("friends.get", param: param) { response in
-            switch response.result {
-            case let .success(data):
-                let json = JSON(data)
-                
-                if json["response"]["count"].intValue > 0,
-                    let friends = json["response"]["items"].array {
+    public func getFriendsList() -> Promise<JSON> {
+        return Promise { seal in
+            let param: Parameters = [
+                "order": "hints",
+                "fields":"nickname,photo_50,city"
+            ]
+            // Получаем данные
+            VKService.shared.setCommand("friends.get", param: param) { response in
+                switch response.result {
+                case let .success(data):
+                    seal.fulfill(JSON(data))
                     
-                    // Список найденых пользователей
-                    var friendList = [Friend]()
-                    
-                    // Создаем список пользователей
-                    for friend in friends {
-                        if let firstName = friend["first_name"].string,
-                            let lastName = friend["last_name"].string,
-                            let uID = friend["id"].int,
-                            let avatarUrlString = friend["photo_50"].string,
-                            friend["deactivated"].stringValue != "deleted"
-                        {
-                            let city = friend["city"]["title"].stringValue
-                            
-                            friendList.append(Friend(userId: uID, photo: avatarUrlString, name: firstName + " " + lastName, city: city))
-                        }
-                    }
-                    
-                    // На всякий случай, может чего не нашли
-                    if friendList.count > 0 {
-                        completion?(.success(friendList))
-                    } else {
-                        completion?(.failure(VKError.FriendListIsEmpty))
-                    }
-                } else {
-                    completion?(.failure(VKError.FriendListIsEmpty))
+                case let .failure(error):
+                    seal.reject(error)
                 }
-                
-            case let .failure(error):
-                completion?(.failure(error))
             }
-            
         }
-        
     }
+//    public func getFriendsList(completion: ((Result<[Friend], Error>) -> Void)? = nil) {
+//        let param: Parameters = [
+//            "order": "hints",
+//            "fields":"nickname,photo_50,city"
+//        ]
+//
+//        // Получаем данные
+//        VKService.shared.setCommand("friends.get", param: param) { response in
+//            switch response.result {
+//            case let .success(data):
+//                let json = JSON(data)
+//
+//                if json["response"]["count"].intValue > 0,
+//                    let friends = json["response"]["items"].array {
+//
+//                    // Список найденых пользователей
+//                    var friendList = [Friend]()
+//
+//                    // Создаем список пользователей
+//                    for friend in friends {
+//                        if let firstName = friend["first_name"].string,
+//                            let lastName = friend["last_name"].string,
+//                            let uID = friend["id"].int,
+//                            let avatarUrlString = friend["photo_50"].string,
+//                            friend["deactivated"].stringValue != "deleted"
+//                        {
+//                            let city = friend["city"]["title"].stringValue
+//
+//                            friendList.append(Friend(userId: uID, photo: avatarUrlString, name: firstName + " " + lastName, city: city))
+//                        }
+//                    }
+//
+//                    // На всякий случай, может чего не нашли
+//                    if friendList.count > 0 {
+//                        completion?(.success(friendList))
+//                    } else {
+//                        completion?(.failure(VKError.FriendListIsEmpty))
+//                    }
+//                } else {
+//                    completion?(.failure(VKError.FriendListIsEmpty))
+//                }
+//
+//            case let .failure(error):
+//                completion?(.failure(error))
+//            }
+//
+//        }
+//
+//    }
     
     // MARK: Проверка токена на валидность
     public func checkToken (token: String?, complition: @escaping (Bool) -> Void) {

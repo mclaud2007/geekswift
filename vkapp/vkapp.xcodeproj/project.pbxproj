@@ -50,7 +50,7 @@
 		07F93DDA23644C4700F6B3B0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */; };
 		07F93DDD23644C7F00F6B3B0 /* FriendPhotosCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F93DDC23644C7F00F6B3B0 /* FriendPhotosCell.swift */; };
 		07F99D2A237B3DE4002E87ED /* LoadingViewControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */; };
-		E02F9164765F9B05DBDAEF44 /* Pods_vkapp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1903FEE547EA02A37358E1AD /* Pods_vkapp.framework */; };
+		67A8D0269FB0F3D45060B7DD /* Pods_vkapp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62D9DAD6AE84FB4F6329B737 /* Pods_vkapp.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -100,9 +100,9 @@
 		07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		07F93DDC23644C7F00F6B3B0 /* FriendPhotosCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendPhotosCell.swift; sourceTree = "<group>"; };
 		07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingViewControl.swift; sourceTree = "<group>"; };
-		086844FCB301EA4EC36393E3 /* Pods-vkapp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vkapp.debug.xcconfig"; path = "Target Support Files/Pods-vkapp/Pods-vkapp.debug.xcconfig"; sourceTree = "<group>"; };
-		1903FEE547EA02A37358E1AD /* Pods_vkapp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_vkapp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4CBF0ACB56B7490F3853A599 /* Pods-vkapp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vkapp.release.xcconfig"; path = "Target Support Files/Pods-vkapp/Pods-vkapp.release.xcconfig"; sourceTree = "<group>"; };
+		62D9DAD6AE84FB4F6329B737 /* Pods_vkapp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_vkapp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0B604C303BE2393A81982F2 /* Pods-vkapp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vkapp.debug.xcconfig"; path = "Target Support Files/Pods-vkapp/Pods-vkapp.debug.xcconfig"; sourceTree = "<group>"; };
+		C26ADB54563E206C5E72AC82 /* Pods-vkapp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vkapp.release.xcconfig"; path = "Target Support Files/Pods-vkapp/Pods-vkapp.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,7 +110,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E02F9164765F9B05DBDAEF44 /* Pods_vkapp.framework in Frameworks */,
+				67A8D0269FB0F3D45060B7DD /* Pods_vkapp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,10 +245,10 @@
 			isa = PBXGroup;
 			children = (
 				07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */,
-				7F7EC26BF591DB6FE8EE5CF1 /* Frameworks */,
 				FA1DEA5FF83E4A19148D58F9 /* Pods */,
 				071097E42358E50100932A4E /* Products */,
 				071097E52358E50100932A4E /* vkapp */,
+				6DEA8549AB86B7CF6B0A63E9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -346,10 +346,10 @@
 			path = CustomUIControl;
 			sourceTree = "<group>";
 		};
-		7F7EC26BF591DB6FE8EE5CF1 /* Frameworks */ = {
+		6DEA8549AB86B7CF6B0A63E9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1903FEE547EA02A37358E1AD /* Pods_vkapp.framework */,
+				62D9DAD6AE84FB4F6329B737 /* Pods_vkapp.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -357,8 +357,8 @@
 		FA1DEA5FF83E4A19148D58F9 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				086844FCB301EA4EC36393E3 /* Pods-vkapp.debug.xcconfig */,
-				4CBF0ACB56B7490F3853A599 /* Pods-vkapp.release.xcconfig */,
+				C0B604C303BE2393A81982F2 /* Pods-vkapp.debug.xcconfig */,
+				C26ADB54563E206C5E72AC82 /* Pods-vkapp.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -370,11 +370,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 071097F72358E50300932A4E /* Build configuration list for PBXNativeTarget "vkapp" */;
 			buildPhases = (
-				C2522058AA6A735B902B6812 /* [CP] Check Pods Manifest.lock */,
+				30A057B2A224CE202C7B01A1 /* [CP] Check Pods Manifest.lock */,
 				071097DF2358E50100932A4E /* Sources */,
 				071097E02358E50100932A4E /* Frameworks */,
 				071097E12358E50100932A4E /* Resources */,
-				2F0B0A67F69AB5C2F57E44AF /* [CP] Embed Pods Frameworks */,
+				AD473839555921C279364012 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -440,24 +440,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2F0B0A67F69AB5C2F57E44AF /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-vkapp/Pods-vkapp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-vkapp/Pods-vkapp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-vkapp/Pods-vkapp-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C2522058AA6A735B902B6812 /* [CP] Check Pods Manifest.lock */ = {
+		30A057B2A224CE202C7B01A1 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -477,6 +460,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AD473839555921C279364012 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-vkapp/Pods-vkapp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-vkapp/Pods-vkapp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-vkapp/Pods-vkapp-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -671,15 +671,44 @@
 		};
 		071097F82358E50300932A4E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 086844FCB301EA4EC36393E3 /* Pods-vkapp.debug.xcconfig */;
+			baseConfigurationReference = C0B604C303BE2393A81982F2 /* Pods-vkapp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4GGD352K79;
+				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = vkapp/Resource/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-l\"c++\"",
+					"-l\"z\"",
+					"-framework",
+					"\"Accelerate\"",
+					"-framework",
+					"\"Alamofire\"",
+					"-framework",
+					"\"CFNetwork\"",
+					"-framework",
+					"\"Foundation\"",
+					"-framework",
+					"\"Kingfisher\"",
+					"-framework",
+					"\"PromiseKit\"",
+					"-framework",
+					"\"Realm\"",
+					"-framework",
+					"\"RealmSwift\"",
+					"-framework",
+					"\"Security\"",
+					"-framework",
+					"\"SwiftyJSON\"",
+					"-framework",
+					"\"UIKit\"",
+					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mcemga.vkapp;
 				PRODUCT_NAME = vkapp;
@@ -690,15 +719,44 @@
 		};
 		071097F92358E50300932A4E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4CBF0ACB56B7490F3853A599 /* Pods-vkapp.release.xcconfig */;
+			baseConfigurationReference = C26ADB54563E206C5E72AC82 /* Pods-vkapp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4GGD352K79;
+				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = vkapp/Resource/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-l\"c++\"",
+					"-l\"z\"",
+					"-framework",
+					"\"Accelerate\"",
+					"-framework",
+					"\"Alamofire\"",
+					"-framework",
+					"\"CFNetwork\"",
+					"-framework",
+					"\"Foundation\"",
+					"-framework",
+					"\"Kingfisher\"",
+					"-framework",
+					"\"PromiseKit\"",
+					"-framework",
+					"\"Realm\"",
+					"-framework",
+					"\"RealmSwift\"",
+					"-framework",
+					"\"Security\"",
+					"-framework",
+					"\"SwiftyJSON\"",
+					"-framework",
+					"\"UIKit\"",
+					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mcemga.vkapp;
 				PRODUCT_NAME = vkapp;
