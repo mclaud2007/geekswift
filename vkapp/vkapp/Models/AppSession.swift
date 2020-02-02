@@ -69,19 +69,18 @@ class AppSession: Object {
             let parameters: Parameters = [
                 "access_token": self.token!,
                 "order": "hints",
-                "v": VK.shared.APIVersion,
+                "v": VKService.shared.vkAPIVersion,
                 "fields":"nickname,photo_50"
             ]
             
             // Получим информацию о пользователе
-            VK.shared.setCommand("users.get", param: parameters) { response in
+            VKService.shared.setCommand("users.get", param: parameters) { response in
                 switch response.result {
                 case .success(_):
                     if let data = response.data {
                         let decoder = JSONDecoder()
                         
                         do {
-                            
                             let realm = try RealmService.service()
                             
                             try realm.write {
@@ -145,7 +144,7 @@ class AppSession: Object {
         return self.userId
     }
     
-    func getToken() -> String {
+    func getToken() -> String? {
         do {
             let result = try RealmService.get(AppSession.self)
             
@@ -161,6 +160,6 @@ class AppSession: Object {
             print("getToken: Realm crashed")
         }
         
-        return self.token ?? ""
+        return self.token
     }
 }

@@ -9,19 +9,19 @@
 import UIKit
 
 class PhotosCell: UICollectionViewCell {
-    @IBOutlet weak var FriendPhotoImageView: AvatarView!
-    @IBOutlet weak var FriendLike: LikeControl!
+    @IBOutlet weak var friendPhotoImageView: AvatarView!
+    @IBOutlet weak var friendLike: LikeControl!
     
     override func prepareForReuse() {
-        self.FriendPhotoImageView.showImage(imageURL: "")
-        self.FriendLike.initLikes(likes: -1, isLiked: false)
+        self.friendPhotoImageView.showImage(imageURL: "")
+        self.friendLike.initLikes(likes: -1, isLiked: false)
     }
     
     func configure(with photos: Photo, indexPath: IndexPath?){
         // Фотография по идее есть
-        self.FriendPhotoImageView.showImage(imageURL: photos.photoUrlString ?? "", indexPath: indexPath)
+        self.friendPhotoImageView.showImage(imageURL: photos.photoUrlString ?? "", indexPath: indexPath)
         
         // Инициализируем лайки
-        self.FriendLike.initLikes(likes: photos.likes, isLiked: photos.isLiked)
+        self.friendLike.initLikes(likes: photos.likes, isLiked: photos.isLiked)
     }
 }

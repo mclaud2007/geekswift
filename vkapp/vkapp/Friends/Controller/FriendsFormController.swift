@@ -8,6 +8,8 @@
 
 import UIKit
 import RealmSwift
+import PromiseKit
+import SwiftyJSON
 
 class FriendsFormController: UIViewController {
     // MARK: Outlets
@@ -87,10 +89,34 @@ class FriendsFormController: UIViewController {
 
         // Загружаем данные в реалм, а его обсервер (объявлен выше) обновит список пользователей,
         // который в свою очередь вызовет обновление зависимых от него списков и обновит tableView
-        VK.shared.getFriendsList()
+        VKService.shared.getFriendsList().then { [weak self] data -> Promise<[Friend]> in
+            guard let self = self else { preconditionFailure("error") }
+            
+            return Promise { seal in
+                let json = JSON(data)
+                
+                if let friends = self.parseFriends(with: json) {
+                    seal.fulfill(friends)
+                } else {
+                    seal.reject(VKService.VKError.FriendListIsEmpty)
+                }
+            }
+        }
+        .done { friendList in
+            do {
+                for friend in friendList {
+                    try RealmService.save(items: friend)
+                }
+            } catch let err {
+                self.showErrorMessage(message: err.localizedDescription)
+            }
+        }
+        .catch { err in
+            self.showErrorMessage(message: err.localizedDescription)
+        }
         
         // Устанавливаем название экрана
-        self.title = NSLocalizedString("Friends", comment: "")
+        title = NSLocalizedString("Friends", comment: "")
         
         // Локализуем кнопку назад
         navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
@@ -129,6 +155,35 @@ class FriendsFormController: UIViewController {
     // Скрываем клавиатуру по клику на вьюху
     @objc func cancelSearchWhenViewTapped () {
         searchBar.endEditing(true)
+    }
+    
+    fileprivate func parseFriends(with json: JSON) -> [Friend]? {
+        if json["response"]["count"].intValue > 0,
+            let friends = json["response"]["items"].array {
+    
+            // Список найденых пользователей
+            var friendList = [Friend]()
+            
+            // Создаем список пользователей
+            for friend in friends {
+                if let firstName = friend["first_name"].string,
+                    let lastName = friend["last_name"].string,
+                    let uID = friend["id"].int,
+                    let avatarUrlString = friend["photo_50"].string,
+                    friend["deactivated"].stringValue != "deleted"
+                {
+                    let city = friend["city"]["title"].stringValue
+                    
+                    friendList.append(Friend(userId: uID, photo: avatarUrlString, name: firstName + " " + lastName, city: city))
+                }
+            }
+            
+            if friendList.count > 0 {
+                return friendList
+            }
+        }
+        
+        return nil
     }
     
     // Подписываемся на изменения данных в реалм
@@ -384,11 +439,11 @@ extension FriendsFormController: UITableViewDataSource {
         if let currentFriend = getCurrentFriend(section: indexPath.section, row: indexPath.row) {
             // Configure the cell...
             cell.configure(with: currentFriend, indexPath: indexPath)
-            cell.FriendPhotoImageView.delegate = self
+            cell.friendPhotoImageView.delegate = self
             
         } else {
             cell.lblFriendsName.text = "Not found!"
-            cell.FriendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
+            cell.friendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
         }
         
         return cell

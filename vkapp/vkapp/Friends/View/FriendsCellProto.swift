@@ -10,15 +10,15 @@ import UIKit
 
 class FriendsCellProto: UITableViewCell {
     @IBOutlet weak var lblFriendsName: UILabel!
-    @IBOutlet weak var FriendPhotoImageView: AvatarView!
+    @IBOutlet weak var friendPhotoImageView: AvatarView!
     
     override func prepareForReuse() {
         self.lblFriendsName.text = "..."
-        self.FriendPhotoImageView.showImage(image: getNotFoundPhoto())
+        self.friendPhotoImageView.showImage(image: getNotFoundPhoto())
     }
     
     public func configure(with friend: Friend, indexPath: IndexPath?){
         self.lblFriendsName.text = friend.name
-        self.FriendPhotoImageView.showImage(imageURL: friend.photo ?? "", indexPath: indexPath)
+        self.friendPhotoImageView.showImage(imageURL: friend.photo ?? "", indexPath: indexPath)
     }
 }
