@@ -38,6 +38,7 @@
 		0788EE3B23634A0A00379186 /* FriendsPhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0788EE3A23634A0A00379186 /* FriendsPhotoController.swift */; };
 		078BDF1323BF609A00ECDF57 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 078BDF1523BF609A00ECDF57 /* Localizable.strings */; };
 		078BDF1823BF60C200ECDF57 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 078BDF1A23BF60C200ECDF57 /* Localizable.strings */; };
+		078E1D4823E7CCD500ABF382 /* PhotoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078E1D4723E7CCD500ABF382 /* PhotoService.swift */; };
 		0793234B236228B400394647 /* GroupsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0793234A236228B400394647 /* GroupsController.swift */; };
 		07A956A923620D120065741F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07A956A823620D120065741F /* Main.storyboard */; };
 		07BAC68C23C08055008FB3BB /* ColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07BAC68B23C08055008FB3BB /* ColorScheme.swift */; };
@@ -89,6 +90,7 @@
 		078BDF1023BF604C00ECDF57 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		078BDF1423BF609A00ECDF57 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		078BDF1923BF60C200ECDF57 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		078E1D4723E7CCD500ABF382 /* PhotoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoService.swift; sourceTree = "<group>"; };
 		0793234A236228B400394647 /* GroupsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsController.swift; sourceTree = "<group>"; };
 		07A956A823620D120065741F /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		07BAC68B23C08055008FB3BB /* ColorScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorScheme.swift; sourceTree = "<group>"; };
@@ -263,6 +265,7 @@
 		071097E52358E50100932A4E /* vkapp */ = {
 			isa = PBXGroup;
 			children = (
+				078E1D4623E7CCAA00ABF382 /* Services */,
 				0707330723A88B27000D9EC9 /* Login */,
 				070732FA23A889BE000D9EC9 /* Friends */,
 				070732FF23A88A8B000D9EC9 /* Groups */,
@@ -301,10 +304,8 @@
 			children = (
 				07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */,
 				07572FD82389857000AB8E01 /* CustomNavigationController.swift */,
-				0775BC6923B227FB0041FABC /* RealmService.swift */,
 				07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */,
 				071A790123BF656500F879B6 /* TabBarController.swift */,
-				0725089A23DD755E00921652 /* VKService.swift */,
 				0711976323E133E600000FB3 /* GetDataOperation.swift */,
 				0711976523E13C2E00000FB3 /* ParseDataOperation.swift */,
 			);
@@ -319,6 +320,16 @@
 				07BAC68B23C08055008FB3BB /* ColorScheme.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		078E1D4623E7CCAA00ABF382 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				0775BC6923B227FB0041FABC /* RealmService.swift */,
+				0725089A23DD755E00921652 /* VKService.swift */,
+				078E1D4723E7CCD500ABF382 /* PhotoService.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		07A956A523620C980065741F /* Resource */ = {
@@ -500,6 +511,7 @@
 				0707922A2392438B00F728BC /* AppSession.swift in Sources */,
 				0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */,
 				0775BC6A23B227FB0041FABC /* RealmService.swift in Sources */,
+				078E1D4823E7CCD500ABF382 /* PhotoService.swift in Sources */,
 				0793234B236228B400394647 /* GroupsController.swift in Sources */,
 				07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */,
 				07326D372376F63F00548A86 /* NewsTableCell.swift in Sources */,

@@ -18,6 +18,7 @@ class AvatarView: UIControl {
     var currentIndexPath: IndexPath?
     var delegate: AvatarViewProto!
     var isClicked = false
+    var photoService = PhotoService()
     
     @IBInspectable var shadowColor: UIColor = UIColor.black
     @IBInspectable var shdowRadius: CGFloat = 5
@@ -98,12 +99,13 @@ class AvatarView: UIControl {
         if (imageURL.isEmpty){
             self.avatarImageView.image = UIImage(named: "photonotfound")
         } else {
-            self.avatarImageView.kf.setImage(with: URL(string: imageURL), placeholder: UIImage(named: "photonotfound"), options: nil, progressBlock: nil) { result in
-                switch result {
-                case let .success(data):
-                    self.avatarImageView.image = data.image
-                case .failure:
-                    self.avatarImageView.image = UIImage(named: "photonotfound")
+            photoService.getPhoto(by: imageURL) { result in
+                DispatchQueue.main.async {
+                    if let image = result {
+                        self.avatarImageView.image = image
+                    } else {
+                        self.avatarImageView.image = UIImage(named: "photonotfound")!
+                    }
                 }
             }
         }

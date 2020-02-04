@@ -55,6 +55,7 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
                     for group in groupsList {
                         try RealmService.save(items: group)
                     }
+                    
                 } catch let err {
                     self.showErrorMessage(message: err.localizedDescription)
                 }
