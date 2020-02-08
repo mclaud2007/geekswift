@@ -38,6 +38,7 @@
 		0788EE3B23634A0A00379186 /* FriendsPhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0788EE3A23634A0A00379186 /* FriendsPhotoController.swift */; };
 		078BDF1323BF609A00ECDF57 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 078BDF1523BF609A00ECDF57 /* Localizable.strings */; };
 		078BDF1823BF60C200ECDF57 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 078BDF1A23BF60C200ECDF57 /* Localizable.strings */; };
+		078E1D4823E7CCD500ABF382 /* PhotoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078E1D4723E7CCD500ABF382 /* PhotoService.swift */; };
 		0793234B236228B400394647 /* GroupsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0793234A236228B400394647 /* GroupsController.swift */; };
 		07A956A923620D120065741F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07A956A823620D120065741F /* Main.storyboard */; };
 		07BAC68C23C08055008FB3BB /* ColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07BAC68B23C08055008FB3BB /* ColorScheme.swift */; };
@@ -50,10 +51,11 @@
 		07F93DDA23644C4700F6B3B0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */; };
 		07F93DDD23644C7F00F6B3B0 /* FriendPhotosCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F93DDC23644C7F00F6B3B0 /* FriendPhotosCell.swift */; };
 		07F99D2A237B3DE4002E87ED /* LoadingViewControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */; };
-		67A8D0269FB0F3D45060B7DD /* Pods_vkapp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62D9DAD6AE84FB4F6329B737 /* Pods_vkapp.framework */; };
+		0B29A902B14FAE69065B3C63 /* Pods_vkapp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A07A5F109F5BB21AF10C6BE /* Pods_vkapp.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		04F27D167A5261F62AF139FD /* Pods-vkapp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vkapp.debug.xcconfig"; path = "Target Support Files/Pods-vkapp/Pods-vkapp.debug.xcconfig"; sourceTree = "<group>"; };
 		070792292392438B00F728BC /* AppSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSession.swift; sourceTree = "<group>"; };
 		071097E32358E50100932A4E /* vkapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vkapp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		071097E62358E50100932A4E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -88,6 +90,7 @@
 		078BDF1023BF604C00ECDF57 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		078BDF1423BF609A00ECDF57 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		078BDF1923BF60C200ECDF57 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		078E1D4723E7CCD500ABF382 /* PhotoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoService.swift; sourceTree = "<group>"; };
 		0793234A236228B400394647 /* GroupsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsController.swift; sourceTree = "<group>"; };
 		07A956A823620D120065741F /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		07BAC68B23C08055008FB3BB /* ColorScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorScheme.swift; sourceTree = "<group>"; };
@@ -100,9 +103,8 @@
 		07F93DD923644C4700F6B3B0 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		07F93DDC23644C7F00F6B3B0 /* FriendPhotosCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendPhotosCell.swift; sourceTree = "<group>"; };
 		07F99D29237B3DE4002E87ED /* LoadingViewControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingViewControl.swift; sourceTree = "<group>"; };
-		62D9DAD6AE84FB4F6329B737 /* Pods_vkapp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_vkapp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0B604C303BE2393A81982F2 /* Pods-vkapp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vkapp.debug.xcconfig"; path = "Target Support Files/Pods-vkapp/Pods-vkapp.debug.xcconfig"; sourceTree = "<group>"; };
-		C26ADB54563E206C5E72AC82 /* Pods-vkapp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vkapp.release.xcconfig"; path = "Target Support Files/Pods-vkapp/Pods-vkapp.release.xcconfig"; sourceTree = "<group>"; };
+		0A07A5F109F5BB21AF10C6BE /* Pods_vkapp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_vkapp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE461D267725FAB4E85E7C7C /* Pods-vkapp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-vkapp.release.xcconfig"; path = "Target Support Files/Pods-vkapp/Pods-vkapp.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,7 +112,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				67A8D0269FB0F3D45060B7DD /* Pods_vkapp.framework in Frameworks */,
+				0B29A902B14FAE69065B3C63 /* Pods_vkapp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -248,7 +250,7 @@
 				FA1DEA5FF83E4A19148D58F9 /* Pods */,
 				071097E42358E50100932A4E /* Products */,
 				071097E52358E50100932A4E /* vkapp */,
-				6DEA8549AB86B7CF6B0A63E9 /* Frameworks */,
+				D56490381E4F03E6738BE75C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -263,6 +265,7 @@
 		071097E52358E50100932A4E /* vkapp */ = {
 			isa = PBXGroup;
 			children = (
+				078E1D4623E7CCAA00ABF382 /* Services */,
 				0707330723A88B27000D9EC9 /* Login */,
 				070732FA23A889BE000D9EC9 /* Friends */,
 				070732FF23A88A8B000D9EC9 /* Groups */,
@@ -301,10 +304,8 @@
 			children = (
 				07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */,
 				07572FD82389857000AB8E01 /* CustomNavigationController.swift */,
-				0775BC6923B227FB0041FABC /* RealmService.swift */,
 				07E419BF2360678A00EF92E6 /* UIViewController+Ext.swift */,
 				071A790123BF656500F879B6 /* TabBarController.swift */,
-				0725089A23DD755E00921652 /* VKService.swift */,
 				0711976323E133E600000FB3 /* GetDataOperation.swift */,
 				0711976523E13C2E00000FB3 /* ParseDataOperation.swift */,
 			);
@@ -319,6 +320,16 @@
 				07BAC68B23C08055008FB3BB /* ColorScheme.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		078E1D4623E7CCAA00ABF382 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				0775BC6923B227FB0041FABC /* RealmService.swift */,
+				0725089A23DD755E00921652 /* VKService.swift */,
+				078E1D4723E7CCD500ABF382 /* PhotoService.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		07A956A523620C980065741F /* Resource */ = {
@@ -346,10 +357,10 @@
 			path = CustomUIControl;
 			sourceTree = "<group>";
 		};
-		6DEA8549AB86B7CF6B0A63E9 /* Frameworks */ = {
+		D56490381E4F03E6738BE75C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				62D9DAD6AE84FB4F6329B737 /* Pods_vkapp.framework */,
+				0A07A5F109F5BB21AF10C6BE /* Pods_vkapp.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -357,8 +368,8 @@
 		FA1DEA5FF83E4A19148D58F9 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				C0B604C303BE2393A81982F2 /* Pods-vkapp.debug.xcconfig */,
-				C26ADB54563E206C5E72AC82 /* Pods-vkapp.release.xcconfig */,
+				04F27D167A5261F62AF139FD /* Pods-vkapp.debug.xcconfig */,
+				BE461D267725FAB4E85E7C7C /* Pods-vkapp.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -370,11 +381,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 071097F72358E50300932A4E /* Build configuration list for PBXNativeTarget "vkapp" */;
 			buildPhases = (
-				30A057B2A224CE202C7B01A1 /* [CP] Check Pods Manifest.lock */,
+				23ABE2762AB0BAAEBA80EB09 /* [CP] Check Pods Manifest.lock */,
 				071097DF2358E50100932A4E /* Sources */,
 				071097E02358E50100932A4E /* Frameworks */,
 				071097E12358E50100932A4E /* Resources */,
-				AD473839555921C279364012 /* [CP] Embed Pods Frameworks */,
+				9EEDCABCDEEE97A128F09BA2 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -440,7 +451,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		30A057B2A224CE202C7B01A1 /* [CP] Check Pods Manifest.lock */ = {
+		23ABE2762AB0BAAEBA80EB09 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -462,7 +473,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AD473839555921C279364012 /* [CP] Embed Pods Frameworks */ = {
+		9EEDCABCDEEE97A128F09BA2 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -500,6 +511,7 @@
 				0707922A2392438B00F728BC /* AppSession.swift in Sources */,
 				0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */,
 				0775BC6A23B227FB0041FABC /* RealmService.swift in Sources */,
+				078E1D4823E7CCD500ABF382 /* PhotoService.swift in Sources */,
 				0793234B236228B400394647 /* GroupsController.swift in Sources */,
 				07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */,
 				07326D372376F63F00548A86 /* NewsTableCell.swift in Sources */,
@@ -590,6 +602,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/**";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -651,6 +664,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/**";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -671,7 +685,7 @@
 		};
 		071097F82358E50300932A4E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C0B604C303BE2393A81982F2 /* Pods-vkapp.debug.xcconfig */;
+			baseConfigurationReference = 04F27D167A5261F62AF139FD /* Pods-vkapp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -719,7 +733,7 @@
 		};
 		071097F92358E50300932A4E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C26ADB54563E206C5E72AC82 /* Pods-vkapp.release.xcconfig */;
+			baseConfigurationReference = BE461D267725FAB4E85E7C7C /* Pods-vkapp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

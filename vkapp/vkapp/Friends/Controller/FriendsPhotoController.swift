@@ -42,27 +42,8 @@ class FriendsPhotoController: UIViewController {
     // Здесь будем хранить наш кастомный лайоут [Index.Row => CustomSectionRowCount]
     fileprivate var customLayout = [Int:CGFloat]()
     
-    // Массив фотографий выбранного пользователя (должен прийти из предыдущего окна или выведем фото notfound)
-    var photosLists = [Photo]() {
-        didSet {
-            self.customLayout = [Int:CGFloat]()
-            
-            // Сформируем лайоут
-            for i in 0..<self.photosLists.count {
-                if (alreadyShown == 2 && currentRowCriteria == 2) {
-                    currentRowCriteria = 3
-                    alreadyShown = 0
-                } else if (alreadyShown == 3 && currentRowCriteria == 3) {
-                    currentRowCriteria = 2
-                    alreadyShown = 0
-                }
-                
-                // Считаем сколько показали
-                alreadyShown += 1
-                self.customLayout[i] = currentRowCriteria
-            }
-        }
-    }
+    // Список пользоваетльских фотографий
+    var realmPhotosList: Results<Photo>?
     
     var token: NotificationToken?
     
@@ -146,7 +127,9 @@ class FriendsPhotoController: UIViewController {
                 let selectFriend = selectedFriend {
                 destinationVC.friendID = selectFriend.userId
                
-                if self.photosLists.indices.contains(indexPath[0][1]) {
+                if let photosList = self.realmPhotosList,
+                    photosList.indices.contains(indexPath[0][1])
+                {
                     destinationVC.currentImageNumber = indexPath[0][1]
                 }
             }
@@ -156,55 +139,42 @@ class FriendsPhotoController: UIViewController {
     fileprivate func subscribeToRealmChanges (by friendID: Int) {
         do {
             // Получаем список фотографий из реалма
-            let photos = try RealmService.get(Photo.self).filter("friendID=\(friendID)").sorted(byKeyPath: "date", ascending: false)
+            self.realmPhotosList = try RealmService.get(Photo.self).filter("friendID=\(friendID)").sorted(byKeyPath: "date", ascending: false)
             
-            // И подписываемся на изменения данных в нем
-            self.token = photos.observe({ [weak self] (changes: RealmCollectionChange) in
-                guard let self = self else { return }
-                
-                switch changes {
-                case let .initial(result):
-                    self.photosLists.removeAll()
+            if let photos = self.realmPhotosList {
+                // И подписываемся на изменения данных в нем
+                self.token = photos.observe({ [weak self] (changes: RealmCollectionChange) in
+                    guard let self = self else { return }
                     
-                    for item in result {
-                        self.photosLists.append(item)
+                    switch changes {
+                    case .initial(_),.update(_, _, _, _):
+                        self.photoListCollectionView.reloadData()
+                    case let .error(err):
+                        self.showErrorMessage(message: err.localizedDescription)
                     }
                     
-                case let .update(res, del, ins, mod):
-                    // Из базы пропала запись
-                    if (del.count > 0) {
-                        // Удаление из базы
-                        for i in 0..<del.count {
-                            if self.photosLists.indices.contains(del[i]) {
-                                self.photosLists.remove(at: del[i])
-                            }
+                    // Обновим лайоут
+                    self.customLayout = [Int:CGFloat]()
+                    var currentRowCriteria: CGFloat = 2, alreadyShown: Int = 0
+                    
+                    // Сформируем лайоут
+                    for i in 0..<photos.count {
+                        if (alreadyShown == 2 && currentRowCriteria == 2) {
+                            currentRowCriteria = 3
+                            alreadyShown = 0
+                        } else if (alreadyShown == 3 && currentRowCriteria == 3) {
+                            currentRowCriteria = 2
+                            alreadyShown = 0
                         }
                         
-                    } else if ins.count > 0 {
-                        // Добавление записи
-                        for i in 0..<ins.count {
-                            if res.indices.contains(ins[i]) {
-                                self.photosLists.append(res[ins[i]])
-                            }
-                        }
-                        
-                    } else if mod.count > 0 {
-                        // Запись обновилась
-                        for i in 0..<mod.count {
-                            if (self.photosLists.indices.contains(mod[i]) && res.indices.contains(mod[i])) {
-                                // Заменим запись
-                                self.photosLists[mod[i]] = res[mod[i]]
-                            }
-                        }
+                        // Считаем сколько показали
+                        alreadyShown += 1
+                        self.customLayout[i] = currentRowCriteria
                     }
-                case let .error(err):
-                    self.showErrorMessage(message: err.localizedDescription)
-                }
-                
-                // Обновляем коллекцию
-                self.photoListCollectionView.reloadData()
-                
-            })
+                })
+            } else {
+                throw VKService.VKError.FriendListIsEmpty
+            }
         } catch let err {
             showErrorMessage(message: err.localizedDescription)
         }
@@ -218,7 +188,11 @@ extension FriendsPhotoController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.photosLists.count
+        if let photosList = self.realmPhotosList {
+            return photosList.count
+        } else {
+            return 0
+        }
     }
     
     // Поготовка ячейки к выводу
@@ -232,8 +206,10 @@ extension FriendsPhotoController: UICollectionViewDataSource {
         cell.friendPhotoImageView.delegate = self
 
         // Configure the cell
-        if photosLists.indices.contains(indexPath.row) {
-            cell.configure(with: photosLists[indexPath.row], indexPath: indexPath)
+        if let photosList = self.realmPhotosList,
+            photosList.indices.contains(indexPath.row)
+        {
+            cell.configure(with: photosList[indexPath.row], indexPath: indexPath)
         } else {
             cell.friendPhotoImageView.showImage(image: getNotFoundPhoto(), indexPath: indexPath)
             cell.friendLike.initLikes(likes: -1, isLiked: false)
