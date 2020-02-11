@@ -99,7 +99,10 @@ class AvatarView: UIControl {
         if (imageURL.isEmpty){
             self.avatarImageView.image = UIImage(named: "photonotfound")
         } else {
-            photoService.getPhoto(by: imageURL) { result in
+            // Для начала выставляем placeholder
+            self.avatarImageView.image = UIImage(named: "loadplaceholder")
+            
+            self.photoService.getPhoto(by: imageURL) { result in
                 DispatchQueue.main.async {
                     if let image = result {
                         self.avatarImageView.image = image

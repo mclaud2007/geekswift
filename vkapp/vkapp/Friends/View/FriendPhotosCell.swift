@@ -13,7 +13,7 @@ class PhotosCell: UICollectionViewCell {
     @IBOutlet weak var friendLike: LikeControl!
     
     override func prepareForReuse() {
-        self.friendPhotoImageView.showImage(imageURL: "")
+        self.friendPhotoImageView.showImage(image: UIImage(named:"loadplaceholder")!)
         self.friendLike.initLikes(likes: -1, isLiked: false)
     }
     

@@ -89,6 +89,24 @@ class FriendsPhotoController: UIViewController {
             subscribeToRealmChanges(by: friend.userId)
             
             // Запрашиваем данные
+            loadPhoto()
+            
+            // Локализуем кнопку назад
+            navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
+            navigationItem.backBarButtonItem?.tintColor = DefaultStyle.self.Colors.tint
+            
+            photoListCollectionView.refreshControl = UIRefreshControl()
+            photoListCollectionView.refreshControl?.attributedTitle = NSAttributedString(string: "Loaded...")
+            photoListCollectionView.refreshControl?.addTarget(self, action: #selector(loadPhoto), for: .valueChanged)
+            
+        } else {
+            navigationController?.popViewController(animated: true)
+        }
+    }
+    
+    @objc func loadPhoto(){
+        // Запрашиваем данные
+        if let friend = selectedFriend {
             VKService.shared.getPhotosBy(friendId: friend.userId) { result in
                 switch result {
                 case let .success(photosList):
@@ -102,14 +120,11 @@ class FriendsPhotoController: UIViewController {
                 case let .failure(err):
                     self.showErrorMessage(message: err.localizedDescription)
                 }
+                
+                self.photoListCollectionView.refreshControl?.endRefreshing()
             }
-            
-            // Локализуем кнопку назад
-            navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
-            navigationItem.backBarButtonItem?.tintColor = DefaultStyle.self.Colors.tint
-            
         } else {
-            navigationController?.popViewController(animated: true)
+            self.photoListCollectionView.refreshControl?.endRefreshing()
         }
     }
     

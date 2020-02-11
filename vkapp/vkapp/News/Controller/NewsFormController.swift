@@ -13,12 +13,16 @@ class NewsFormController: UIViewController {
     @IBOutlet weak var tableView: UITableView! {
         didSet {
             tableView.dataSource = self
+            tableView.delegate = self
+            tableView.prefetchDataSource = self
         }
     }
     
     @IBOutlet weak var btnLogout: UIBarButtonItem!
     
     var newsList = [News]()
+    var nextFrom: String?
+    var newsLoading = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,16 +42,118 @@ class NewsFormController: UIViewController {
         btnLogout.tintColor = DefaultStyle.self.Colors.tint
         
         // Загружаем новости
-        VKService.shared.getNewsList() { result  in
+        VKService.shared.getNewsList { [weak self] (result, next_from)  in
+            guard let self = self else { return }
+            
             switch result {
             case let .success(newsList):
                 self.newsList = newsList
+                self.nextFrom = next_from
                 self.tableView.reloadData()
             case let .failure(err):
                 self.showErrorMessage(message: err.localizedDescription)
             }
         }
+        
+        // Инициилизируем refreshControl
+        tableView.refreshControl = UIRefreshControl()
+        tableView.refreshControl?.attributedTitle = NSAttributedString(string: "Reloading...")
+        tableView.refreshControl?.addTarget(self, action: #selector(getReloadNews), for: .valueChanged)
     }
+    
+    @objc func getReloadNews(){
+        if let newsList = self.newsList.first,
+            let uxDateTime = newsList.unixDateTime
+        {
+            // Загружаем новости
+            VKService.shared.getNewsList(startFrom: nil, startTime: uxDateTime + 1) { [weak self] (result, next_from)  in
+                guard let self = self else { return }
+                
+                switch result {
+                case let .success(news):
+                    let localNewsList = self.newsList
+                    self.newsList.removeAll()
+                    
+                    // Добавляем новые новости в конец списка
+                    self.newsList = news + localNewsList
+                    
+                    // Присваиваем новый адрес следующей страницы
+                    self.nextFrom = next_from
+                    
+                    // Добавляем новые новости в конец
+                    self.tableView.reloadData()
+                    
+                case let .failure(err):
+                    self.showErrorMessage(message: err.localizedDescription)
+                }
+                
+                self.newsLoading = false
+                self.tableView.refreshControl?.endRefreshing()
+            }
+        }
+    }
+}
+
+extension NewsFormController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if indexPath.row == 1 {
+            if newsList.indices.contains(indexPath.section) {
+                if let ratio = newsList[indexPath.section].aspectRatio {
+                    return tableView.bounds.width * ratio
+                } else {
+                    return 240
+                }
+            } else {
+                return 240
+            }
+        } else {
+            return UITableView.automaticDimension
+        }
+    }
+}
+
+extension NewsFormController: UITableViewDataSourcePrefetching {
+    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        guard let maxSection = indexPaths.map({ $0.section }).max() else { return }
+        
+        let newsCount = newsList.count
+        
+        if let nextFrom = nextFrom,
+            // Нам нужно подгружать следующую страницу, только когда новости уже есть
+            // за три секции до конца списка, в случае если не ведется загрузка
+            (newsCount > 0 && ((newsCount - 3) < maxSection) && !newsLoading)
+        {
+            newsLoading = true
+            
+            // Загружаем новости
+            VKService.shared.getNewsList(startFrom: nextFrom, startTime: nil) { [weak self] (result, next_from)  in
+                guard let self = self else { return }
+                
+                switch result {
+                case let .success(news):
+                    let startIndex = self.newsList.count
+                    let endIndex = startIndex + news.count
+                    let indexSet = IndexSet(integersIn: startIndex ..< endIndex)
+                    
+                    // Добавляем новые новости в конец списка
+                    self.newsList.append(contentsOf: news)
+                    
+                    // Присваиваем новый адрес следующей страницы
+                    self.nextFrom = next_from
+                    
+                    // Добавляем новые новости в конец
+                    self.tableView.insertSections(indexSet, with: .automatic)
+                    
+                case let .failure(err):
+                    self.showErrorMessage(message: err.localizedDescription)
+                }
+                
+                self.newsLoading = false
+            }
+        }
+    }
+    
+    
 }
 
 extension NewsFormController: UITableViewDataSource {

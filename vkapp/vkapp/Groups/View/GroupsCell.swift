@@ -29,6 +29,8 @@ class GroupsCell: UITableViewCell {
     }
     
     override func layoutSubviews() {
+        super.layoutSubviews()
+        
         let lblGroupsImageTop = (bounds.height/2).rounded(.up) - (imageAvatarWidth/2).rounded(.up)
         lblGroupsImage.frame = CGRect(x: imageAvatarInsets,
                                       y: lblGroupsImageTop,
