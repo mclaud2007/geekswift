@@ -98,10 +98,8 @@ class VKService {
                     NewsList.append(News(json: item, groups: groupList, profiles: usersList))
                 }
             }
-        }
-        
-        // Для собираем новости в основном потоке
-        parseNewsSourceDispatch.notify(queue: DispatchQueue.main) {
+            
+            // Возвращаем список новостей в комплишен
             complition(NewsList)
         }
     }
@@ -204,8 +202,47 @@ class VKService {
         opq.addOperation(parse)
     }
     
+    // Получаем нужные нам размеры фото из атачмента
+    func getPhotoMaxSizeFrom(attachments: [JSON]) -> JSON? {
+        let attacheTypeToSearch = ["photo", "link", "video", "doc"]
+        var attache: JSON?
+        var pSizes: [JSON]?
+        
+        for i in 0..<attacheTypeToSearch.count {
+            if let attacheTest = attachments.filter({ $0["type"].stringValue == attacheTypeToSearch[i] }).first {
+                attache = attacheTest
+                break
+            }
+        }
+        
+        // Ищем массив с размерами
+        if let attache = attache {
+            switch attache["type"].stringValue {
+            case "photo":
+                pSizes = attache["photo"]["sizes"].arrayValue
+            case "video":
+                pSizes = attache["video"]["image"]["sizes"].arrayValue
+            case "link":
+                pSizes = attache["link"]["photo"]["sizes"].arrayValue
+            case "doc":
+                pSizes = attache["doc"]["preview"]["photo"]["sizes"].arrayValue
+            default:
+                break
+            }
+        }
+        
+        // Массив размеров найден
+        if let sizes = pSizes,
+            let photoMaxSize = VKService.shared.getPhotoMaxSizeFrom(sizes: sizes)
+        {
+            return photoMaxSize
+        }
+    
+        return nil
+    }
+    
     // Получаем нужные нам размеры фото
-    func getPhotoUrlFrom(sizes: [JSON]) -> JSON? {
+    func getPhotoMaxSizeFrom(sizes: [JSON]) -> JSON? {
         if sizes.count > 0 {
             //let neededSizes = ["m", "x", "p", "q", "r", "y"]
             
@@ -246,7 +283,7 @@ class VKService {
                         if let pID = photo["id"].int,
                             let date = photo["date"].int,
                             let sizes = photo["sizes"].array,
-                            let photoMaxSizesURL = self.getPhotoUrlFrom(sizes: sizes),
+                            let photoMaxSizesURL = self.getPhotoMaxSizeFrom(sizes: sizes),
                             let photoURL = photoMaxSizesURL["url"].string
                         {
                             let likes = photo["likes"]["count"].int ?? -1

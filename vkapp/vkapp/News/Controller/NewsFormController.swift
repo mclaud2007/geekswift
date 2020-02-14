@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Kingfisher
 
 class NewsFormController: UIViewController {
     @IBOutlet weak var tableView: UITableView! {
@@ -57,7 +56,7 @@ class NewsFormController: UIViewController {
         
         // Инициилизируем refreshControl
         tableView.refreshControl = UIRefreshControl()
-        tableView.refreshControl?.attributedTitle = NSAttributedString(string: "Reloading...")
+        tableView.refreshControl?.attributedTitle = NSAttributedString(string: NSLocalizedString("Loading ...", comment: ""))
         tableView.refreshControl?.addTarget(self, action: #selector(getReloadNews), for: .valueChanged)
     }
     
@@ -96,16 +95,18 @@ class NewsFormController: UIViewController {
 
 extension NewsFormController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.row == 1 {
-            if newsList.indices.contains(indexPath.section) {
-                if let ratio = newsList[indexPath.section].aspectRatio {
-                    return tableView.bounds.width * ratio
-                } else {
-                    return 240
-                }
-            } else {
-                return 240
+        if indexPath.row == 1,
+            newsList.indices.contains(indexPath.section)
+        {
+            if let ratio = newsList[indexPath.section].aspectRatio {
+                return (tableView.bounds.width * ratio).rounded()
             }
+            
+            
+            return 0
+            
+        } else if indexPath.row == 2 {
+            return 35
         } else {
             return UITableView.automaticDimension
         }
@@ -152,8 +153,6 @@ extension NewsFormController: UITableViewDataSourcePrefetching {
             }
         }
     }
-    
-    
 }
 
 extension NewsFormController: UITableViewDataSource {

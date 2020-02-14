@@ -15,7 +15,7 @@ protocol LikeControlProto {
 class LikeControl: UIControl {
     @IBInspectable var initLikes: Int = -1
     @IBInspectable var notLikedTextColor: UIColor = .white
-    @IBInspectable var LikedTextColor: UIColor = .red
+    @IBInspectable var likedTextColor: UIColor = .red
     @IBInspectable var likedTextFontSize: CGFloat = 17
     
     var delegate: LikeControlProto?
@@ -46,7 +46,7 @@ class LikeControl: UIControl {
         // Drawing code
         self.lblLikes = UILabel()
         self.lblLikes.font = UIFont(name: "System", size: likedTextFontSize)
-        self.lblLikes.frame = CGRect(x: 20, y: 0, width: bounds.width, height: bounds.height)
+        self.lblLikes.frame = CGRect(x: 20, y: 0, width: bounds.width, height: 20)
 
         if (self.initLikes > 0){
             self.lblLikes.text = String(self.initLikes)
@@ -72,7 +72,7 @@ class LikeControl: UIControl {
         self.isLiked = isLiked
         
         if (self.isLiked == true){
-            self.lblLikes.textColor = self.LikedTextColor
+            self.lblLikes.textColor = self.likedTextColor
         } else {
             self.lblLikes.textColor = self.notLikedTextColor
         }

@@ -96,7 +96,7 @@ class FriendsPhotoController: UIViewController {
             navigationItem.backBarButtonItem?.tintColor = DefaultStyle.self.Colors.tint
             
             photoListCollectionView.refreshControl = UIRefreshControl()
-            photoListCollectionView.refreshControl?.attributedTitle = NSAttributedString(string: "Loaded...")
+            photoListCollectionView.refreshControl?.attributedTitle = NSAttributedString(string: NSLocalizedString("Loading ...", comment: ""))
             photoListCollectionView.refreshControl?.addTarget(self, action: #selector(loadPhoto), for: .valueChanged)
             
         } else {

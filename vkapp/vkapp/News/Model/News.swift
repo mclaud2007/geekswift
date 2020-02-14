@@ -68,42 +68,17 @@ class News {
         }
         
         // Ищем фото для новости
-        if let attachments = news["attachments"].array {
-            let photos = attachments.filter({ $0["type"].stringValue == "photo" })
-            var pSizeArray = [JSON]()
+        if let attachments = news["attachments"].array,
+            let photoMaxSize = VKService.shared.getPhotoMaxSizeFrom(attachments: attachments)
+        {
+            self.picWidth = photoMaxSize["width"].int
+            self.picHeight = photoMaxSize["height"].int
             
-            // Фотографии могут быть в ссылках
-            if photos.count == 0 {
-                let pLink = attachments.filter({ $0["type"].stringValue == "link" })
-                
-                if pLink.count > 0 {
-                    pSizeArray = pLink[0]["link"]["photo"]["sizes"].arrayValue
-                } else {
-                    let pVideo = attachments.filter({ $0["type"].stringValue == "video" })
-                    
-                    if pVideo.count > 0 {
-                        pSizeArray = pVideo[0]["video"]["image"].arrayValue
-                    } else {
-                        let pDoc = attachments.filter({ $0["type"].stringValue == "doc" })
-                        
-                        if pDoc.count > 0 {
-                            pSizeArray = pDoc[0]["doc"]["preview"]["photo"].arrayValue
-                        }
-                    }
-                }
-            } else {
-                pSizeArray = photos[0]["photo"]["sizes"].arrayValue
-            }
-            
-            if pSizeArray.count > 0 {
-                // Теперь найдем фотографии нужных размеров
-                if let photoMaxSize = VKService.shared.getPhotoUrlFrom(sizes: pSizeArray),
-                    let pictureUrlString = photoMaxSize["url"].string
-                {
-                    picture = pictureUrlString
-                    picWidth = photoMaxSize["width"].intValue
-                    picHeight = photoMaxSize["height"].intValue
-                } 
+            // У doc фотография хранится в src
+            if let srcString = photoMaxSize["src"].string {
+                self.picture = srcString
+            } else if let urlString = photoMaxSize["url"].string {
+                self.picture = urlString
             }
         }
         
