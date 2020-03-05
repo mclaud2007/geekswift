@@ -27,7 +27,15 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     // MARK: Properties
-    var realmGroupsList: Results<Group>?
+    var realmGroupsList: Results<RLMGroup>?
+    var groupsList: [Group]?
+    
+    // Адаптер для получения данных
+    let groupsAdapter = GroupsAdapter()
+    
+    // Список данных для отображения во вью
+    var viewModels: [GroupViewModel] = []
+    let viewFactory = GroupsViewFactory()
     
     // Рекомендованные групп
     var recommendedGroups = [Group]()
@@ -44,25 +52,33 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         btnLogout.title = NSLocalizedString("Logout", comment: "")
         btnLogout.tintColor = DefaultStyle.self.Colors.tint
         
-        // Подписываемся на изменение данных
-        subscribeToRealmChanges()
-        
-        // Загрузка информации о группах
-        VKService.shared.getGroupsList { result in
-            switch result {
-            case let .success(groupsList):
-                do {
-                    for group in groupsList {
-                        try RealmService.save(items: group)
-                    }
-                    
-                } catch let err {
-                    self.showErrorMessage(message: err.localizedDescription)
-                }
-            case let .failure(err):
-                self.showErrorMessage(message: err.localizedDescription)
-            }
+        // Получаем группы через адаптер (ниже предыдущая реализация через замыкания и Realm)
+        groupsAdapter.getGropus { [weak self] (groups) in
+            guard let self = self else { return }
+            self.groupsList = groups
+            self.viewModels = self.viewFactory.constructViews(from: groups)
+            self.tableView.reloadData()
         }
+        
+        // Подписываемся на изменение данных
+//        subscribeToRealmChanges()
+//
+//        // Загрузка информации о группах
+//        VKService.shared.getGroupsList { result in
+//            switch result {
+//            case let .success(groupsList):
+//                do {
+//                    for group in groupsList {
+//                        try RealmService.save(items: group)
+//                    }
+//
+//                } catch let err {
+//                    self.showErrorMessage(message: err.localizedDescription)
+//                }
+//            case let .failure(err):
+//                self.showErrorMessage(message: err.localizedDescription)
+//            }
+//        }
     }
     
     // MARK: Data source
@@ -72,7 +88,7 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 1 {
-            if let groupsList = self.realmGroupsList {
+            if let groupsList = self.groupsList {
                 return groupsList.count
             } else {
                 return 0
@@ -92,18 +108,16 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
             preconditionFailure("Error")
         }
         
-        var currentGroup: Group
-        
-        if let groupsList = self.realmGroupsList,
+        if let _ = self.groupsList,
             indexPath.section == 1
         {
-            currentGroup = groupsList[indexPath.row]
+            cell.configure(with: viewModels[indexPath.row])
         } else {
-            currentGroup = recommendedGroups[indexPath.row]
+            cell.configure(with: recommendedGroups[indexPath.row])
         }
 
         // Configure the cell...
-        cell.configure(with: currentGroup)
+        
     
         return cell
     }
@@ -118,21 +132,21 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     // Override to support editing the table view.
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            if indexPath.section == 1,
-                let groupsList = self.realmGroupsList,
-                let objectToDelete = groupsList.filter("groupId=\(groupsList[indexPath.row].groupId)").first
-            {
-                
-                do {
-                    try RealmService.delete(object: objectToDelete)
-                } catch let err {
-                    self.showErrorMessage(message: err.localizedDescription)
-                }
-            } else {
-                return
-            }
-        }
+//        if editingStyle == .delete {
+//            if indexPath.section == 1,
+//                let groupsList = self.groupsList,
+//                let objectToDelete = groupsList.filter("groupId=\(groupsList[indexPath.row].groupId)").first
+//            {
+//
+//                do {
+//                    try RealmService.delete(object: objectToDelete)
+//                } catch let err {
+//                    self.showErrorMessage(message: err.localizedDescription)
+//                }
+//            } else {
+//                return
+//            }
+//        }
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -152,8 +166,12 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
         if indexPath.section == 0 {
             if recommendedGroups.indices.contains(indexPath.row) {
                 do {
-                    try RealmService.save(items: recommendedGroups[indexPath.row])
+                    let recomendedGroup = recommendedGroups[indexPath.row]
+                    let realmRecomendedGroups = RLMGroup(groupId: recomendedGroup.groupId, name: recomendedGroup.name, image: recomendedGroup.imageString)
+                    
+                    try RealmService.save(items: realmRecomendedGroups)
                     recommendedGroups.remove(at: indexPath.row)
+                    
                     tableView.reloadData()
                 } catch let err {
                     self.showErrorMessage(message: err.localizedDescription)
@@ -171,7 +189,7 @@ class GroupsController: UIViewController, UITableViewDelegate, UITableViewDataSo
     // MARK: Cestom methods
     fileprivate func subscribeToRealmChanges () {
         do {
-            self.realmGroupsList = try RealmService.get(Group.self).sorted(byKeyPath: "name", ascending: true)
+            self.realmGroupsList = try RealmService.get(RLMGroup.self).sorted(byKeyPath: "name", ascending: true)
             
             if let groups = self.realmGroupsList {
                 // Подписываемся на изменения групп
@@ -205,7 +223,11 @@ extension GroupsController: UISearchBarDelegate {
             VKService.shared.getGroupSearch(query: searchText) { result in
                 switch result {
                 case let .success(groups):
-                    self.recommendedGroups = groups
+                    // Преобразуем [RLMGroup] -> [Group]
+                    self.recommendedGroups = groups.compactMap { (group) in
+                        Group(groupId: group.groupId, name: group.name, image: group.imageString)
+                    }
+                    
                     self.tableView.reloadData()
                 case .failure(_):
                     break

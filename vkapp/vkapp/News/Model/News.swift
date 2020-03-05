@@ -38,7 +38,7 @@ class News {
     
     // Инициализируем новость от массива полученного
     // непосредственно в сетевом сервисе
-    init (json news: JSON, groups: [Group], profiles: [Friend]) {
+    init (json news: JSON, groups: [RLMGroup], profiles: [Friend]) {
         var sourceId = news["source_id"].intValue
         unixDateTime = news["date"].doubleValue
         content = news["text"].stringValue

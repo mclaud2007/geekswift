@@ -16,6 +16,10 @@
 		0711976423E133E600000FB3 /* GetDataOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0711976323E133E600000FB3 /* GetDataOperation.swift */; };
 		0711976623E13C2E00000FB3 /* ParseDataOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0711976523E13C2E00000FB3 /* ParseDataOperation.swift */; };
 		071A790223BF656500F879B6 /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071A790123BF656500F879B6 /* TabBarController.swift */; };
+		072094A42410B0F400844C1E /* GroupsAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072094A32410B0F400844C1E /* GroupsAdapter.swift */; };
+		072094A62410B13E00844C1E /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072094A52410B13E00844C1E /* Group.swift */; };
+		072094A82410BB1800844C1E /* GroupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072094A72410BB1800844C1E /* GroupViewModel.swift */; };
+		072094AA2410BDCA00844C1E /* GroupsViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072094A92410BDCA00844C1E /* GroupsViewFactory.swift */; };
 		0725089B23DD755E00921652 /* VKService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0725089A23DD755E00921652 /* VKService.swift */; };
 		072E6C3223D4476C00E03018 /* NewsImageCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 072E6C3123D4476C00E03018 /* NewsImageCell.xib */; };
 		072E6C3523D4483200E03018 /* NewsImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072E6C3423D4483200E03018 /* NewsImageCell.swift */; };
@@ -29,7 +33,7 @@
 		073770C4239BDBA500DB51CB /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 073770C3239BDBA500DB51CB /* User.swift */; };
 		07572FD72389828100AB8E01 /* CustomInteractAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */; };
 		07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07572FD82389857000AB8E01 /* CustomNavigationController.swift */; };
-		0769B0F623645F8D0016E6D8 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F523645F8D0016E6D8 /* Group.swift */; };
+		0769B0F623645F8D0016E6D8 /* RLMGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F523645F8D0016E6D8 /* RLMGroup.swift */; };
 		0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F9236460FE0016E6D8 /* GroupsCell.swift */; };
 		0773D3602371BD85006AFAA3 /* FriendsSearchControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */; };
 		0775BC6A23B227FB0041FABC /* RealmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0775BC6923B227FB0041FABC /* RealmService.swift */; };
@@ -66,6 +70,10 @@
 		0711976323E133E600000FB3 /* GetDataOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetDataOperation.swift; sourceTree = "<group>"; };
 		0711976523E13C2E00000FB3 /* ParseDataOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParseDataOperation.swift; sourceTree = "<group>"; };
 		071A790123BF656500F879B6 /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
+		072094A32410B0F400844C1E /* GroupsAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsAdapter.swift; sourceTree = "<group>"; };
+		072094A52410B13E00844C1E /* Group.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
+		072094A72410BB1800844C1E /* GroupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupViewModel.swift; sourceTree = "<group>"; };
+		072094A92410BDCA00844C1E /* GroupsViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsViewFactory.swift; sourceTree = "<group>"; };
 		0725089A23DD755E00921652 /* VKService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VKService.swift; sourceTree = "<group>"; };
 		072E6C3123D4476C00E03018 /* NewsImageCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewsImageCell.xib; sourceTree = "<group>"; };
 		072E6C3423D4483200E03018 /* NewsImageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsImageCell.swift; sourceTree = "<group>"; };
@@ -80,7 +88,7 @@
 		07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomInteractAnimator.swift; sourceTree = "<group>"; };
 		07572FD82389857000AB8E01 /* CustomNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNavigationController.swift; sourceTree = "<group>"; };
 		0769B0F3236450680016E6D8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0769B0F523645F8D0016E6D8 /* Group.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
+		0769B0F523645F8D0016E6D8 /* RLMGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RLMGroup.swift; sourceTree = "<group>"; };
 		0769B0F9236460FE0016E6D8 /* GroupsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsCell.swift; sourceTree = "<group>"; };
 		0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsSearchControl.swift; sourceTree = "<group>"; };
 		0775BC6923B227FB0041FABC /* RealmService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmService.swift; sourceTree = "<group>"; };
@@ -163,6 +171,8 @@
 				0707330023A88A93000D9EC9 /* Model */,
 				0707330123A88AAF000D9EC9 /* View */,
 				0707330223A88AC4000D9EC9 /* Controller */,
+				072094A32410B0F400844C1E /* GroupsAdapter.swift */,
+				072094A92410BDCA00844C1E /* GroupsViewFactory.swift */,
 			);
 			path = Groups;
 			sourceTree = "<group>";
@@ -170,7 +180,9 @@
 		0707330023A88A93000D9EC9 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				0769B0F523645F8D0016E6D8 /* Group.swift */,
+				0769B0F523645F8D0016E6D8 /* RLMGroup.swift */,
+				072094A52410B13E00844C1E /* Group.swift */,
+				072094A72410BB1800844C1E /* GroupViewModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -504,18 +516,21 @@
 				0773D3602371BD85006AFAA3 /* FriendsSearchControl.swift in Sources */,
 				073770C4239BDBA500DB51CB /* User.swift in Sources */,
 				07F8E9B7238193B30049B352 /* BigPhotosController.swift in Sources */,
-				0769B0F623645F8D0016E6D8 /* Group.swift in Sources */,
+				0769B0F623645F8D0016E6D8 /* RLMGroup.swift in Sources */,
 				07BAC68C23C08055008FB3BB /* ColorScheme.swift in Sources */,
 				07F99D2A237B3DE4002E87ED /* LoadingViewControl.swift in Sources */,
 				0779F55E236EA77B008E0A51 /* AvatarView.swift in Sources */,
+				072094AA2410BDCA00844C1E /* GroupsViewFactory.swift in Sources */,
 				0707922A2392438B00F728BC /* AppSession.swift in Sources */,
 				0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */,
 				0775BC6A23B227FB0041FABC /* RealmService.swift in Sources */,
 				078E1D4823E7CCD500ABF382 /* PhotoService.swift in Sources */,
 				0793234B236228B400394647 /* GroupsController.swift in Sources */,
+				072094A82410BB1800844C1E /* GroupViewModel.swift in Sources */,
 				07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */,
 				07326D372376F63F00548A86 /* NewsTableCell.swift in Sources */,
 				07326D2F2375744800548A86 /* FriendsCellProto.swift in Sources */,
+				072094A42410B0F400844C1E /* GroupsAdapter.swift in Sources */,
 				07326D3B2376FDEE00548A86 /* NewsFormController.swift in Sources */,
 				072E6C3523D4483200E03018 /* NewsImageCell.swift in Sources */,
 				0788EE38236341C500379186 /* Friends.swift in Sources */,
@@ -523,6 +538,7 @@
 				072E6C3923D45C4300E03018 /* NewsShareCell.swift in Sources */,
 				071097E72358E50100932A4E /* AppDelegate.swift in Sources */,
 				07E419C02360678A00EF92E6 /* UIViewController+Ext.swift in Sources */,
+				072094A62410B13E00844C1E /* Group.swift in Sources */,
 				071097E92358E50100932A4E /* SceneDelegate.swift in Sources */,
 				07C3721D2377115600828D30 /* News.swift in Sources */,
 				0725089B23DD755E00921652 /* VKService.swift in Sources */,

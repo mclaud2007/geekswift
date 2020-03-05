@@ -58,12 +58,22 @@ class GroupsCell: UITableViewCell {
         
         //  Фотография может быть как UIImage так и строка
         if let image = group.imageString {
-            lblGroupsImage.showImage(imageURL: image)
+            lblGroupsImage.showImage(image: image)
         } else {
             lblGroupsImage.showImage(image: getNotFoundPhoto())
         }
         
         // Нужно перерисовать лайоут
         setNeedsLayout()
+    }
+    
+    public func configure(with view: GroupViewModel){
+        lblGroupsName.text = view.name
+        
+        if let image = view.image as? UIImage {
+            lblGroupsImage.showImage(image: image)
+        } else if let image = view.image as? String {
+            lblGroupsImage.showImage(image: image)
+        }
     }
 }

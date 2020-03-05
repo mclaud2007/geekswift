@@ -73,7 +73,7 @@ class FriendsFormController: UIViewController {
         // Регистрируем xib в качестве прототипа ячейки
         tableView.register(UINib(nibName: "FriendsCellProto", bundle: nil), forCellReuseIdentifier: "FriendsCellProto")
 
-        // Загружаем данные в реалм, а его обсервер (объявлен выше) обновит список пользователей,
+        // Загружаем данные в реалм, а его обсервер обновит список пользователей,
         // который в свою очередь вызовет обновление зависимых от него списков и обновит tableView
         VKService.shared.getFriendsList()
             .map(on: DispatchQueue.global()) { json -> [Friend] in

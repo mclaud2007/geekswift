@@ -39,6 +39,12 @@ extension VKAppService {
     }
 }
 
+extension GroupsViewFactory {
+    func getNotFoundPhoto () -> UIImage {
+        return UIImage(named: "photonotfound")!
+    }
+}
+
 extension UIViewController: VKAppService {}
 //extension FriendsCellProto: VKAppService {}
 extension UICollectionViewCell: VKAppService {}

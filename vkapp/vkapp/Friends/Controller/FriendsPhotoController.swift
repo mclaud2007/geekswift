@@ -80,7 +80,7 @@ class FriendsPhotoController: UIViewController {
             // И ставим его фотографию
             if let photo = friend.photo {
                 let curPhotoIndexPath = IndexPath(item: 0, section: 0)
-                friendAvatarPhoto.showImage(imageURL: photo, indexPath: curPhotoIndexPath)
+                friendAvatarPhoto.showImage(image: photo, indexPath: curPhotoIndexPath)
             } else {
                 friendAvatarPhoto.showImage(image: getNotFoundPhoto())
             }

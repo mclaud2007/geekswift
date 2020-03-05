@@ -36,7 +36,7 @@ class VKService {
     
     public func parseNews(from json: JSON, complition: @escaping ([News]) -> Void) {
         // Массив со списком источникв
-        var groupList = [Group]()
+        var groupList = [RLMGroup]()
         var usersList = [Friend]()
         
         // Результат парсинга json
@@ -64,7 +64,7 @@ class VKService {
                         let _ = group["photo_50"].string
                     {
                         
-                        groupList.append(Group(from: group))
+                        groupList.append(RLMGroup(from: group))
                     }
                 }
             }
@@ -136,8 +136,8 @@ class VKService {
         }
     }
     
-    public func getGroupSearch(query: String, complition: @escaping (Swift.Result<[Group], Error>) -> Void) {
-        var localGroupList = [Group]()
+    public func getGroupSearch(query: String, complition: @escaping (Swift.Result<[RLMGroup], Error>) -> Void) {
+        var localGroupList = [RLMGroup]()
         
         let param: Parameters = [
             "user_id": AppSession.shared.getUserId(),
@@ -158,7 +158,7 @@ class VKService {
                             group["name"].string != nil,
                             group["photo_50"].string != nil {
                             
-                            localGroupList.append(Group(from: group))
+                            localGroupList.append(RLMGroup(from: group))
                         }
                     }
                     
@@ -177,7 +177,7 @@ class VKService {
         
     }
     
-    public func getGroupsList(complition: ((Swift.Result<[Group], Error>) -> Void)? = nil) {
+    public func getGroupsList(complition: ((Swift.Result<[RLMGroup], Error>) -> Void)? = nil) {
         let param: Parameters = [
             "user_id": AppSession.shared.getUserId(),
             "extended": 1,

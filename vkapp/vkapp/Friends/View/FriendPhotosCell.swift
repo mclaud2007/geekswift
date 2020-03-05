@@ -19,7 +19,7 @@ class PhotosCell: UICollectionViewCell {
     
     func configure(with photos: Photo, indexPath: IndexPath?){
         // Фотография по идее есть
-        self.friendPhotoImageView.showImage(imageURL: photos.photoUrlString ?? "", indexPath: indexPath)
+        self.friendPhotoImageView.showImage(image: photos.photoUrlString ?? "", indexPath: indexPath)
         
         // Инициализируем лайки
         self.friendLike.initLikes(likes: photos.likes, isLiked: photos.isLiked)

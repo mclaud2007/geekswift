@@ -1,29 +1,17 @@
 //
-//  Groups.swift
-//  weather
+//  Group.swift
+//  vkapp
 //
-//  Created by Григорий Мартюшин on 26.10.2019.
-//  Copyright © 2019 Григорий Мартюшин. All rights reserved.
+//  Created by Григорий Мартюшин on 05.03.2020.
+//  Copyright © 2020 Григорий Мартюшин. All rights reserved.
 //
 
-import UIKit
-import RealmSwift
-import SwiftyJSON
+import Foundation
 
-class Group: Object {
-    @objc dynamic var name: String
-    @objc dynamic var imageString: String? = nil
-    @objc dynamic var groupId: Int
-    
-    override class func primaryKey() -> String? {
-        "groupId"
-    }
-    
-    init (from json: JSON) {
-        self.groupId = json["id"].intValue
-        self.name = json["name"].stringValue
-        self.imageString = json["photo_50"].stringValue
-    }
+class Group {
+    var name: String
+    var imageString: String? = nil
+    var groupId: Int
     
     init (groupId: Int, name: String, image: String?){
         self.groupId = groupId

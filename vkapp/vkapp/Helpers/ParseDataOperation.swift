@@ -10,7 +10,7 @@ import Foundation
 import SwiftyJSON
 
 class ParseData: Operation {
-    var outputData: [Group] = []
+    var outputData: [RLMGroup] = []
     
     override func main() {
         guard let getDataOperation = dependencies.first as? GetDataOperation,
@@ -22,7 +22,7 @@ class ParseData: Operation {
                     group["name"].string != nil,
                     group["photo_50"].string != nil
                 {
-                    outputData.append(Group(from: group))
+                    outputData.append(RLMGroup(from: group))
                 }
             }
         }
