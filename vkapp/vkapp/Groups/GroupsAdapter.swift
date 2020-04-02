@@ -11,7 +11,10 @@ import Realm
 import RealmSwift
 
 class GroupsAdapter {
-    private let vkService = VKService.shared
+    // Просто меняем настоящий сервис на прокси
+    // private let vkService = VKService.shared
+    private let vkService = VKProxy()
+    
     private var groups: [Group] = []
     private var realmGroupsList: Results<RLMGroup>?
     var token: NotificationToken?
@@ -41,7 +44,7 @@ class GroupsAdapter {
         }
         
         // Загрузка информации о группах
-        VKService.shared.getGroupsList { result in
+        vkService.getGroupsList { result in
             switch result {
             case let .success(groupsList):
                 do {

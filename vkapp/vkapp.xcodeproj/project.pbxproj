@@ -33,6 +33,8 @@
 		073770C4239BDBA500DB51CB /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 073770C3239BDBA500DB51CB /* User.swift */; };
 		07572FD72389828100AB8E01 /* CustomInteractAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */; };
 		07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07572FD82389857000AB8E01 /* CustomNavigationController.swift */; };
+		075E795D24359ED30047EF4E /* VKServiceProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075E795C24359ED30047EF4E /* VKServiceProxy.swift */; };
+		075E795F24359F050047EF4E /* VKServiceProxyProto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075E795E24359F050047EF4E /* VKServiceProxyProto.swift */; };
 		0769B0F623645F8D0016E6D8 /* RLMGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F523645F8D0016E6D8 /* RLMGroup.swift */; };
 		0769B0FA236460FE0016E6D8 /* GroupsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0769B0F9236460FE0016E6D8 /* GroupsCell.swift */; };
 		0773D3602371BD85006AFAA3 /* FriendsSearchControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0773D35F2371BD85006AFAA3 /* FriendsSearchControl.swift */; };
@@ -87,6 +89,8 @@
 		073770C3239BDBA500DB51CB /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		07572FD62389828100AB8E01 /* CustomInteractAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomInteractAnimator.swift; sourceTree = "<group>"; };
 		07572FD82389857000AB8E01 /* CustomNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNavigationController.swift; sourceTree = "<group>"; };
+		075E795C24359ED30047EF4E /* VKServiceProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VKServiceProxy.swift; sourceTree = "<group>"; };
+		075E795E24359F050047EF4E /* VKServiceProxyProto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VKServiceProxyProto.swift; sourceTree = "<group>"; };
 		0769B0F3236450680016E6D8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0769B0F523645F8D0016E6D8 /* RLMGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RLMGroup.swift; sourceTree = "<group>"; };
 		0769B0F9236460FE0016E6D8 /* GroupsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsCell.swift; sourceTree = "<group>"; };
@@ -340,6 +344,8 @@
 				0775BC6923B227FB0041FABC /* RealmService.swift */,
 				0725089A23DD755E00921652 /* VKService.swift */,
 				078E1D4723E7CCD500ABF382 /* PhotoService.swift */,
+				075E795C24359ED30047EF4E /* VKServiceProxy.swift */,
+				075E795E24359F050047EF4E /* VKServiceProxyProto.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -530,6 +536,7 @@
 				07572FD92389857000AB8E01 /* CustomNavigationController.swift in Sources */,
 				07326D372376F63F00548A86 /* NewsTableCell.swift in Sources */,
 				07326D2F2375744800548A86 /* FriendsCellProto.swift in Sources */,
+				075E795F24359F050047EF4E /* VKServiceProxyProto.swift in Sources */,
 				072094A42410B0F400844C1E /* GroupsAdapter.swift in Sources */,
 				07326D3B2376FDEE00548A86 /* NewsFormController.swift in Sources */,
 				072E6C3523D4483200E03018 /* NewsImageCell.swift in Sources */,
@@ -543,6 +550,7 @@
 				07C3721D2377115600828D30 /* News.swift in Sources */,
 				0725089B23DD755E00921652 /* VKService.swift in Sources */,
 				0711976423E133E600000FB3 /* GetDataOperation.swift in Sources */,
+				075E795D24359ED30047EF4E /* VKServiceProxy.swift in Sources */,
 				071A790223BF656500F879B6 /* TabBarController.swift in Sources */,
 				0711976623E13C2E00000FB3 /* ParseDataOperation.swift in Sources */,
 				07572FD72389828100AB8E01 /* CustomInteractAnimator.swift in Sources */,

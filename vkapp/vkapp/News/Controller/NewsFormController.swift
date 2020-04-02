@@ -23,6 +23,9 @@ class NewsFormController: UIViewController {
     var nextFrom: String?
     var newsLoading = false
     
+    //  Прокси для ВК сервиса
+    let vkProxy = VKProxy()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -41,7 +44,7 @@ class NewsFormController: UIViewController {
         btnLogout.tintColor = DefaultStyle.self.Colors.tint
         
         // Загружаем новости
-        VKService.shared.getNewsList { [weak self] (result, next_from)  in
+        vkProxy.getNewsList { [weak self] (result, next_from)  in
             guard let self = self else { return }
             
             switch result {
@@ -65,7 +68,7 @@ class NewsFormController: UIViewController {
             let uxDateTime = newsList.unixDateTime
         {
             // Загружаем новости
-            VKService.shared.getNewsList(startFrom: nil, startTime: uxDateTime + 1) { [weak self] (result, next_from)  in
+            vkProxy.getNewsList(startFrom: nil, startTime: uxDateTime + 1) { [weak self] (result, next_from)  in
                 guard let self = self else { return }
                 
                 switch result {
@@ -127,7 +130,7 @@ extension NewsFormController: UITableViewDataSourcePrefetching {
             newsLoading = true
             
             // Загружаем новости
-            VKService.shared.getNewsList(startFrom: nextFrom, startTime: nil) { [weak self] (result, next_from)  in
+            vkProxy.getNewsList(startFrom: nextFrom, startTime: nil) { [weak self] (result, next_from)  in
                 guard let self = self else { return }
                 
                 switch result {

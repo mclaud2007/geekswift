@@ -62,6 +62,9 @@ class FriendsFormController: UIViewController {
     // Токен изменений реалма
     var token: NotificationToken?
     
+    // Прокси для ВК сервиса
+    let vkProxy = VKProxy()
+    
     // MARK: Lifecycles
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,7 +78,7 @@ class FriendsFormController: UIViewController {
 
         // Загружаем данные в реалм, а его обсервер обновит список пользователей,
         // который в свою очередь вызовет обновление зависимых от него списков и обновит tableView
-        VKService.shared.getFriendsList()
+        vkProxy.getFriendsList()
             .map(on: DispatchQueue.global()) { json -> [Friend] in
                 return try self.parseFriends(with: json)
         }.done(on: DispatchQueue.main) { friendList in
