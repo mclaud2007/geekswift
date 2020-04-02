@@ -13,7 +13,22 @@ class News {
     var title: String?
     var content: String
     var date: String
+    var unixDateTime: Double?
+    
     var picture: String?
+    var picHeight: Int?
+    var picWidth: Int?
+    var aspectRatio: CGFloat? {
+        if let picHeight = picHeight,
+            let picWidth = picWidth,
+            picWidth != 0
+        {
+            return CGFloat(picHeight) / CGFloat(picWidth)
+        } else {
+            return nil
+        }
+    }
+    
     var likes: Int? = 0
     var comments: Int? = 0
     var views: Int? = 0
@@ -23,15 +38,13 @@ class News {
     
     // Инициализируем новость от массива полученного
     // непосредственно в сетевом сервисе
-    init (json news: JSON, groups: [Group], profiles: [Friend]) {
+    init (json news: JSON, groups: [RLMGroup], profiles: [Friend]) {
         var sourceId = news["source_id"].intValue
-        let date = news["date"].doubleValue
-        let text = news["text"].stringValue
+        unixDateTime = news["date"].doubleValue
+        content = news["text"].stringValue
     
         // Название новости - это паблик или профиль. По-умолчанию будет "Без названия" - дальше переопределим в случае успеха
-        var title = "Без названия"
-        var avatar: String?
-        var picture: String?
+        title = "Без названия"
         
         // если источник < 0 - это группа
         if sourceId < 0 {
@@ -55,53 +68,26 @@ class News {
         }
         
         // Ищем фото для новости
-        if let attachments = news["attachments"].array {
-            let photos = attachments.filter({ $0["type"].stringValue == "photo" })
-            var pSizeArray = [JSON]()
+        if let attachments = news["attachments"].array,
+            let photoMaxSize = VKService.shared.getPhotoMaxSizeFrom(attachments: attachments)
+        {
+            self.picWidth = photoMaxSize["width"].int
+            self.picHeight = photoMaxSize["height"].int
             
-            // Фотографии могут быть в ссылках
-            if photos.count == 0 {
-                let pLink = attachments.filter({ $0["type"].stringValue == "link" })
-                
-                if pLink.count > 0 {
-                    pSizeArray = pLink[0]["link"]["photo"]["sizes"].arrayValue
-                }
-            } else {
-                pSizeArray = photos[0]["photo"]["sizes"].arrayValue
-            }
-            
-            if pSizeArray.count > 0 {
-                // Теперь найдем фотографии нужных размеров
-                let pArr = pSizeArray.filter({ $0["type"].stringValue == "y" || $0["type"].stringValue == "l" || $0["type"].stringValue == "m" || $0["type"].stringValue == "r" })
-                let pSizeCount = pArr.count
-                
-                // Что-то нашли
-                if pSizeCount == 1 {
-                    picture = pArr[0]["url"].stringValue
-                } else if pSizeCount > 1 {
-                    // Ищем размер y
-                    for i in 0..<pSizeCount {
-                        picture = pArr[i]["url"].stringValue
-                        
-                        // Если нашли размер y - дальше ничего не потребуется
-                        if pArr[i]["type"].stringValue == "y" {
-                            break
-                        }
-                    }
-                }
+            // У doc фотография хранится в src
+            if let srcString = photoMaxSize["src"].string {
+                self.picture = srcString
+            } else if let urlString = photoMaxSize["url"].string {
+                self.picture = urlString
             }
         }
         
-        let humanDate = Date(timeIntervalSince1970: date)
+        let humanDate = Date(timeIntervalSince1970: unixDateTime ?? 0)
         let dateFormatter = DateFormatter()
         dateFormatter.timeStyle = .none //Set time style
         dateFormatter.dateStyle = DateFormatter.Style.medium //Set date style
         dateFormatter.timeZone = .current
         
-        self.title = title
-        self.content = text
-        self.picture = picture
-        self.avatar = avatar
         self.date = dateFormatter.string(from: humanDate)
         
         // Лайки просмотры комментарии
@@ -117,6 +103,7 @@ class News {
         self.content = content
         self.date = date
         self.picture = picture
+        self.unixDateTime = nil
     }
     
     init (title: String, content: String, date: String, picture: String, likes: Int) {
@@ -125,6 +112,7 @@ class News {
         self.date = date
         self.picture = picture
         self.likes = likes
+        self.unixDateTime = nil
     }
     
     init (title: String, content: String, date: String, picture: String, likes: Int, views: Int) {
@@ -134,6 +122,7 @@ class News {
         self.picture = picture
         self.likes = likes
         self.views = views
+        self.unixDateTime = nil
     }
     
     init (title: String, content: String, date: String, picture: String, likes: Int, views: Int, comments: Int) {
@@ -144,6 +133,7 @@ class News {
         self.likes = likes
         self.comments = comments
         self.views = views
+        self.unixDateTime = nil
     }
     
     init (title: String, content: String, date: String, picture: String, likes: Int, views: Int, comments: Int, shared: Int) {
@@ -155,6 +145,7 @@ class News {
         self.comments = comments
         self.views = views
         self.shared = shared
+        self.unixDateTime = nil
     }
     
     init (title: String, content: String, date: String, picture: String, likes: Int, views: Int, comments: Int, shared: Int, isLiked: Bool) {
@@ -167,6 +158,7 @@ class News {
         self.views = views
         self.shared = shared
         self.isLiked = isLiked
+        self.unixDateTime = nil
     }
     
     init (title: String, content: String, date: String, picture: String?, likes: Int, views: Int, comments: Int, shared: Int, isLiked: Bool, avatar: String?) {
@@ -180,5 +172,6 @@ class News {
         self.shared = shared
         self.isLiked = isLiked
         self.avatar = avatar
+        self.unixDateTime = nil
     }
 }

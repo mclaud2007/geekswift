@@ -78,7 +78,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="pT6-Id-s5d">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="80" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="pT6-Id-s5d">
                                 <rect key="frame" x="0.0" y="88" width="414" height="725"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <searchBar key="tableHeaderView" contentMode="redraw" id="xM1-Iq-sz8">
@@ -87,26 +87,24 @@
                                     <textInputTraits key="textInputTraits"/>
                                 </searchBar>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="GroupsCell" rowHeight="76" id="Gtl-aF-iAV" customClass="GroupsCell" customModule="vkapp" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="72" width="414" height="76"/>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="GroupsCell" id="Gtl-aF-iAV" customClass="GroupsCell" customModule="vkapp" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="72" width="414" height="80"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" tableViewCell="Gtl-aF-iAV" id="U8q-KJ-kjJ">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="76"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" tableViewCell="Gtl-aF-iAV" id="U8q-KJ-kjJ">
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="80"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qLo-nj-gcM">
-                                                    <rect key="frame" x="70" y="28" width="324" height="20"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qLo-nj-gcM">
+                                                    <rect key="frame" x="352" y="28" width="42" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LG5-Im-9gE" customClass="AvatarView" customModule="vkapp" customModuleProvider="target">
-                                                    <rect key="frame" x="10" y="10" width="50" height="56"/>
+                                                <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LG5-Im-9gE" customClass="AvatarView" customModule="vkapp" customModuleProvider="target">
+                                                    <rect key="frame" x="10" y="10" width="332" height="56"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" constant="50" id="5QZ-n5-MyV"/>
-                                                        <constraint firstAttribute="width" secondItem="LG5-Im-9gE" secondAttribute="height" multiplier="1:1" priority="999" id="U5v-x7-ClS"/>
-                                                    </constraints>
                                                     <userDefinedRuntimeAttributes>
                                                         <userDefinedRuntimeAttribute type="number" keyPath="shdowRadius">
                                                             <real key="value" value="1"/>
@@ -120,14 +118,6 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </view>
                                             </subviews>
-                                            <constraints>
-                                                <constraint firstAttribute="bottom" secondItem="LG5-Im-9gE" secondAttribute="bottom" constant="10" id="CqS-AO-c3f"/>
-                                                <constraint firstItem="qLo-nj-gcM" firstAttribute="centerY" secondItem="U8q-KJ-kjJ" secondAttribute="centerY" id="Izl-FI-VK7"/>
-                                                <constraint firstItem="LG5-Im-9gE" firstAttribute="leading" secondItem="U8q-KJ-kjJ" secondAttribute="leading" constant="10" id="YTh-AU-2Ao"/>
-                                                <constraint firstItem="LG5-Im-9gE" firstAttribute="top" secondItem="U8q-KJ-kjJ" secondAttribute="top" constant="10" id="gzX-E7-xni"/>
-                                                <constraint firstAttribute="trailing" secondItem="qLo-nj-gcM" secondAttribute="trailing" constant="20" id="hdR-uZ-Mla"/>
-                                                <constraint firstItem="qLo-nj-gcM" firstAttribute="leading" secondItem="LG5-Im-9gE" secondAttribute="trailing" constant="10" id="hy7-0c-1D6"/>
-                                            </constraints>
                                         </tableViewCellContentView>
                                         <connections>
                                             <outlet property="lblGroupsImage" destination="LG5-Im-9gE" id="IA8-aL-bGA"/>
@@ -300,7 +290,7 @@
                                     <constraint firstItem="pnU-q3-VAR" firstAttribute="top" secondItem="51d-Yd-BlY" secondAttribute="top" constant="10" id="hSJ-8C-vz5"/>
                                 </constraints>
                             </view>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="fRO-kK-Mga">
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" prefetchingEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fRO-kK-Mga">
                                 <rect key="frame" x="0.0" y="80" width="414" height="596"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="FVy-kL-e9f">
@@ -457,7 +447,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="singleLineEtched" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="GtN-gG-CCN">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="GtN-gG-CCN">
                                 <rect key="frame" x="0.0" y="88" width="414" height="725"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>

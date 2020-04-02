@@ -36,7 +36,7 @@ class VKService {
     
     public func parseNews(from json: JSON, complition: @escaping ([News]) -> Void) {
         // Массив со списком источникв
-        var groupList = [Group]()
+        var groupList = [RLMGroup]()
         var usersList = [Friend]()
         
         // Результат парсинга json
@@ -64,7 +64,7 @@ class VKService {
                         let _ = group["photo_50"].string
                     {
                         
-                        groupList.append(Group(from: group))
+                        groupList.append(RLMGroup(from: group))
                     }
                 }
             }
@@ -98,21 +98,27 @@ class VKService {
                     NewsList.append(News(json: item, groups: groupList, profiles: usersList))
                 }
             }
-        }
-        
-        // Для собираем новости в основном потоке
-        parseNewsSourceDispatch.notify(queue: DispatchQueue.main) {
+            
+            // Возвращаем список новостей в комплишен
             complition(NewsList)
         }
     }
     
-    public func getNewsList(completion: @escaping ((Swift.Result<[News], Error>) -> Void) ) {
-        let param: Parameters = [
+    public func getNewsList(startFrom: String? = nil, startTime: Double? = nil, completion: @escaping ((Swift.Result<[News], Error>, String?) -> Void) ) {
+        var param: Parameters = [
             "filters": "post",
             "return_banned": 0,
             "count": 50,
             "fields":"nickname,photo_50"
         ]
+        
+        if let startFrom = startFrom {
+            param["start_from"] = startFrom
+        }
+        
+        if let startTime = startTime {
+            param["start_time"] = startTime
+        }
         
         // Получаем данные
         VKService.shared.setCommand("newsfeed.get", param: param) { response in
@@ -121,17 +127,17 @@ class VKService {
                 let json = JSON(data)
                 
                 self.parseNews(from: json) { NewsList in
-                    completion(.success(NewsList))
+                    completion(.success(NewsList), json["response"]["next_from"].string)
                 }
                 
             case let .failure(error):
-                completion(.failure(error))
+                completion(.failure(error), nil)
             }
         }
     }
     
-    public func getGroupSearch(query: String, complition: @escaping (Swift.Result<[Group], Error>) -> Void) {
-        var localGroupList = [Group]()
+    public func getGroupSearch(query: String, complition: @escaping (Swift.Result<[RLMGroup], Error>) -> Void) {
+        var localGroupList = [RLMGroup]()
         
         let param: Parameters = [
             "user_id": AppSession.shared.getUserId(),
@@ -152,7 +158,7 @@ class VKService {
                             group["name"].string != nil,
                             group["photo_50"].string != nil {
                             
-                            localGroupList.append(Group(from: group))
+                            localGroupList.append(RLMGroup(from: group))
                         }
                     }
                     
@@ -171,7 +177,7 @@ class VKService {
         
     }
     
-    public func getGroupsList(complition: ((Swift.Result<[Group], Error>) -> Void)? = nil) {
+    public func getGroupsList(complition: ((Swift.Result<[RLMGroup], Error>) -> Void)? = nil) {
         let param: Parameters = [
             "user_id": AppSession.shared.getUserId(),
             "extended": 1,
@@ -196,23 +202,62 @@ class VKService {
         opq.addOperation(parse)
     }
     
-    // Получаем нужные нам размеры фото
-    func getPhotoUrlFrom(sizes: [JSON]) -> String {
-        if sizes.count > 0 {
-            let photoArr = sizes.filter({ $0["type"].stringValue == "r" })
-            
-            if photoArr.count > 0 {
-                return photoArr[0]["url"].stringValue
-            } else {
-                let photoArr = sizes.filter({ $0["type"].stringValue == "y" })
-                
-                if photoArr.count > 0 {
-                    return photoArr[0]["url"].stringValue
-                }
+    // Получаем нужные нам размеры фото из атачмента
+    func getPhotoMaxSizeFrom(attachments: [JSON]) -> JSON? {
+        let attacheTypeToSearch = ["photo", "link", "video", "doc"]
+        var attache: JSON?
+        var pSizes: [JSON]?
+        
+        for i in 0..<attacheTypeToSearch.count {
+            if let attacheTest = attachments.filter({ $0["type"].stringValue == attacheTypeToSearch[i] }).first {
+                attache = attacheTest
+                break
             }
         }
         
-        return ""
+        // Ищем массив с размерами
+        if let attache = attache {
+            switch attache["type"].stringValue {
+            case "photo":
+                pSizes = attache["photo"]["sizes"].arrayValue
+            case "video":
+                pSizes = attache["video"]["image"]["sizes"].arrayValue
+            case "link":
+                pSizes = attache["link"]["photo"]["sizes"].arrayValue
+            case "doc":
+                pSizes = attache["doc"]["preview"]["photo"]["sizes"].arrayValue
+            default:
+                break
+            }
+        }
+        
+        // Массив размеров найден
+        if let sizes = pSizes,
+            let photoMaxSize = VKService.shared.getPhotoMaxSizeFrom(sizes: sizes)
+        {
+            return photoMaxSize
+        }
+    
+        return nil
+    }
+    
+    // Получаем нужные нам размеры фото
+    func getPhotoMaxSizeFrom(sizes: [JSON]) -> JSON? {
+        if sizes.count > 0 {
+            //let neededSizes = ["m", "x", "p", "q", "r", "y"]
+            
+            // Возвращаем максимально доступный размер фотографии
+            return sizes.sorted { (first, second) -> Bool in
+                
+                if first["width"].intValue > second["width"].intValue {
+                    return true
+                } else {
+                    return false
+                }
+            }.first
+        }
+        
+        return nil
     }
     
     // Загружаем фотографии пользователя
@@ -237,13 +282,15 @@ class VKService {
                     for photo in json["response"]["items"].arrayValue {
                         if let pID = photo["id"].int,
                             let date = photo["date"].int,
-                            let sizes = photo["sizes"].array
+                            let sizes = photo["sizes"].array,
+                            let photoMaxSizesURL = self.getPhotoMaxSizeFrom(sizes: sizes),
+                            let photoURL = photoMaxSizesURL["url"].string
                         {
                             let likes = photo["likes"]["count"].int ?? -1
                             let liked = photo["likes"]["user_likes"] == 0 ? false : true
-                            let photo = self.getPhotoUrlFrom(sizes: sizes)
                             
-                            localPhotoList.append(Photo(friendID: friendId, photoId: pID, photo: photo, likes: likes, liked: liked, date: date))
+                            localPhotoList.append(Photo(friendID: friendId, photoId: pID, photo: photoURL, likes: likes, liked: liked, date: date))
+                            
                         }
                     }
                     

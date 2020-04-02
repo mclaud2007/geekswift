@@ -17,9 +17,9 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iSZ-Kl-qYh" customClass="LikeControl" customModule="vkapp" customModuleProvider="target">
-                        <rect key="frame" x="25" y="5" width="50" height="20"/>
+                        <rect key="frame" x="25" y="5" width="50" height="30"/>
                         <constraints>
-                            <constraint firstAttribute="height" constant="20" id="Rzi-oq-ff7"/>
+                            <constraint firstAttribute="height" priority="999" constant="20" id="Rzi-oq-ff7"/>
                             <constraint firstAttribute="width" constant="50" id="fv4-ew-xTu"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="ENb-Sn-Jmg"/>
@@ -82,28 +82,28 @@
                     </label>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="8a7-AL-FIR" firstAttribute="top" secondItem="3mg-6r-RBQ" secondAttribute="top" constant="5" id="23u-Iw-3SA"/>
-                    <constraint firstItem="eCb-tj-O9y" firstAttribute="trailing" secondItem="3mg-6r-RBQ" secondAttribute="trailing" constant="-25" id="50n-8L-F7T"/>
-                    <constraint firstItem="iSZ-Kl-qYh" firstAttribute="leading" secondItem="3mg-6r-RBQ" secondAttribute="leading" constant="25" id="CkP-7a-El2"/>
-                    <constraint firstItem="3mg-6r-RBQ" firstAttribute="bottom" secondItem="vlQ-U1-Eou" secondAttribute="bottom" constant="5" id="LPM-6s-OwD"/>
-                    <constraint firstItem="3mg-6r-RBQ" firstAttribute="bottom" secondItem="JJr-E2-XdW" secondAttribute="bottom" constant="5" id="MxB-uH-DeF"/>
+                    <constraint firstItem="8a7-AL-FIR" firstAttribute="top" secondItem="5fg-oj-2uU" secondAttribute="top" constant="5" id="23u-Iw-3SA"/>
+                    <constraint firstItem="eCb-tj-O9y" firstAttribute="trailing" secondItem="5fg-oj-2uU" secondAttribute="trailing" constant="-25" id="50n-8L-F7T"/>
+                    <constraint firstItem="iSZ-Kl-qYh" firstAttribute="leading" secondItem="5fg-oj-2uU" secondAttribute="leading" constant="25" id="CkP-7a-El2"/>
+                    <constraint firstAttribute="bottom" secondItem="vlQ-U1-Eou" secondAttribute="bottom" constant="5" id="LPM-6s-OwD"/>
+                    <constraint firstAttribute="bottom" secondItem="JJr-E2-XdW" secondAttribute="bottom" constant="5" id="MxB-uH-DeF"/>
                     <constraint firstItem="pHV-ri-MTI" firstAttribute="trailing" secondItem="vlQ-U1-Eou" secondAttribute="leading" constant="-5" id="OmZ-4v-9fT"/>
-                    <constraint firstItem="21Y-sN-1TD" firstAttribute="top" secondItem="3mg-6r-RBQ" secondAttribute="top" constant="5" id="PBY-us-ytA"/>
-                    <constraint firstItem="3mg-6r-RBQ" firstAttribute="bottom" secondItem="eCb-tj-O9y" secondAttribute="bottom" constant="5" id="Qba-br-dQI"/>
-                    <constraint firstItem="JJr-E2-XdW" firstAttribute="top" secondItem="3mg-6r-RBQ" secondAttribute="top" constant="5" id="S5d-rI-ByB"/>
+                    <constraint firstItem="21Y-sN-1TD" firstAttribute="top" secondItem="5fg-oj-2uU" secondAttribute="top" constant="5" id="PBY-us-ytA"/>
+                    <constraint firstItem="iSZ-Kl-qYh" firstAttribute="bottom" secondItem="5fg-oj-2uU" secondAttribute="bottom" constant="5" id="PMa-2Z-2LU"/>
+                    <constraint firstAttribute="bottom" secondItem="eCb-tj-O9y" secondAttribute="bottom" constant="5" id="Qba-br-dQI"/>
+                    <constraint firstItem="JJr-E2-XdW" firstAttribute="top" secondItem="5fg-oj-2uU" secondAttribute="top" constant="5" id="S5d-rI-ByB"/>
                     <constraint firstItem="vlQ-U1-Eou" firstAttribute="trailing" secondItem="eCb-tj-O9y" secondAttribute="leading" constant="-5" id="Vux-5b-YRx"/>
-                    <constraint firstItem="3mg-6r-RBQ" firstAttribute="bottom" secondItem="8a7-AL-FIR" secondAttribute="bottom" constant="5" id="Yse-R8-ZnX"/>
-                    <constraint firstItem="eCb-tj-O9y" firstAttribute="top" secondItem="3mg-6r-RBQ" secondAttribute="top" constant="5" id="bDX-Lf-gFT"/>
-                    <constraint firstItem="iSZ-Kl-qYh" firstAttribute="top" secondItem="3mg-6r-RBQ" secondAttribute="top" constant="5" id="bha-Id-MW1"/>
-                    <constraint firstItem="pHV-ri-MTI" firstAttribute="top" secondItem="3mg-6r-RBQ" secondAttribute="top" constant="5" id="cYw-Dx-Z7J"/>
-                    <constraint firstItem="3mg-6r-RBQ" firstAttribute="bottom" secondItem="21Y-sN-1TD" secondAttribute="bottom" constant="5" id="d8n-hY-LPi"/>
-                    <constraint firstItem="vlQ-U1-Eou" firstAttribute="top" secondItem="3mg-6r-RBQ" secondAttribute="top" constant="5" id="f0H-U1-C34"/>
+                    <constraint firstAttribute="bottom" secondItem="8a7-AL-FIR" secondAttribute="bottom" constant="5" id="Yse-R8-ZnX"/>
+                    <constraint firstItem="eCb-tj-O9y" firstAttribute="top" secondItem="5fg-oj-2uU" secondAttribute="top" constant="5" id="bDX-Lf-gFT"/>
+                    <constraint firstItem="iSZ-Kl-qYh" firstAttribute="top" secondItem="5fg-oj-2uU" secondAttribute="top" constant="5" id="bha-Id-MW1"/>
+                    <constraint firstItem="pHV-ri-MTI" firstAttribute="top" secondItem="5fg-oj-2uU" secondAttribute="top" constant="5" id="cYw-Dx-Z7J"/>
+                    <constraint firstAttribute="bottom" secondItem="21Y-sN-1TD" secondAttribute="bottom" constant="5" id="d8n-hY-LPi"/>
+                    <constraint firstItem="vlQ-U1-Eou" firstAttribute="top" secondItem="5fg-oj-2uU" secondAttribute="top" constant="5" id="f0H-U1-C34"/>
                     <constraint firstItem="JJr-E2-XdW" firstAttribute="trailing" secondItem="pHV-ri-MTI" secondAttribute="leading" constant="-10" id="gIK-xU-Hec"/>
-                    <constraint firstItem="3mg-6r-RBQ" firstAttribute="bottom" secondItem="pHV-ri-MTI" secondAttribute="bottom" constant="5" id="nd9-ZR-1M7"/>
+                    <constraint firstAttribute="bottom" secondItem="pHV-ri-MTI" secondAttribute="bottom" constant="5" id="nd9-ZR-1M7"/>
                     <constraint firstItem="21Y-sN-1TD" firstAttribute="leading" secondItem="iSZ-Kl-qYh" secondAttribute="trailing" constant="5" id="xAh-hR-ELJ"/>
                     <constraint firstItem="8a7-AL-FIR" firstAttribute="leading" secondItem="21Y-sN-1TD" secondAttribute="trailing" constant="5" id="zpy-Hy-pfq"/>
                 </constraints>
-                <viewLayoutGuide key="safeArea" id="3mg-6r-RBQ"/>
             </tableViewCellContentView>
             <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
             <connections>

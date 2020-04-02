@@ -80,7 +80,7 @@ class FriendsPhotoController: UIViewController {
             // И ставим его фотографию
             if let photo = friend.photo {
                 let curPhotoIndexPath = IndexPath(item: 0, section: 0)
-                friendAvatarPhoto.showImage(imageURL: photo, indexPath: curPhotoIndexPath)
+                friendAvatarPhoto.showImage(image: photo, indexPath: curPhotoIndexPath)
             } else {
                 friendAvatarPhoto.showImage(image: getNotFoundPhoto())
             }
@@ -89,6 +89,24 @@ class FriendsPhotoController: UIViewController {
             subscribeToRealmChanges(by: friend.userId)
             
             // Запрашиваем данные
+            loadPhoto()
+            
+            // Локализуем кнопку назад
+            navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
+            navigationItem.backBarButtonItem?.tintColor = DefaultStyle.self.Colors.tint
+            
+            photoListCollectionView.refreshControl = UIRefreshControl()
+            photoListCollectionView.refreshControl?.attributedTitle = NSAttributedString(string: NSLocalizedString("Loading ...", comment: ""))
+            photoListCollectionView.refreshControl?.addTarget(self, action: #selector(loadPhoto), for: .valueChanged)
+            
+        } else {
+            navigationController?.popViewController(animated: true)
+        }
+    }
+    
+    @objc func loadPhoto(){
+        // Запрашиваем данные
+        if let friend = selectedFriend {
             VKService.shared.getPhotosBy(friendId: friend.userId) { result in
                 switch result {
                 case let .success(photosList):
@@ -102,14 +120,11 @@ class FriendsPhotoController: UIViewController {
                 case let .failure(err):
                     self.showErrorMessage(message: err.localizedDescription)
                 }
+                
+                self.photoListCollectionView.refreshControl?.endRefreshing()
             }
-            
-            // Локализуем кнопку назад
-            navigationItem.backBarButtonItem?.title = NSLocalizedString("Back", comment: "")
-            navigationItem.backBarButtonItem?.tintColor = DefaultStyle.self.Colors.tint
-            
         } else {
-            navigationController?.popViewController(animated: true)
+            self.photoListCollectionView.refreshControl?.endRefreshing()
         }
     }
     

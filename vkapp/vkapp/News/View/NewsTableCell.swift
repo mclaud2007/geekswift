@@ -28,7 +28,7 @@ class NewsTableCell: UITableViewCell {
         lblNewsContent.text = newsCell.content
         
         if let avatar = newsCell.avatar {
-            imgAvatarView.showImage(imageURL: avatar)
+            imgAvatarView.showImage(image: avatar)
         } else {
             imgAvatarView.showImage(image: getNotFoundPhoto())
         }

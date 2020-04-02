@@ -94,12 +94,15 @@ class AvatarView: UIControl {
         }
     }
     
-    public func showImage(imageURL: String, indexPath: IndexPath? = nil){
+    public func showImage(image: String, indexPath: IndexPath? = nil){
         // Меняем адрес картинки
-        if (imageURL.isEmpty){
+        if (image.isEmpty){
             self.avatarImageView.image = UIImage(named: "photonotfound")
         } else {
-            photoService.getPhoto(by: imageURL) { result in
+            // Для начала выставляем placeholder
+            self.avatarImageView.image = UIImage(named: "loadplaceholder")
+            
+            self.photoService.getPhoto(by: image) { result in
                 DispatchQueue.main.async {
                     if let image = result {
                         self.avatarImageView.image = image

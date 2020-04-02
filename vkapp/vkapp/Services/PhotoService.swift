@@ -63,7 +63,9 @@ class PhotoService {
         
         if let data = image.pngData() {
             // Сохраняем изображение в память
-            PhotoService.cachedImages[fileName.path] = image
+            DispatchQueue.main.async {
+                PhotoService.cachedImages[fileName.path] = image
+            }
             
             do {
                 try data.write(to: fileName)
@@ -93,29 +95,25 @@ class PhotoService {
     public func getPhoto(by urlString: String, complition: @escaping (UIImage?) -> Void) {
         if let fileName = getFileName(from: urlString),
             let image = PhotoService.cachedImages[fileName.path] {
-            print("From memory")
             complition(image)
             
         } else if let image = getPhotoFromDisk(by: urlString) {
-            print("From cache")
             complition(image)
             
         } else {
             if let url = URL(string: urlString) {
-                DispatchQueue.global().async {
-                    AF.request(url).responseData { resp in
-                        if let imageData = resp.data,
-                            let image = UIImage(data: imageData)
-                        {
-                            // Сохраняем фотографию
-                            self.setPhotoToDisk(for: urlString, image: image)
-
-                            print("From network")
-                            // Вызываем замыкание
-                            complition(image)
-                        }
+                AF.request(url).responseData(queue: .global(qos: .userInitiated)) { resp in
+                    if let imageData = resp.data,
+                        let image = UIImage(data: imageData)
+                    {
+                        // Сохраняем фотографию
+                        self.setPhotoToDisk(for: urlString, image: image)
+                        
+                        // Вызываем замыкание
+                        complition(image)
                     }
                 }
+                
             } else {
                 complition(nil)
             }

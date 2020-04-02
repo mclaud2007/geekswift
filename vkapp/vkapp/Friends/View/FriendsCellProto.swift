@@ -19,6 +19,6 @@ class FriendsCellProto: UITableViewCell {
     
     public func configure(with friend: Friend, indexPath: IndexPath?){
         self.lblFriendsName.text = friend.name
-        self.friendPhotoImageView.showImage(imageURL: friend.photo ?? "", indexPath: indexPath)
+        self.friendPhotoImageView.showImage(image: friend.photo ?? "", indexPath: indexPath)
     }
 }
