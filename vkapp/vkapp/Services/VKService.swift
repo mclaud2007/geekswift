@@ -11,7 +11,7 @@ import Alamofire
 import SwiftyJSON
 import PromiseKit
 
-class VKService {
+class VKService: VKServiceProxy {
     private let vkAPIUrl = "api.vk.com"
     private let vkAPIUriSuffix = "/method"
     let vkAPIVersion = "5.103"
