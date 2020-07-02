@@ -2,408 +2,461 @@
 //  VKService.swift
 //  vkapp
 //
-//  Created by Григорий Мартюшин on 26.01.2020.
+//  Created by Григорий Мартюшин on 01.05.2020.
 //  Copyright © 2020 Григорий Мартюшин. All rights reserved.
 //
 
 import Foundation
-import Alamofire
-import SwiftyJSON
-import PromiseKit
 
-class VKService: VKServiceProxy {
-    private let vkAPIUrl = "api.vk.com"
+class VKService {
+    private let vkApiUrlString = "api.vk.com"
     private let vkAPIUriSuffix = "/method"
-    let vkAPIVersion = "5.103"
+    private let vkAPIVersion = "5.103"
     
+    private let vkAPISchema = "https"
+    private let vkClientID = "7503380"
+    private let vkClientSecret = "34RFFYCFu7tVqp7Kjn1B"
+    
+    // Полный адрес для запроса методов АПИ
+    private lazy var vkApiUrlComponents: URLComponents = {
+        let session = VKService.shared.session
+            
+        var url = URLComponents()
+        url.scheme = VKService.shared.vkAPISchema
+        url.host = VKService.shared.vkApiUrlString
+        
+        // Если токена нет - все тлен, выбьем ошибку авторизации при вызове АПИ
+        guard let token = session.token else { return url }
+        
+        // Список дефолтных параметров, которые должны быть всегда
+        url.queryItems = [
+            URLQueryItem(name: "access_token", value: token),
+            URLQueryItem(name: "v", value: VKService.shared.vkAPIVersion)
+        ]
+        
+        return url
+    }()
+    
+    // Параметры запроса формы входа
     private let vkOAuthURL = "oauth.vk.com"
     private let vkOAuthUriSuffix = "/authorize"
     private let vkOAuthBackLink = "https://oauth.vk.com/blank.html"
+    private let vkOauthScope = "wall,photos,offline,friends,stories,status,groups"
+    private let vkOauthTimeout = 10.0
     
-    private let vkAPISchema = "https"
-    private let vkClientID = "7238798"
-    private let vkClientSecret = "FkU2VoEQb7vVr5esriPQ"
+    // Полный адрес для запроса авторизации
+    private lazy var vkOAuthUrlComponents: URLComponents = {
+        var url = URLComponents()
+        url.scheme = VKService.shared.vkAPISchema
+        url.host = VKService.shared.vkOAuthURL
+        url.path = VKService.shared.vkOAuthUriSuffix
+        url.queryItems = [
+            URLQueryItem(name: "client_id", value: VKService.shared.vkClientID),
+            URLQueryItem(name: "display", value: "mobile"),
+            URLQueryItem(name: "redirect_url", value: VKService.shared.vkOAuthBackLink),
+            URLQueryItem(name: "response_type", value: "token"),
+            URLQueryItem(name: "scope", value: VKService.shared.vkOauthScope)
+        ]
+        
+        return url
+    }()
     
     // Седалем синглтоном
     static let shared = VKService()
     
+    // Данные сессии
+    private let session = AppSession.shared
+    
+    // Служба сети
+    private let network = NetworkService(configuration: nil)
+    
+    // Список возможных ошибок сервиса
     enum VKError: Error {
         case FriendListIsEmpty
         case PhotosListIsEmpty
         case GroupsListIsEmpty
         case GroupsNotFound
+        case NewsListEmpty
+        case EmptyURL
+        case NoToken
+        case UserNotFound
+        case UserIdNotFoundInSession
     }
     
-    public func parseNews(from json: JSON, complition: @escaping ([News]) -> Void) {
-        // Массив со списком источникв
-        var groupList = [RLMGroup]()
-        var usersList = [Friend]()
-        
-        // Результат парсинга json
-        var NewsList = [News]()
-        
-        guard let items = json["response"]["items"].array else { return complition(NewsList) }
-        
-        // Группа для обработки профиля и групп
-        let parseNewsSourceDispatch = DispatchGroup()
-        
-        // Новостей нет - дальше нет смысла смотреть
-        if items.count == 0 {
-            complition(NewsList)
-        }
-        
-        // Закинем разбор групп и профилей в отдельный поток
-        DispatchQueue.global().async(group: parseNewsSourceDispatch) {
-            // Вернулся список групп
-            if let groups = json["response"]["groups"].array,
-                groups.count > 0 {
-                
-                for group in groups {
-                    if let _ = group["id"].int,
-                        let _ = group["name"].string,
-                        let _ = group["photo_50"].string
-                    {
-                        
-                        groupList.append(RLMGroup(from: group))
-                    }
-                }
-            }
-        }
-            
-        DispatchQueue.global().async(group: parseNewsSourceDispatch) {
-            // Вернулся список профилей - источников новостей
-            if let profiles = json["response"]["profiles"].array,
-                profiles.count > 0 {
-                
-                for profile in profiles {
-                    if let pID = profile["id"].int,
-                        let pFirstName = profile["first_name"].string,
-                        let pLastName = profile["last_name"].string,
-                        let pAvatar = profile["photo_50"].string
-                    {
-                        usersList.append(Friend(userId: pID, photo: pAvatar, name: pFirstName + " " + pLastName))
-                    }
-                }
-            }
-        }
-        
-        parseNewsSourceDispatch.notify(queue: DispatchQueue.main) {
-            // Сформируем список новостей
-            for item in items {
-                if let _ = item["source_id"].int,
-                    let _ = item["date"].double,
-                    let text = item["text"].string,
-                    !text.isEmpty
-                {
-                    NewsList.append(News(json: item, groups: groupList, profiles: usersList))
-                }
-            }
-            
-            // Возвращаем список новостей в комплишен
-            complition(NewsList)
-        }
-    }
-    
-    public func getNewsList(startFrom: String? = nil, startTime: Double? = nil, completion: @escaping ((Swift.Result<[News], Error>, String?) -> Void) ) {
-        var param: Parameters = [
-            "filters": "post",
-            "return_banned": 0,
-            "count": 50,
-            "fields":"nickname,photo_50"
+    // Получение списка новостей
+    func getNewsList(startFrom: String? = nil, startTime: Double? = nil, completion: @escaping ((Result<[News], Error>, String?) -> Void) )  {
+        var param = [
+            URLQueryItem(name: "filters", value: "post"),
+            URLQueryItem(name: "return_banned", value: "0"),
+            URLQueryItem(name: "count", value: "50"),
+            URLQueryItem(name: "fields", value: "nickname,photo_50")
         ]
         
-        if let startFrom = startFrom {
-            param["start_from"] = startFrom
+        if let _ = startFrom {
+            param.append(URLQueryItem(name: "start_from", value: startFrom))
         }
         
         if let startTime = startTime {
-            param["start_time"] = startTime
+            param.append(URLQueryItem(name: "start_time", value: String(startTime)))
         }
         
-        // Получаем данные
-        VKService.shared.setCommand("newsfeed.get", param: param) { response in
-            switch response.result {
-            case let .success(data):
-                let json = JSON(data)
-                
-                self.parseNews(from: json) { NewsList in
-                    completion(.success(NewsList), json["response"]["next_from"].string)
-                }
-                
-            case let .failure(error):
-                completion(.failure(error), nil)
-            }
-        }
-    }
-    
-    public func getGroupSearch(query: String, complition: @escaping (Swift.Result<[RLMGroup], Error>) -> Void) {
-        var localGroupList = [RLMGroup]()
-        
-        let param: Parameters = [
-            "user_id": AppSession.shared.getUserId(),
-            "type": "group",
-            "q": query,
-            "count": 10,
-        ]
-        
-        VKService.shared.setCommand("groups.search", param: param) { response in
-            switch response.result {
-            case let .success(data):
-                let json = JSON(data)
-                
-                // что-то нашли
-                if (json["response"]["count"].intValue > 0){
-                    for group in json["response"]["items"].arrayValue {
-                        if group["id"].int != nil,
-                            group["name"].string != nil,
-                            group["photo_50"].string != nil {
-                            
-                            localGroupList.append(RLMGroup(from: group))
-                        }
-                    }
-                    
-                    if localGroupList.count > 0 {
-                        complition(.success(localGroupList))
-                    } else {
-                        complition(.failure(VKError.GroupsNotFound))
-                    }
-                } else {
-                    complition(.failure(VKError.GroupsNotFound))
-                }
-            case let .failure(error):
-                complition(.failure(error))
-            }
-        }
-        
-    }
-    
-    public func getGroupsList(complition: ((Swift.Result<[RLMGroup], Error>) -> Void)? = nil) {
-        let param: Parameters = [
-            "user_id": AppSession.shared.getUserId(),
-            "extended": 1,
-            "fields": "photo_50,name"
-        ]
-        
-        let op = GetDataOperation(method: "groups.get", param: param)
-        let opq = OperationQueue()
-        opq.addOperation(op)
-        
-        let parse = ParseData()
-        parse.addDependency(op)
-        
-        parse.completionBlock = {
-            if parse.outputData.count > 0 {
-                complition?(.success(parse.outputData))
-            } else {
-                complition?(.failure(VKError.GroupsListIsEmpty))
-            }
-        }
-        
-        opq.addOperation(parse)
-    }
-    
-    // Получаем нужные нам размеры фото из атачмента
-    func getPhotoMaxSizeFrom(attachments: [JSON]) -> JSON? {
-        let attacheTypeToSearch = ["photo", "link", "video", "doc"]
-        var attache: JSON?
-        var pSizes: [JSON]?
-        
-        for i in 0..<attacheTypeToSearch.count {
-            if let attacheTest = attachments.filter({ $0["type"].stringValue == attacheTypeToSearch[i] }).first {
-                attache = attacheTest
-                break
-            }
-        }
-        
-        // Ищем массив с размерами
-        if let attache = attache {
-            switch attache["type"].stringValue {
-            case "photo":
-                pSizes = attache["photo"]["sizes"].arrayValue
-            case "video":
-                pSizes = attache["video"]["image"]["sizes"].arrayValue
-            case "link":
-                pSizes = attache["link"]["photo"]["sizes"].arrayValue
-            case "doc":
-                pSizes = attache["doc"]["preview"]["photo"]["sizes"].arrayValue
-            default:
-                break
-            }
-        }
-        
-        // Массив размеров найден
-        if let sizes = pSizes,
-            let photoMaxSize = VKService.shared.getPhotoMaxSizeFrom(sizes: sizes)
+        // Готовим адрес для загрузки данных
+        if let rURI = VKService.shared.getApiMethodRequest("newsfeed.get", param: param),
+            let url = rURI.url
         {
-            return photoMaxSize
-        }
-    
-        return nil
-    }
-    
-    // Получаем нужные нам размеры фото
-    func getPhotoMaxSizeFrom(sizes: [JSON]) -> JSON? {
-        if sizes.count > 0 {
-            //let neededSizes = ["m", "x", "p", "q", "r", "y"]
-            
-            // Возвращаем максимально доступный размер фотографии
-            return sizes.sorted { (first, second) -> Bool in
-                
-                if first["width"].intValue > second["width"].intValue {
-                    return true
-                } else {
-                    return false
-                }
-            }.first
-        }
-        
-        return nil
-    }
-    
-    // Загружаем фотографии пользователя
-    func getPhotosBy(friendId: Int, completion: ((Swift.Result<[Photo], Error>) -> Void)? = nil){
-        var localPhotoList = [Photo]()
-    
-        let param: Parameters = [
-            "owner_id": friendId,
-            "extended": 1,
-            "need_hidden": 0,
-            "skip_hidden": 1,
-            "count": 200
-        ]
-        
-        // Запрашиваем все фотографии пользователя
-        VKService.shared.setCommand("photos.getAll", param: param) { response in
-            switch response.result {
-            case let .success(data):
-                let json = JSON(data)
-                
-                if json["response"]["count"].intValue > 0 {
-                    for photo in json["response"]["items"].arrayValue {
-                        if let pID = photo["id"].int,
-                            let date = photo["date"].int,
-                            let sizes = photo["sizes"].array,
-                            let photoMaxSizesURL = self.getPhotoMaxSizeFrom(sizes: sizes),
-                            let photoURL = photoMaxSizesURL["url"].string
-                        {
-                            let likes = photo["likes"]["count"].int ?? -1
-                            let liked = photo["likes"]["user_likes"] == 0 ? false : true
+            // Запускаем запрос
+            network.getDataFrom(url: url) { response in
+                switch response {
+                case .success(let data):
+                    if let jsonObject = try? JSONSerialization.jsonObject(with: data!, options: []),
+                        let jsonArray = jsonObject as? [String: Any],
+                        let response = jsonArray["response"] as? [String: Any]
+                    {
+                        if let news = response["items"] as? [[String: Any]] {
+                            var groupList = [Group]()
+                            var profilesList = [Friend]()
                             
-                            localPhotoList.append(Photo(friendID: friendId, photoId: pID, photo: photoURL, likes: likes, liked: liked, date: date))
+                            if let groups = response["groups"] as? [[String: Any]] {
+                                groupList = groups.map { Group(from: $0) }
+                            }
                             
+                            if let profiles = response["profiles"] as? [[String: Any]] {
+                                profilesList = profiles.map { Friend(from: $0) }
+                            }
+                        
+                            let newsList = news.map { News(from: $0, groups: groupList, profiles: profilesList) }
+                            let nextFrom = response["next_from"] as? String
+                            
+                            completion(.success(newsList), nextFrom)
+                        } else {
+                            completion(.failure(VKError.NewsListEmpty), nil)
                         }
+                    } else {
+                        completion(.failure(VKError.NewsListEmpty), nil)
                     }
                     
-                    // Что-то таки нашли
-                    if localPhotoList.count > 0 {
-                        completion?(.success(localPhotoList))
+                    
+                    break
+                case .failure(let err):
+                    completion(.failure(err), nil)
+                    break;
+                }
+            }
+        }
+    }
+        
+    // Получение информации о пользователи
+    func getUserInfo(completion: @escaping (Result<[String: Any], Error>) -> Void) {
+        let userInfoParam = [URLQueryItem(name: "fields", value: "nickname,photo_50")];
+        
+        // Готовим адрес для запроса данных
+        if let rURI = VKService.shared.getApiMethodRequest("users.get", param: userInfoParam),
+            let url = rURI.url
+        {
+            // Запускаем запрос на выполнение
+            network.getDataFrom(url: url) { result in
+                switch result {
+                case .success(let data):
+                    if let jsonObject = try? JSONSerialization.jsonObject(with: data!, options: []) {
+                        if let jsonArray = jsonObject as? [String: Any],
+                            let response = jsonArray["response"] as? [[String: Any]],
+                            let userInfo = response.first
+                        {
+                            completion(.success(userInfo))
+                        }
+                    } else {
+                        completion(.failure(VKError.UserNotFound))
+                    }
+                    
+                    break
+                case .failure(_):
+                    completion(.failure(VKError.UserNotFound))
+                    break
+                }
+            }
+            
+        } else {
+            completion(.failure(VKError.EmptyURL))
+        }
+    }
+    
+    // Поиск групп по ключевому слову
+    func getGroupListBy(query: String, completion: @escaping (Result<[Group], Error>) -> Void) {
+        let param = [
+            URLQueryItem(name: "user_id", value: String(session.userId)),
+            URLQueryItem(name: "type", value: "group"),
+            URLQueryItem(name: "q", value: query),
+            URLQueryItem(name: "count", value: "10"),
+        ]
+        
+        if let rURI = VKService.shared.getApiMethodRequest("groups.search", param: param),
+            let url = rURI.url
+        {
+            // Выполняем запрос
+            network.getDataFrom(url: url) { result in
+                switch result {
+                case .success(let data):
+                    // Разбираем пришедшие данные как JSON
+                    if let jsonResult = try? JSONSerialization.jsonObject(with: data!, options: []),
+                        
+                        // закастим главный объект как словарь
+                        let jsonRootObject = jsonResult as? [String: Any],
+                        
+                        // В нем найдем массив с ответом
+                        let jsonResponse = jsonRootObject["response"] as? [String: Any],
+                        
+                        // Общее количество найденых групп
+                        let totalGroups = jsonResponse["count"] as? Int,
+                        totalGroups > 0,
+                        
+                        // Непосредственно сами группы
+                        let groups = jsonResponse["items"] as? [[String: Any]]
+                    {
+                        let groupsList = groups.map { Group(from: $0) }
+                        completion(.success(groupsList))
+                    }
+                    
+                    break
+                case .failure(let err):
+                    completion(.failure(err))
+                    break
+                }
+            }
+        }
+    }
+    
+    // Получения списка групп пользователя
+    func getGroupList(completion: @escaping (Result<[Group], Error>) -> Void) {
+        let param = [
+            URLQueryItem(name: "user_id", value: String(session.userId)),
+            URLQueryItem(name: "extended", value: "1"),
+            URLQueryItem(name: "fields", value: "photo_50,name")
+        ]
+        
+        if let rURI = VKService.shared.getApiMethodRequest("groups.get", param: param),
+            let url = rURI.url
+        {
+            // Выполняем запрос
+            network.getDataFrom(url: url) { response in
+                switch response {
+                case .success(let data):
+                    // Первоначальный разбор вернувшегося JSON
+                    if let jsonResult = try? JSONSerialization.jsonObject(with: data!, options: []),
+                        let jsonRootObject = jsonResult as? [String: Any],
+                         
+                        // Верхний уровень - массив response
+                        let jsonResponse = jsonRootObject["response"] as? [String: Any],
+                        
+                        // Общее количество вернувщихся щаписей,
+                        let totalGroups = jsonResponse["count"] as? Int,
+                        
+                        // .. если их ноль то вернем ошибку
+                        totalGroups > 0,
+                        
+                        // Непосередственно сам список групп
+                        let groups = jsonResponse["items"] as? [[String: Any]]
+                    {
+                        let groupList = groups.map { Group(from: $0) }
+                        completion(.success(groupList))
+                    } else {
+                        completion(.failure(VKError.GroupsListIsEmpty))
+                    }
+                    
+                    break
+                    
+                case .failure(let err):
+                    completion(.failure(err))
+                    break
+                }
+            }
+        } else {
+            completion(.failure(VKError.EmptyURL))
+        }
+    }
+    
+    func getPhotosBy(friendId: Int, completion: ((Result<[Photo], Error>) -> Void)? = nil) {
+        let param = [
+            URLQueryItem(name: "owner_id", value: String(friendId)),
+            URLQueryItem(name: "extended", value: "1"),
+            URLQueryItem(name: "need_hidden", value: "0"),
+            URLQueryItem(name: "skip_hidden", value: "1"),
+            URLQueryItem(name: "count", value: "200")
+        ]
+        
+        if let rURI = VKService.shared.getApiMethodRequest("photos.getAll", param: param),
+            let url = rURI.url
+        {
+            // Выполняем запрос
+            network.getDataFrom(url: url) { result in
+                switch result {
+                case .success(let data):
+                    // Пытаемся разобрать вернувшийся json
+                    if let jsonResult = try? JSONSerialization.jsonObject(with: data!, options: []),
+                        // Кастим объект как словарь
+                        let jsonRootObject = jsonResult as? [String: Any],
+                        
+                        // Корневой уровень ответа
+                        let jsonResponse = jsonRootObject["response"] as? [String: Any],
+                        
+                        // Общее количество фотографий
+                        let totalPhotos = jsonResponse["count"] as? Int,
+                        
+                        // если их нет, то дальше идти нет смысл
+                        totalPhotos > 0,
+                        
+                        // Непосредственно список фотогрфаий
+                        let photos = jsonResponse["items"] as? [[String: Any]]
+                    {
+                        let photosList = photos.map { Photo(from: $0) }
+                        completion?(.success(photosList))
                     } else {
                         completion?(.failure(VKError.PhotosListIsEmpty))
                     }
-                } else {
-                    completion?(.failure(VKError.PhotosListIsEmpty))
+                    
+                    break
+                case .failure(let err):
+                    completion?(.failure(err))
+                    break
                 }
-            case let .failure(err):
-                completion?(.failure(err))
             }
         }
     }
     
-    // Загрузука списка друзей
-    public func getFriendsList() -> Promise<JSON> {
-        return Promise { seal in
-            let param: Parameters = [
-                "order": "hints",
-                "fields":"nickname,photo_50,city"
-            ]
-            // Получаем данные
-            VKService.shared.setCommand("friends.get", param: param) { response in
-                switch response.result {
-                case let .success(data):
-                    seal.fulfill(JSON(data))
+    // Получение списка друзей
+    func getFriendsList(completion: @escaping (Result<[Friend], Error>) -> Void) {
+        let param = [
+            URLQueryItem(name: "order", value: "hints"),
+            URLQueryItem(name: "fields", value: "nickname,photo_50,city,occupation,bdate")
+        ]
+        
+        // Получаем данные
+        if let rURI = VKService.shared.getApiMethodRequest("friends.get", param: param),
+            let url = rURI.url
+        {
+            network.getDataFrom(url: url) { result in
+                switch result {
+                case .success(let data):
+                    // Пытаемся разобрать полученный json
+                    if let jsonResult = try? JSONSerialization.jsonObject(with: data!, options: []),
+                        
+                        // Кастим объект как словарь
+                        let jsonRootObject = jsonResult as? [String: Any],
+                        
+                        // Верхний уровень
+                        let jsonResponse = jsonRootObject["response"] as? [String: Any],
+                        
+                        // Количество друзей
+                        let totalFriends = jsonResponse["count"] as? Int,
+                        
+                        // если их 0, то разбирать не нужно
+                        totalFriends > 0,
+                        
+                        // Список друзей
+                        let friends = jsonResponse["items"] as? [[String: Any]]
+                    {
+                        let friendList = friends.map { Friend(from: $0) }
+                        completion(.success(friendList))
+                    }
                     
-                case let .failure(error):
-                    seal.reject(error)
+                    break
+                case .failure(let err):
+                    completion(.failure(err))
+                    break
                 }
             }
+            
+        } else {
+            completion(.failure(VKError.EmptyURL))
         }
     }
     
     // MARK: Проверка токена на валидность
-    public func checkToken (token: String?, complition: @escaping (Bool) -> Void) {
+    func checkToken (token: String?, complition: @escaping (Bool) -> Void) {
         // Если токена нет, то смысла дальше продолжать тоже
         if token == nil {
             complition(false)
         }
-        
+
         // Для првоерки токена требуются доп. параметры
-        let param: Parameters = [
-            "client_id": self.vkClientID,
-            "client_secret": self.vkClientSecret,
-            "v": self.vkAPIVersion,
-            "token": token!
+        let param = [
+            URLQueryItem(name: "client_id", value: self.vkClientID),
+            URLQueryItem(name: "client_secret", value: self.vkClientSecret),
+            URLQueryItem(name: "token", value: token!),
+            URLQueryItem(name: "v", value: self.vkAPIVersion)
         ]
         
-        VKService.shared.setCommand("secure.checkToken", param: param) { response in
-            switch response.result {
-            case let .success(data):
-                let json = JSON(data)
-                
-                if json["response"]["success"].intValue == 1 {
-                    complition(true)
-                } else {
+        // Выполняем запрос к АПИ на проверку токена
+        if let rURI = VKService.shared.getApiMethodRequest("secure.checkToken", param: param),
+            let url = rURI.url
+        {
+            network.getDataFrom(url: url) { result in
+                switch result {
+                case .success(let data):
+                    let decoder = JSONDecoder()
+                    
+                    if let response = try? decoder.decode(TokenCheck.self, from: data!) {
+                        if response.item.success == 1 {
+                            complition(true)
+                        }
+                    } else {
+                        complition(false)
+                    }
+                    
+                    break
+                case .failure(_):
                     complition(false)
+                    break
                 }
+            }
+            
+        } else {
+            complition(false)
+        }
+    }
+    
+    // Если удалось восстановить сессию из БД - проверим токен на валидность
+    // В противном случае в замыкании вызывается WebKit с запросом доступа
+    func getCheckLogedIn(complition: @escaping (Bool) -> Void) {
+        // Если токен не определен, то возрващаем ошибку
+        if let token = session.token {
+            // В противном случае проверим его на корректность
+            VKService.shared.checkToken(token: token, complition: complition)
+            
+        } else {
+            complition(false)
+        }
+    }
+    
+    // Просто подготовка адреса для запроса ключа авторизации
+    func getOAuthRequest() -> URLRequest {
+        // Готовим запрос
+        let urlComponents = self.vkOAuthUrlComponents
+        return URLRequest(url: urlComponents.url!, cachePolicy: .useProtocolCachePolicy, timeoutInterval: vkOauthTimeout)
+    }
+    
+    // Просто подготовка адреса для запроса метода АПИ
+    private func getApiMethodRequest(_ apiMethod: String, param: [URLQueryItem]?) -> URLComponents? {
+        // Адрес запроса состоит из общей части
+        var url = self.vkApiUrlComponents
+        
+        // И кстомного пути
+        url.path = self.vkAPIUriSuffix + "/" + apiMethod
+        
+        // Для запроса всегда нужен токен!
+        guard let _ = session.token else { return nil }
+        
+        // Небольшой говнокод, для метода проверки токена параметры должны перезаписать дефолтные
+        if let param = param {
+            if apiMethod == "secure.checkToken" {
+                url.queryItems = param
                 
-            case .failure(_):
-                complition(false)
+            } else {
+                for item in param {
+                    url.queryItems?.append(item)
+                }
             }
         }
-    }
-    
-    // Добавление обязательных пареметров, которые требуются в каждом вызове
-    public func appSysParam(_ param: Parameters?) -> Parameters? {
-        // Проверим есть ли токен
-        guard let token = AppSession.shared.getToken() else { return param }
         
-        var newParam = param
-        
-        if newParam?["access_token"] == nil {
-            newParam!["access_token"] = token
-        }
-        
-        if newParam?["v"] == nil {
-            newParam!["v"] = self.vkAPIVersion
-        }
-        
-        return newParam
-    }
-    
-    // Отправка комманда к апи
-    public func setCommand (_ apiMethod: String, param: Parameters?, completion: ((AFDataResponse<Any>) -> Void)? ) {
-        let url = self.vkAPISchema + "://" + self.vkAPIUrl + self.vkAPIUriSuffix + "/" + apiMethod
-        
-        // Генерируем запрос
-        AF.request(url, method: .get, parameters: (apiMethod != "secure.checkToken" ? appSysParam(param) : param)).responseJSON { response in
-            completion?(response)
-        }
-    }
-    
-    public func getOAuthRequest () -> URLRequest {
-        // Готовим запрос
-        var urlComponents = URLComponents()
-        urlComponents.scheme = self.vkAPISchema
-        urlComponents.host = self.vkOAuthURL
-        urlComponents.path = self.vkOAuthUriSuffix
-        
-        urlComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: self.vkClientID),
-            URLQueryItem(name: "display", value: "mobile"),
-            URLQueryItem(name: "redirect_url", value: vkOAuthBackLink),
-            URLQueryItem(name: "response_type", value: "token"),
-            URLQueryItem(name: "scope", value: "wall,photos,offline,friends,stories,status,groups")
-        ]
-        
-        return URLRequest(url: urlComponents.url!)
+        return url
     }
 }

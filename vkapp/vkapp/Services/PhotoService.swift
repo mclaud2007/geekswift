@@ -2,27 +2,30 @@
 //  PhotoService.swift
 //  vkapp
 //
-//  Created by Григорий Мартюшин on 03.02.2020.
+//  Created by Григорий Мартюшин on 06.06.2020.
 //  Copyright © 2020 Григорий Мартюшин. All rights reserved.
 //
 
 import Foundation
 import UIKit
-import Alamofire
 
 class PhotoService {
-    // Время жизни кэша в секундах
+    private(set) var network = NetworkService(configuration: nil)
     private let cacheLifetime: TimeInterval = 60 * 60
-    private static var cachedImages = [String: UIImage]()
-    
-    // Путь где хранится кэш
-    private var cachePath: URL? {
-        let pathName: String = "images"
+    private(set) lazy var cachedImages = [String:UIImage]()
+    static let shared = PhotoService()
         
-        guard let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
-       
-        let url = cacheDirectory.appendingPathComponent(pathName, isDirectory: true)
+    // Путь к дирректории для кэша изображений
+    private var cacheDir: URL? {
+        let pathName = "images"
         
+        // Запрашиваем адрес директории кэша пользователя
+        guard let caheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
+        
+        // Дополняем её названием images
+        let url = caheDirectory.appendingPathComponent(pathName)
+
+        // Если её нет пытаемся создать
         if !FileManager.default.fileExists(atPath: url.path) {
             try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
         }
@@ -30,93 +33,111 @@ class PhotoService {
         return url
     }
     
-    // Получаем полный путь до файла где будем хранить кэш
-    private func getFileName (from urlString: String) -> URL? {
-        guard let cacheDirectory = self.cachePath else { return nil }
+    // Получаем название файла из url
+    private func getCacheFileNameUrlFrom(string: String, category: String?) -> URL? {
+        // Получилось получить URL из строки
+        guard let url = URL(string: string) else { return nil }
         
-        // Предварительно получим URL от строки
-        let urlTarget = URL(string: urlString)
+        // Нам известна директория с кэшем
+        guard var cacheDir = cacheDir else { return nil }
         
-        // Здесь будем хранить наше имя файла
-        var fileName: String
-        
-        // Получаем название файла из url
-        if let component = urlTarget,
-            !component.lastPathComponent.isEmpty
-        {
-            fileName = component.lastPathComponent
+        // Возможно указана категория изображения - тогда добавим еще и информацию о ней
+        if let category = category {
+            cacheDir = cacheDir.appendingPathComponent(category)
+            
+            // Также создадим её в случае необходимости
+            if !FileManager.default.fileExists(atPath: cacheDir.path) {
+                try? FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true, attributes: nil)
+            }
         }
-        // В крайнем случае получим просто из строки
-        else {
-            if let fName = urlString.split(separator: "/").last {
+        
+        // По умолчанию название будет браться из последнего компонента URL
+        var fileName = url.lastPathComponent
+        
+        // Если же оно пустое то попробуем получить иначе
+        if (fileName.isEmpty) {
+            if let fName = string.split(separator: "/").last {
                 fileName = String(fName)
             } else {
+                // В самом худшем случае у нас будет таймштамп
                 fileName = String(NSDate().timeIntervalSince1970)
             }
         }
         
-        return cacheDirectory.appendingPathComponent(fileName, isDirectory: false)
+        return cacheDir.appendingPathComponent(fileName)
     }
     
-    private func setPhotoToDisk(for urlString: String, image: UIImage) {
-        guard let fileName = getFileName(from: urlString) else { return }
+    // Попытаемся получить закешированные данные
+    private func getCachedPhotoBy(urlString: String, category photoCategory: String?) -> UIImage? {
+        // Получаем путь к закешированному файлу
+        guard let cachedFileName = getCacheFileNameUrlFrom(string: urlString, category: photoCategory),
+            let info = try? FileManager.default.attributesOfItem(atPath: cachedFileName.path),
+            let modificationDate = info[FileAttributeKey.modificationDate] as? Date else { return nil }
+
+        let lifeTime = Date().timeIntervalSince(modificationDate)
         
-        if let data = image.pngData() {
-            // Сохраняем изображение в память
-            DispatchQueue.main.async {
-                PhotoService.cachedImages[fileName.path] = image
-            }
+        guard lifeTime <= cacheLifetime else { return nil }
+        
+        // Изображение уже кешировано в ОЗУ
+        if let image = self.cachedImages[urlString] {
+            return image
             
-            do {
-                try data.write(to: fileName)
-            }
-            // Это кэш нет нужды обрабатывать ситуацию когда файл не записался
-            // Нет так нет ничего страшного
-            catch { }
+        } else {
+            guard let imageData = try? Data(contentsOf: cachedFileName),
+            let image = UIImage(data: imageData) else { return nil }
+            
+            // Сохраняем изображение в память
+            self.cachedImages[urlString] = image
+            
+            return image
         }
     }
     
-    private func getPhotoFromDisk(by urlString: String) -> UIImage? {
-        guard let fileName = getFileName(from: urlString),
-            let info = try? FileManager.default.attributesOfItem(atPath: fileName.path),
-            let modificationDate = info[FileAttributeKey.modificationDate] as? Date else { return nil }
+    // Попытаемся сохранить загруженное фото в кэш
+    private func setPhotoToCache(image: UIImage, urlString: String, category: String?) {
+        guard let cachedFilename = getCacheFileNameUrlFrom(string: urlString, category: category) else { return }
         
-        let lifeTime = Date().timeIntervalSince(modificationDate)
- 
-        guard lifeTime <= cacheLifetime,
-            let image = UIImage(contentsOfFile: fileName.path) else { return nil }
-        
-        // Сохраняем изображение в память
-        PhotoService.cachedImages[fileName.path] = image
-        
-        return image
+        if let data = image.pngData() {
+            do {
+                try data.write(to: cachedFilename)
+                
+                // Если у нас все получилось - положим изображение в массив в память
+                self.cachedImages[urlString] = image
+            } catch { }
+        }
     }
     
-    public func getPhoto(by urlString: String, complition: @escaping (UIImage?) -> Void) {
-        if let fileName = getFileName(from: urlString),
-            let image = PhotoService.cachedImages[fileName.path] {
-            complition(image)
-            
-        } else if let image = getPhotoFromDisk(by: urlString) {
-            complition(image)
-            
-        } else {
-            if let url = URL(string: urlString) {
-                AF.request(url).responseData(queue: .global(qos: .userInitiated)) { resp in
-                    if let imageData = resp.data,
-                        let image = UIImage(data: imageData)
-                    {
-                        // Сохраняем фотографию
-                        self.setPhotoToDisk(for: urlString, image: image)
+    func getPhotoBy(urlString: String, catrgory: String? = nil, completion: @escaping (UIImage?) -> Void) {
+        if let url = URL(string: urlString) {
+            // Попытаемся проверить существование кэша
+            if let image = getCachedPhotoBy(urlString: urlString, category: catrgory) {
+                completion(image)
+
+            } else {
+                network.getDataFrom(url: url) { [weak self] result in
+                    guard let self = self else { completion(nil); return }
+                    
+                    switch result {
+                    case .success(let data):
+                        if let data = data,
+                            let image = UIImage(data: data)
+                        {
+                            // Загрузка удалась - для ускорения следующей загрузки сохраним её в кэш
+                            self.setPhotoToCache(image: image, urlString: urlString, category: catrgory)
+                            completion(image)
+                        } else {
+                            completion(nil)
+                        }
                         
-                        // Вызываем замыкание
-                        complition(image)
+                        break
+                    case .failure(_):
+                        completion(nil)
+                        break
                     }
                 }
-                
-            } else {
-                complition(nil)
             }
+        } else {
+            completion(nil)
         }
     }
 }
