@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:/Users/grigoriy/Documents/Studying/Swift/vkapp/vkapp/vkapp.xcodeproj">
+      location = "self:vkapp.xcodeproj">
    </FileRef>
 </Workspace>

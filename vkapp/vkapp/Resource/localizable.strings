@@ -1,0 +1,21 @@
+/*
+  russians.strings
+  vkapp
+
+  Created by Григорий Мартюшин on 10.06.2020.
+  Copyright © 2020 Григорий Мартюшин. All rights reserved.
+*/
+"Token recieve error. Try again later."="Ошибка получения токена. Попробуйте повторить попытку";
+"Auth error. Try again later."="Ошибка авторизации попробуйте повторить попытку позже";
+"Auth page loading error. Try again later."="Ошибка загрузки страницы авторизации, попробуйте позже.";
+"Can't take auth token. To try again press \"Retry\" button."="Не удалось получить токен. Для повторения попытки нажмите кнопку \"Повтор\".";
+"Retry"="Повторить";
+"Friends"="Друзья";
+"Something went wrong"="Что-то пошло не так";
+"Logout"="Выход";
+"Can't find information about friend"="Не удалось отобразить информацию о друге.";
+"Groups"="Группы";
+"Recomended groups"="Рекомендованные группы";
+"Your groups"="Ваши группы";
+"News"="Новости";
+"Loading ..."="Загрузка ...";
